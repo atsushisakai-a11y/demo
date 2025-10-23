@@ -1,10 +1,11 @@
 # ============================================
-# DAG: Run BigQuery SQL from GitHub
+# DAG: Run BigQuery SQL from GitHub (fixed)
 # ============================================
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
+from datetime import datetime
 import requests
 import os
 
@@ -12,71 +13,46 @@ import os
 # Config
 # ----------------------------
 GITHUB_REPO = "atsushisakai-a11y/google-maps-bq-pipeline"
-SQL_FOLDER = "sql"
-SQL_FILES = [
-    "sql/transform.sql",
-    "sql/datamart.sql"
-]
+SQL_FILES = ["sql/transform.sql", "sql/datamart.sql"]
 BRANCH = "main"
 
 PROJECT_ID = "grand-water-473707-r8"
 DATASET_ID = "osm-demo"
-LOCATION = "europe-west4"  # adjust if needed
+LOCATION = "europe-west4"
 
 # ----------------------------
 # DAG Definition
 # ----------------------------
 default_args = {
-    "owner": "airflow",
+    "owner": "atsushi",
     "start_date": days_ago(1),
     "retries": 1,
 }
 
-dag = DAG(
+with DAG(
     dag_id="run_bq_sql_from_github",
     default_args=default_args,
-    schedule_interval="@daily",  # run daily
+    schedule_interval="@daily",
     catchup=False,
     tags=["bigquery", "github", "google-maps"],
-)
+) as dag:
 
-# ----------------------------
-# Helper: fetch SQL from GitHub
-# ----------------------------
-def fetch_sql_from_github():
-    raw_url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{BRANCH}/{SQL_FOLDER}/{SQL_FILE}"
-    print(f"🔗 Fetching SQL from: {raw_url}")
-    response = requests.get(raw_url)
-    response.raise_for_status()
-    sql = response.text
-    with open(f"/tmp/{SQL_FILE}", "w") as f:
-        f.write(sql)
-    print("✅ SQL file saved to /tmp/")
-    return f"/tmp/{SQL_FILE}"
+    def fetch_and_run_sql():
+        for sql_file in SQL_FILES:
+            raw_url = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{BRANCH}/{sql_file}"
+            print(f"🔗 Fetching SQL from: {raw_url}")
+            resp = requests.get(raw_url)
+            resp.raise_for_status()
+            sql = resp.text
+            print(f"✅ Running {sql_file} ({len(sql)} chars) in BigQuery...")
 
-fetch_sql = PythonOperator(
-    task_id="fetch_sql",
-    python_callable=fetch_sql_from_github,
-    dag=dag,
-)
+            from google.cloud import bigquery
+            client = bigquery.Client(project=PROJECT_ID)
+            job = client.query(sql)
+            job.result()
+            print(f"🎉 Finished executing {sql_file}")
 
-# ----------------------------
-# Execute BigQuery Job
-# ----------------------------
-run_bq_sql = BigQueryInsertJobOperator(
-    task_id="run_bq_sql",
-    configuration={
-        "query": {
-            "query": open(f"/tmp/{SQL_FILE}").read() if os.path.exists(f"/tmp/{SQL_FILE}") else "",
-            "useLegacySql": False,
-            "defaultDataset": {"datasetId": DATASET_ID, "projectId": PROJECT_ID},
-        }
-    },
-    location=LOCATION,
-    dag=dag,
-)
-
-# ----------------------------
-# DAG Task Order
-# ----------------------------
-fetch_sql >> run_bq_sql
+    run_bq_pipeline = PythonOperator(
+        task_id="run_bq_pipeline",
+        python_callable=fetch_and_run_sql,
+    )
