@@ -13,7 +13,10 @@ import os
 # ----------------------------
 GITHUB_REPO = "atsushisakai-a11y/google-maps-bq-pipeline"
 SQL_FOLDER = "sql"
-SQL_FILE = "transform.sql"  # 🧠 set this to your SQL filename
+SQL_FILES = [
+    "sql/transform.sql",
+    "sql/datamart.sql"
+]
 BRANCH = "main"
 
 PROJECT_ID = "grand-water-473707-r8"
