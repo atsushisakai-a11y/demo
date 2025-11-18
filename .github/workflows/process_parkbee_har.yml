@@ -77,8 +77,10 @@ jobs:
               CAST(NULL AS STRING) AS postCode
             ) AS address,
             STRUCT(
-              pricingAndAvailability.pricing.cost AS cost,
-              pricingAndAvailability.pricing.currency AS currency,
+              STRUCT(
+                pricingAndAvailability.pricing.cost AS cost,
+                pricingAndAvailability.pricing.currency AS currency
+              ) AS pricing,
               STRUCT(
                 pricingAndAvailability.availability.availableSpaces AS availableSpaces,
                 pricingAndAvailability.availability.totalSpaces AS totalSpaces
