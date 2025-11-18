@@ -1,4 +1,4 @@
---CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_locations_combined` AS
+CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_locations_combined` AS
 WITH matched_locations AS (
   SELECT
     spg.id AS location_id,
