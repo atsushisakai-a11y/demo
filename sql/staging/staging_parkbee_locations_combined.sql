@@ -20,7 +20,9 @@ WITH matched_locations AS (
     ST_DISTANCE(
       ST_GEOGPOINT(spg.longitude, spg.latitude),
       ST_GEOGPOINT(loc.lng, loc.lat)
-    ) AS distance_meters
+    ) AS distance_meters,
+    loc.rating as avg_rating,
+    loc.user_ratings_total as total_review
   FROM
     `grand-water-473707-r8.staging.staging_parkbee_garages` spg
   LEFT JOIN
