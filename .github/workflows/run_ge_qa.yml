@@ -1,8 +1,9 @@
 name: Run Great Expectations QA on ParkBee DWH
 
+# Trigger manually or after DWH pipeline completes
 on:
-  workflow_dispatch:      # Allows manual execution
-  workflow_run:           # Automatically runs after DWH workflow finishes
+  workflow_dispatch:      # Manual execution
+  workflow_run:           # Auto-trigger after DWH pipeline
     workflows: ["Run ParkBee SQL Pipelines on BigQuery"]
     types:
       - completed
@@ -12,22 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Decode and load GCP service account credentials
       - name: Decode GCP service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
 
-      - name: Authenticate with gcloud
+      # 3. Authenticate with gcloud and export credentials for Python client
+      - name: Authenticate with gcloud and export credentials
         run: |
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/key.json" >> $GITHUB_ENV
 
+      # 4. Install Great Expectations and dependencies
       - name: Install GE and dependencies
         run: |
           pip install great_expectations pandas google-cloud-bigquery
 
+      # 5. Run all Great Expectations QA scripts
       - name: Run Great Expectations QA scripts
         run: |
           for qa_script in ge/*.py; do
