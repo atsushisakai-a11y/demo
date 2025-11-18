@@ -1,4 +1,4 @@
-name: Run ParkBee SQL Pipelines on BigQuery
+name: Run ParkBee dwh SQLs on BigQuery
 
 on:
   workflow_dispatch:     # Manual trigger
