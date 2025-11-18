@@ -5,7 +5,7 @@ WITH matched_locations AS (
     loc.place_id,
     spg.name AS name_parkbee,
     spg.country AS country_parkbee,
-    spg.city AS city_parkbee,.
+    spg.city AS city_parkbee,
     loc.name AS name_google,
     loc.address AS address_google,
     spg.price_cost,
