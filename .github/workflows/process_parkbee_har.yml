@@ -1,0 +1,45 @@
+name: Process ParkBee HAR to JSON
+
+on:
+  workflow_dispatch:
+    inputs:
+      har_filename:
+        description: "HAR file name in GCS"
+        required: true
+        type: string
+
+jobs:
+  extract-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Decode GCP service account key
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
+
+      - name: Authenticate with gcloud
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+
+      - name: Install dependencies (if any)
+        run: pip install --upgrade pip
+
+      - name: Download HAR file from GCS
+        run: gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
+
+      - name: Run extraction script
+        run: python scripts/extract_parkbee.py ${{ github.event.inputs.har_filename }}
+
+      - name: Upload JSON to GCS
+        run: |
+          JSON_FILE=$(ls parkbee_garages_*.json)
+          gsutil cp $JSON_FILE gs://parkbee-raw-data/$JSON_FILE
+          echo "Uploaded JSON to parkbee-raw-data bucket"
