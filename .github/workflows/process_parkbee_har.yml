@@ -51,14 +51,53 @@ jobs:
             raw.new_parkbee_garages_tmp \
             gs://parkbee-raw-data/$JSON_FILE
 
+      - name: Clean temporary table schema
+        run: |
+          echo "Cleaning temp table schema to match target..."
+          bq query --use_legacy_sql=false "
+          CREATE OR REPLACE TABLE \`raw.new_parkbee_garages_tmp\` AS
+          SELECT
+            id,
+            name,
+            latitude,
+            longitude,
+            address,
+            pricingAndAvailability,
+            scrape_datetime
+          FROM \`raw.new_parkbee_garages_tmp\`;
+          "
+          echo "Temp table cleaned."
+
       - name: Merge data into raw_parkbee_garages table
         run: |
           echo "Merging data into raw.raw_parkbee_garages..."
           bq query --use_legacy_sql=false "
           MERGE INTO \`raw.raw_parkbee_garages\` AS target
-          USING \`raw.new_parkbee_garages_tmp\` AS source
+          USING (
+            SELECT
+              id,
+              name,
+              latitude,
+              longitude,
+              address,
+              pricingAndAvailability,
+              scrape_datetime
+            FROM \`raw.new_parkbee_garages_tmp\`
+          ) AS source
           ON target.id = source.id AND target.scrape_datetime = source.scrape_datetime
           WHEN NOT MATCHED THEN
-            INSERT ROW;
+            INSERT (
+              id, name, latitude, longitude, address, pricingAndAvailability, scrape_datetime
+            )
+            VALUES (
+              source.id, source.name, source.latitude, source.longitude, source.address,
+              source.pricingAndAvailability, source.scrape_datetime
+            );
           "
           echo "Merge complete!"
+
+      - name: Clean up temp table
+        run: |
+          echo "Dropping temp table..."
+          bq rm -f -t raw.new_parkbee_garages_tmp || true
+          echo "Temp table dropped."
