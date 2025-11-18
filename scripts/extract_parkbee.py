@@ -39,6 +39,7 @@ print(f"📦 Extracted {len(garages)} garages with scrape_datetime")
 
 output_file = f"parkbee_garages_{garages[0]['scrape_datetime'][:10]}.json"
 with open(output_file, "w") as f:
-    json.dump(garages, f, indent=2)
+    for g in garages:
+        f.write(json.dumps(g) + "\n")
 
 print(f"💾 Saved → {output_file}")
