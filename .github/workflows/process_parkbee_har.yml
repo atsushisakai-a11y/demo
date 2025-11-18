@@ -1,15 +1,15 @@
-name: Process ParkBee HAR to JSON
+name: Process ParkBee HAR to BigQuery
 
 on:
   workflow_dispatch:
     inputs:
       har_filename:
-        description: "HAR file name in GCS"
+        description: "HAR file name in GCS (e.g., parkbee_2025-01-18.har)"
         required: true
         type: string
 
 jobs:
-  extract-json:
+  har-to-bigquery:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,9 +29,6 @@ jobs:
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
 
-      - name: Install dependencies (if any)
-        run: pip install --upgrade pip
-
       - name: Download HAR file from GCS
         run: gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
 
@@ -42,4 +39,26 @@ jobs:
         run: |
           JSON_FILE=$(ls parkbee_garages_*.json)
           gsutil cp $JSON_FILE gs://parkbee-raw-data/$JSON_FILE
-          echo "Uploaded JSON to parkbee-raw-data bucket"
+          echo "Uploaded JSON to parkbee-raw-data bucket: $JSON_FILE"
+
+      - name: Load JSON into BigQuery (temporary table)
+        run: |
+          JSON_FILE=$(ls parkbee_garages_*.json)
+          echo "Loading $JSON_FILE into raw.new_parkbee_garages_tmp..."
+          bq load \
+            --source_format=NEWLINE_DELIMITED_JSON \
+            --autodetect \
+            raw.new_parkbee_garages_tmp \
+            gs://parkbee-raw-data/$JSON_FILE
+
+      - name: Merge data into raw_parkbee_garages table
+        run: |
+          echo "Merging data into raw.raw_parkbee_garages..."
+          bq query --use_legacy_sql=false "
+          MERGE INTO \`raw.raw_parkbee_garages\` AS target
+          USING \`raw.new_parkbee_garages_tmp\` AS source
+          ON target.id = source.id AND target.scrape_datetime = source.scrape_datetime
+          WHEN NOT MATCHED THEN
+            INSERT ROW;
+          "
+          echo "Merge complete!"
