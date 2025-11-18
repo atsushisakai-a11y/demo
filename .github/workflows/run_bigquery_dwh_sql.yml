@@ -1,10 +1,10 @@
-name: Run Staging Query on BigQuery
+name: Run All Staging SQL on BigQuery
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:     # Manual trigger
   push:
     paths:
-      - 'sql/staging/*.sql'
+      - 'sql/staging/*.sql'   # Auto-trigger when staging SQL files change
 
 jobs:
   run-staging-sql:
@@ -23,6 +23,9 @@ jobs:
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
 
-      - name: Execute staging SQL
+      - name: Run all staging SQL files
         run: |
-          bq query --use_legacy_sql=false < sql/staging/staging_parkbee_garages.sql
+          for sql_file in sql/staging/*.sql; do
+            echo "Running $sql_file ..."
+            bq query --use_legacy_sql=false < "$sql_file"
+          done
