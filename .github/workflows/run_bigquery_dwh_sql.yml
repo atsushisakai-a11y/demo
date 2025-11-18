@@ -4,7 +4,7 @@ on:
   workflow_dispatch:     # Manual trigger
   push:
     paths:
-      - 'sql/dwh/staging/*.sql'   # Trigger only when staging SQL files change
+      - 'sql/staging/*.sql'   # Trigger only when staging SQL files change
 
 jobs:
   run-staging-sql:
@@ -23,4 +23,4 @@ jobs:
 
       - name: Execute staging_parkbee_garages.sql
         run: |
-          bq query --use_legacy_sql=false < sql/dwh/staging/staging_parkbee_garages.sql
+          bq query --use_legacy_sql=false < sql/staging/staging_parkbee_garages.sql
