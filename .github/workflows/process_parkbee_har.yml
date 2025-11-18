@@ -72,9 +72,9 @@ jobs:
             STRUCT(
               address.city AS city,
               address.country AS country,
-              NULL AS street,
-              NULL AS number,
-              NULL AS postCode
+              CAST(NULL AS STRING) AS street,
+              CAST(NULL AS STRING) AS number,
+              CAST(NULL AS STRING) AS postCode
             ) AS address,
             STRUCT(
               pricingAndAvailability.pricing.cost AS cost,
@@ -88,6 +88,7 @@ jobs:
           FROM \`raw.new_parkbee_garages_tmp\`;
           "
           echo "Temp table normalized successfully."
+
 
       - name: Merge data into raw.raw_parkbee_garages
         run: |
