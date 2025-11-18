@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_raw_google_parkbee_locations` AS
+CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_google_parkbee_locations` AS
 SELECT
   rpl.place_id,
   rpl.name,
