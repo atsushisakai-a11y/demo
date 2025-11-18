@@ -1,0 +1,75 @@
+name: Run ParkBee SQL Pipelines on BigQuery
+
+on:
+  workflow_dispatch:     # Manual trigger
+  push:
+    paths:
+      - 'sql/staging/*.sql'
+      - 'sql/dwh/*.sql'
+
+jobs:
+  # --------------------------------------
+  # 1. Staging SQL Job
+  # --------------------------------------
+  run-staging-sql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Decode GCP service account key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
+
+      - name: Authenticate using service account
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+
+      - name: Run Staging SQL files in dependency order
+        run: |
+          declare -a staging_sql_files=(
+            "sql/staging/staging_google_parkbee_locations.sql"
+            "sql/staging/staging_parkbee_garages.sql"
+            "sql/staging/staging_parkbee_locations_combined.sql"
+          )
+
+          for sql_file in "${staging_sql_files[@]}"; do
+            echo "🏗️ Running $sql_file..."
+            bq query --use_legacy_sql=false < "$sql_file"
+            echo "✔️ Completed $sql_file"
+          done
+
+  # --------------------------------------
+  # 2. DWH SQL Job (depends on staging)
+  # --------------------------------------
+  run-dwh-sql:
+    runs-on: ubuntu-latest
+    needs: run-staging-sql   # 🔗 Enforces dependency
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Decode GCP service account key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
+
+      - name: Authenticate using service account
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+
+      - name: Run DWH SQL files in dependency order
+        run: |
+          declare -a dwh_sql_files=(
+            "sql/dwh/dim_parkbee_locations.sql"
+            "sql/dwh/fact_parkbee_locations.sql"
+          )
+
+          for sql_file in "${dwh_sql_files[@]}"; do
+            echo "🏗️ Running $sql_file..."
+            bq query --use_legacy_sql=false < "$sql_file"
+            echo "✔️ Completed $sql_file"
+          done
