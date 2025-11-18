@@ -30,20 +30,28 @@ jobs:
           gcloud config set project grand-water-473707-r8
 
       - name: Download HAR file from GCS
-        run: gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
+        run: |
+          echo "Downloading HAR file..."
+          gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
+          echo "Downloaded: ${{ github.event.inputs.har_filename }}"
 
       - name: Run extraction script
-        run: python scripts/extract_parkbee.py ${{ github.event.inputs.har_filename }}
+        run: |
+          echo "Extracting garages from HAR..."
+          python scripts/extract_parkbee.py ${{ github.event.inputs.har_filename }}
 
       - name: Upload JSON to GCS
         run: |
           JSON_FILE=$(ls parkbee_garages_*.json)
+          echo "Uploading JSON file $JSON_FILE to GCS..."
           gsutil cp $JSON_FILE gs://parkbee-raw-data/$JSON_FILE
-          echo "Uploaded JSON to parkbee-raw-data bucket: $JSON_FILE"
+          echo "Uploaded JSON to GCS: $JSON_FILE"
 
       - name: Load JSON into BigQuery (temporary table)
         run: |
           JSON_FILE=$(ls parkbee_garages_*.json)
+          echo "Removing old temp table if exists..."
+          bq rm -f -t raw.new_parkbee_garages_tmp || true
           echo "Loading $JSON_FILE into raw.new_parkbee_garages_tmp..."
           bq load \
             --source_format=NEWLINE_DELIMITED_JSON \
@@ -51,9 +59,9 @@ jobs:
             raw.new_parkbee_garages_tmp \
             gs://parkbee-raw-data/$JSON_FILE
 
-      - name: Clean temporary table schema
+      - name: Normalize temporary table schema
         run: |
-          echo "Cleaning temp table schema to match target..."
+          echo "Normalizing temp table schema to match raw table..."
           bq query --use_legacy_sql=false "
           CREATE OR REPLACE TABLE \`raw.new_parkbee_garages_tmp\` AS
           SELECT
@@ -68,15 +76,22 @@ jobs:
               NULL AS number,
               NULL AS postCode
             ) AS address,
-            pricingAndAvailability,
+            STRUCT(
+              pricingAndAvailability.pricing.cost AS cost,
+              pricingAndAvailability.pricing.currency AS currency,
+              STRUCT(
+                pricingAndAvailability.availability.availableSpaces AS availableSpaces,
+                pricingAndAvailability.availability.totalSpaces AS totalSpaces
+              ) AS availability
+            ) AS pricingAndAvailability,
             scrape_datetime
           FROM \`raw.new_parkbee_garages_tmp\`;
           "
-          echo "Temp table cleaned."
+          echo "Temp table normalized successfully."
 
-      - name: Merge data into raw_parkbee_garages table
+      - name: Merge data into raw.raw_parkbee_garages
         run: |
-          echo "Merging data into raw.raw_parkbee_garages..."
+          echo "Merging new data into raw.raw_parkbee_garages..."
           bq query --use_legacy_sql=false "
           MERGE INTO \`raw.raw_parkbee_garages\` AS target
           USING (
@@ -102,8 +117,10 @@ jobs:
           "
           echo "Merge complete!"
 
-      - name: Clean up temp table
+      - name: Clean up temporary table
+        if: always()
         run: |
-          echo "Dropping temp table..."
+          echo "Removing temporary table..."
           bq rm -f -t raw.new_parkbee_garages_tmp || true
-          echo "Temp table dropped."
+          echo "Cleanup complete."
+
