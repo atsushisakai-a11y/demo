@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_locations_combined` AS
+--CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_locations_combined` AS
 WITH matched_locations AS (
   SELECT
     spg.id AS location_id,
@@ -12,11 +12,13 @@ WITH matched_locations AS (
     spg.price_currency,
     spg.available_spaces,
     spg.total_spaces,
-    spg.scrape_datetime,
+    spg.scrape_datetime as scrape_datetime_parkbee,
+    loc.fetched_at as scrape_datetime_google,
     spg.latitude AS parkbee_lat,
     spg.longitude AS parkbee_lng,
     loc.lat AS google_lat,
     loc.lng AS google_lng,
+    loc.google_maps_url,
     ST_DISTANCE(
       ST_GEOGPOINT(spg.longitude, spg.latitude),
       ST_GEOGPOINT(loc.lng, loc.lat)
