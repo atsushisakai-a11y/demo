@@ -6,8 +6,10 @@ distinct
   country_parkbee as country,
   city_parkbee as city,
   name_parkbee,
+  name_google,
   parkbee_lat,
-  parkbee_lng
+  parkbee_lng,
+  google_maps_url
 FROM
   `grand-water-473707-r8.staging.staging_parkbee_locations_combined` l
 order by 1,2,3
