@@ -1,10 +1,10 @@
 name: Run Staging Query on BigQuery
 
 on:
-  workflow_dispatch:     # Manual trigger
+  workflow_dispatch:
   push:
     paths:
-      - 'sql/staging/*.sql'   # Trigger only when staging SQL files change
+      - 'sql/staging/*.sql'
 
 jobs:
   run-staging-sql:
@@ -20,6 +20,11 @@ jobs:
           project_id: grand-water-473707-r8
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+
+      - name: Authenticate Service Account
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" > key.json
+          gcloud auth activate-service-account --key-file=key.json
 
       - name: Execute staging_parkbee_garages.sql
         run: |
