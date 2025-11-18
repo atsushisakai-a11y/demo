@@ -12,4 +12,6 @@ SELECT
   pricingAndAvailability.availability.totalSpaces AS total_spaces,
   scrape_datetime
 FROM
-  `grand-water-473707-r8.raw.raw_parkbee_garages`;
+  `grand-water-473707-r8.raw.raw_parkbee_garages`
+WHERE id is not null  
+  ;
