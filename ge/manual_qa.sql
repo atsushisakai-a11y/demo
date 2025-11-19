@@ -29,5 +29,16 @@ FROM
   `grand-water-473707-r8.staging.staging_parkbee_locations_combined`
 GROUP BY
   ALL
+
+  union all
+
+SELECT
+'fact_parkbee_locations' as table_name,
+  DATE_TRUNC(scrape_datetime_parkbee, day) AS scrape_date,
+  COUNT(*)
+FROM
+  `grand-water-473707-r8.dwh.fact_parkbee_locations`
+GROUP BY
+  ALL
 ORDER BY
   1
