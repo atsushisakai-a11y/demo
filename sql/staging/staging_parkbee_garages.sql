@@ -1,6 +1,6 @@
 CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_garages` AS
 SELECT
-  id,
+  id as location_id,
   name,
   latitude,
   longitude,
