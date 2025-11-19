@@ -6,6 +6,8 @@ SELECT
   splc.price_cost,
   splc.available_spaces,
   splc.total_spaces,
+  splc.total_spaces - splc.available_spaces as occupancy,
+  case when splc.total_spaces > 0 then (splc.total_spaces - splc.available_spaces) / splc.total_spaces else null end as occupancy_rate,
   splc.avg_rating,
   splc.total_review
 FROM
