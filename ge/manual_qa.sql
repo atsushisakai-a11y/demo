@@ -39,6 +39,15 @@ SELECT
 FROM
   `grand-water-473707-r8.dwh.fact_parkbee_locations`
 GROUP BY
+
+--location_id duplication check
+select 
+dpl.location_id,
+count(*) as counts
+from `grand-water-473707-r8.dwh.dim_parkbee_locations` dpl
+group by all
+having count(*) > 1
+order by 2 desc  
   ALL
 ORDER BY
   1
