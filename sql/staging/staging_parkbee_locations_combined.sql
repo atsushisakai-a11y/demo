@@ -40,4 +40,5 @@ SELECT
   -- Convert UTC → Europe/Amsterdam
   DATETIME(TIMESTAMP(CURRENT_TIMESTAMP()), "Europe/Amsterdam") AS created_datetime
 FROM matched_locations
-QUALIFY ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY distance_meters ASC) = 1;
+--QUALIFY ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY distance_meters ASC) = 1
+  ;
