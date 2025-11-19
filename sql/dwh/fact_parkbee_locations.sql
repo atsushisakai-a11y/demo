@@ -9,4 +9,5 @@ SELECT
   case when spg.total_spaces > 0 then (spg.total_spaces - spg.available_spaces) / spg.total_spaces else null end as occupancy_rate
 FROM
   `grand-water-473707-r8.staging.staging_parkbee_garages` spg
+  where spg.total_spaces >= spg.available_spaces --get rid of error of available spaces > total spaces
 order by 1,2,3
