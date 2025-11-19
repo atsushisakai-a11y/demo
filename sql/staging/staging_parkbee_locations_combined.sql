@@ -1,7 +1,7 @@
 CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_locations_combined` AS
 WITH matched_locations AS (
   SELECT
-    spg.id AS location_id,
+    spg.location_id,
     loc.place_id,
     spg.name AS name_parkbee,
     spg.country AS country_parkbee,
