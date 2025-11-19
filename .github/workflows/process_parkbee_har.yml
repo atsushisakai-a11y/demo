@@ -1,4 +1,4 @@
-name: Process ParkBee HAR to BigQuery
+name: 1.ParkBee har to json
 
 on:
   workflow_dispatch:
