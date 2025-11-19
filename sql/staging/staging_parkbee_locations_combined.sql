@@ -37,6 +37,7 @@ WITH matched_locations AS (
 )
 SELECT
   *,
-  TIMESTAMP(CURRENT_TIMESTAMP()) AS created_datetime
+  -- Convert UTC → Europe/Amsterdam
+  DATETIME(TIMESTAMP(CURRENT_TIMESTAMP()), "Europe/Amsterdam") AS created_datetime
 FROM matched_locations
 QUALIFY ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY distance_meters ASC) = 1;
