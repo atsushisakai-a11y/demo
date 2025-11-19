@@ -1,4 +1,4 @@
-name: Run All Staging SQL on BigQuery
+name: 2.ParkBee staging queries
 
 on:
   workflow_dispatch:    # Manual trigger
