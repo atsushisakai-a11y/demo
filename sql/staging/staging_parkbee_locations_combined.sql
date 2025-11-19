@@ -12,8 +12,8 @@ WITH matched_locations AS (
     spg.price_currency,
     spg.available_spaces,
     spg.total_spaces,
-    spg.scrape_datetime as scrape_datetime_parkbee,
-    loc.fetched_at as scrape_datetime_google,
+    spg.scrape_datetime AS scrape_datetime_parkbee,
+    loc.fetched_at AS scrape_datetime_google,
     spg.latitude AS parkbee_lat,
     spg.longitude AS parkbee_lng,
     loc.lat AS google_lat,
@@ -23,8 +23,8 @@ WITH matched_locations AS (
       ST_GEOGPOINT(spg.longitude, spg.latitude),
       ST_GEOGPOINT(loc.lng, loc.lat)
     ) AS distance_meters,
-    loc.rating as avg_rating,
-    loc.user_ratings_total as total_review
+    loc.rating AS avg_rating,
+    loc.user_ratings_total AS total_review
   FROM
     `grand-water-473707-r8.staging.staging_parkbee_garages` spg
   LEFT JOIN
@@ -35,6 +35,8 @@ WITH matched_locations AS (
       ST_GEOGPOINT(loc.lng, loc.lat)
     ) < 300
 )
-SELECT * FROM matched_locations
--- Optionally, keep only closest match per ParkBee location
+SELECT
+  *,
+  TIMESTAMP(CURRENT_TIMESTAMP()) AS created_datetime
+FROM matched_locations
 QUALIFY ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY distance_meters ASC) = 1;
