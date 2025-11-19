@@ -1,15 +1,12 @@
 CREATE OR REPLACE TABLE `grand-water-473707-r8.dwh.fact_parkbee_locations` AS
 SELECT
-  splc.scrape_datetime_parkbee,
-  splc.scrape_datetime_google,
-  splc.location_id,
-  splc.price_cost,
-  splc.available_spaces,
-  splc.total_spaces,
-  splc.total_spaces - splc.available_spaces as occupancy,
-  case when splc.total_spaces > 0 then (splc.total_spaces - splc.available_spaces) / splc.total_spaces else null end as occupancy_rate,
-  splc.avg_rating,
-  splc.total_review
+  spg.scrape_datetime,
+  spg.location_id,
+  spg.price_cost,
+  spg.available_spaces,
+  spg.total_spaces,
+  spg.total_spaces - spg.available_spaces as occupancy,
+  case when spg.total_spaces > 0 then (spg.total_spaces - spg.available_spaces) / spg.total_spaces else null end as occupancy_rate
 FROM
-  `grand-water-473707-r8.staging.staging_parkbee_locations_combined` splc
+  `grand-water-473707-r8.staging.staging_parkbee_garages` spg
 order by 1,2,3
