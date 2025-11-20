@@ -49,7 +49,7 @@ jobs:
       - name: Convert GeoJSON to NDJSON
         run: |
           echo "Converting GeoJSON to NDJSON..."
-          python3 - << 'EOF'
+          python3 - <<EOF
 import json
 
 with open("raw_geo.json") as f:
@@ -59,7 +59,7 @@ features = data.get("features", [])
 
 with open("parking_fee.ndjson", "w") as out:
     for f in features:
-        out.write(json.dumps(f) + "\n")
+        out.write(json.dumps(f) + "\\n")
 
 print(f"Converted {len(features)} features → parking_fee.ndjson")
 EOF
