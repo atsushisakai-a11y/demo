@@ -1,0 +1,51 @@
+name: Load Amsterdam Parking Fee JSON into BigQuery (RAW)
+
+on:
+  workflow_dispatch:   # Manual trigger
+
+jobs:
+  load-parking-fee-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository (good practice even if not strictly needed)
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Decode GCP service account key
+      - name: Decode GCP service account key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
+
+      # 3. Authenticate with gcloud
+      - name: Authenticate with gcloud
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/key.json" >> $GITHUB_ENV
+
+      # 4. Locate the latest file in GCS bucket
+      - name: Find latest parking fee JSON in GCS
+        id: findfile
+        run: |
+          echo "Searching for: gs://standard_parking_price/partking_fee_amsterdam_*.json"
+          LATEST_FILE=$(gsutil ls gs://standard_parking_price/partking_fee_amsterdam_*.json | sort | tail -n 1)
+          if [ -z "$LATEST_FILE" ]; then
+            echo "No JSON files found!" && exit 1
+          fi
+          echo "latest_file=$LATEST_FILE" >> $GITHUB_OUTPUT
+          echo "Found: $LATEST_FILE"
+
+      # 5. Load into BigQuery RAW table
+      - name: Load JSON into BigQuery RAW table
+        run: |
+          FILE="${{ steps.findfile.outputs.latest_file }}"
+          echo "Loading file into BigQuery: $FILE"
+
+          bq load \
+            --source_format=JSON \
+            --autodetect \
+            grand-water-473707-r8.raw.raw_parking_fee_amsterdam \
+            "$FILE"
+
+          echo "Successfully loaded: $FILE"
