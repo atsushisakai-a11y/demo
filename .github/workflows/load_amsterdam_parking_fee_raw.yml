@@ -1,4 +1,4 @@
-name: Load Amsterdam Parking Fee JSON into BigQuery (RAW)
+name: １。Load Amsterdam Parking Fee JSON into BigQuery
 
 on:
   workflow_dispatch:   # Manual trigger only
