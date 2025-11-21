@@ -42,13 +42,13 @@ jobs:
           gsutil cp "${{ steps.findfile.outputs.latest_file }}" raw_geo.json
           echo "Downloaded raw_geo.json"
 
-      # 6. Create Python script (line-by-line, safest method)
+      # 6. Create Python script (safe for GitHub YAML)
       - name: Create conversion script
         run: |
           echo "import json" > convert_geojson.py
           echo "with open('raw_geo.json') as f:" >> convert_geojson.py
           echo "    data = json.load(f)" >> convert_geojson.py
-          echo "features = data.get('features', [])" >> convert_geojson.py
+          echo "features = data.get('featuresParkingZones') or data.get('features') or data.get('data') or []" >> convert_geojson.py
           echo "with open('parking_fee.ndjson', 'w') as out:" >> convert_geojson.py
           echo "    for f in features:" >> convert_geojson.py
           echo "        out.write(json.dumps(f) + '\\n')" >> convert_geojson.py
@@ -59,13 +59,19 @@ jobs:
         run: |
           python3 convert_geojson.py
 
-      # 8. Ensure RAW dataset exists
+      # 8. Validate NDJSON
+      - name: Validate NDJSON content
+        run: |
+          echo "Preview NDJSON:"
+          head -n 5 parking_fee.ndjson
+
+      # 9. Ensure RAW dataset exists
       - name: Ensure RAW dataset exists
         run: |
           echo "Ensuring dataset raw exists..."
           bq --location=EU mk --dataset grand-water-473707-r8:raw || echo "Dataset already exists"
 
-      # 9. Load NDJSON into BigQuery RAW table
+      # 10. Load NDJSON into BigQuery RAW table
       - name: Load NDJSON into BigQuery RAW table
         run: |
           echo "Loading NDJSON into BigQuery..."
