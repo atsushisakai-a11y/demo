@@ -72,6 +72,6 @@ jobs:
           bq load \
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
-            grand-water-473707-r8.raw.raw_parking_fee_amsterdam \
+            raw.raw_parking_fee_amsterdam \
             parking_fee.ndjson
           echo "✔ Successfully loaded into raw.raw_parking_fee_amsterdam"
