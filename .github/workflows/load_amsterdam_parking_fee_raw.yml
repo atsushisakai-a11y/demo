@@ -8,68 +8,99 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -----------------------------------------
       # 1. Checkout repository
+      # -----------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Decode GCP service account key
+      # -----------------------------------------
+      # 2. Decode GCP secret key
+      # -----------------------------------------
       - name: Decode GCP service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
 
+      # -----------------------------------------
       # 3. Authenticate with gcloud
+      # -----------------------------------------
       - name: Authenticate with gcloud
         run: |
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/key.json" >> $GITHUB_ENV
 
-      # 4. Locate the latest JSON file in GCS
+      # -----------------------------------------
+      # 4. Find the newest JSON file in GCS
+      # -----------------------------------------
       - name: Find latest parking fee JSON in GCS
         id: findfile
         run: |
           FILE=$(gsutil ls gs://standard_parking_price/partking_fee_amsterdam_*.json | sort | tail -n 1)
           if [ -z "$FILE" ]; then
-            echo "No JSON file found."
+            echo "No parking fee JSON file found."
             exit 1
           fi
           echo "latest_file=$FILE" >> $GITHUB_OUTPUT
-          echo "Found file: $FILE"
+          echo "Found JSON file: $FILE"
 
-      # 5. Download JSON
-      - name: Download JSON
+      # -----------------------------------------
+      # 5. Download JSON file
+      # -----------------------------------------
+      - name: Download JSON file
         run: |
           gsutil cp "${{ steps.findfile.outputs.latest_file }}" raw_geo.json
           echo "Downloaded raw_geo.json"
 
-      # 6. Create Python NDJSON converter (line-by-line to avoid YAML issues)
+      # -----------------------------------------
+      # 6. Create NDJSON converter script
+      # -----------------------------------------
       - name: Create conversion script
         run: |
           echo "import json" > convert_geojson.py
           echo "with open('raw_geo.json') as f:" >> convert_geojson.py
           echo "    data = json.load(f)" >> convert_geojson.py
-          echo "with open('parking_fee.ndjson', 'w') as out:" >> convert_geojson.py
-          echo "    for key, value in data.items():" >> convert_geojson.py
-          echo "        record = {'zone_id': key}" >> convert_geojson.py
-          echo "        if isinstance(value, dict):" >> convert_geojson.py
-          echo "            record.update(value)" >> convert_geojson.py
-          echo "        out.write(json.dumps(record) + '\\n')" >> convert_geojson.py
-          echo "print('Converted', len(data.items()), 'records → parking_fee.ndjson')" >> convert_geojson.py
+          echo "records = []" >> convert_geojson.py
 
-      # 7. Convert JSON → NDJSON
+          echo "for key, value in data.items():" >> convert_geojson.py
+          echo "    record = {'zone_id': key}" >> convert_geojson.py
+          echo "    if isinstance(value, dict):" >> convert_geojson.py
+          echo "        for k, v in value.items():" >> convert_geojson.py
+          echo "            if k == 'tarieven' and isinstance(v, dict):" >> convert_geojson.py
+          echo "                tarieven_list = []" >> convert_geojson.py
+          echo "                for t_key, t_val in v.items():" >> convert_geojson.py
+          echo "                    tarieven_list.append({'price_key': t_key, **t_val})" >> convert_geojson.py
+          echo "                record['tarieven'] = tarieven_list" >> convert_geojson.py
+          echo "            else:" >> convert_geojson.py
+          echo "                record[k] = v" >> convert_geojson.py
+          echo "    records.append(record)" >> convert_geojson.py
+
+          echo "with open('parking_fee.ndjson', 'w') as out:" >> convert_geojson.py
+          echo "    for r in records:" >> convert_geojson.py
+          echo "        out.write(json.dumps(r) + '\\n')" >> convert_geojson.py
+
+          echo "print('Converted', len(records), 'records → parking_fee.ndjson')" >> convert_geojson.py
+
+      # -----------------------------------------
+      # 7. Convert → NDJSON
+      # -----------------------------------------
       - name: Convert JSON to NDJSON
         run: |
           python3 convert_geojson.py
-          echo "NDJSON preview:"
+          echo "Preview NDJSON:"
           head -n 5 parking_fee.ndjson
 
+      # -----------------------------------------
       # 8. Ensure RAW dataset exists
+      # -----------------------------------------
       - name: Ensure RAW dataset exists
         run: |
-          echo "Ensuring dataset raw exists..."
+          echo "Ensuring RAW dataset exists..."
           bq --location=EU mk --dataset grand-water-473707-r8:raw || echo "Dataset already exists"
 
-      # 9. Load NDJSON into BigQuery RAW table
+      # -----------------------------------------
+      # 9. Load into BigQuery
+      # -----------------------------------------
       - name: Load NDJSON into BigQuery RAW table
         run: |
           echo "Loading NDJSON into BigQuery..."
