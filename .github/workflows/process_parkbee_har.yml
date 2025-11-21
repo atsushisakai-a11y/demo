@@ -1,4 +1,4 @@
-name: 1.ParkBee har to json to raw_parkbee_garages
+name: 1-1.ParkBee har to json to raw_parkbee_garages
 
 on:
   workflow_dispatch:
