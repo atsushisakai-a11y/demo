@@ -45,7 +45,7 @@ jobs:
           echo "Found JSON file: $FILE"
 
       # ---------------------------------------------------------------------
-      # 5. Download JSON
+      # 5. Download JSON file
       # ---------------------------------------------------------------------
       - name: Download JSON file
         run: |
@@ -57,26 +57,34 @@ jobs:
       # ---------------------------------------------------------------------
       - name: Create conversion script
         run: |
-          echo "import json" > convert_geojson.py
-          echo "import re" >> convert_geojson.py
+          echo "import json, re" > convert_geojson.py
 
           echo "def fix_invalid_keys(obj):" >> convert_geojson.py
           echo "    if isinstance(obj, dict):" >> convert_geojson.py
           echo "        valid = {}" >> convert_geojson.py
           echo "        invalid_list = []" >> convert_geojson.py
           echo "        for k, v in obj.items():" >> convert_geojson.py
-          echo "            # BigQuery allows only A-Z, a-z, 0-9, and underscore, not starting with digit" >> convert_geojson.py
+          echo "            # SPECIAL CASE: GeoJSON polygon (nested arrays!) → convert to STRING" >> convert_geojson.py
+          echo "            if k == 'location':" >> convert_geojson.py
+          echo "                valid['location_json'] = json.dumps(v)" >> convert_geojson.py
+          echo "                continue" >> convert_geojson.py
+
+          echo "            # VALID BigQuery key?" >> convert_geojson.py
           echo "            if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', str(k)):" >> convert_geojson.py
           echo "                valid[k] = fix_invalid_keys(v)" >> convert_geojson.py
           echo "            else:" >> convert_geojson.py
           echo "                invalid_list.append({'key': k, 'value': fix_invalid_keys(v)})" >> convert_geojson.py
+
           echo "        if invalid_list:" >> convert_geojson.py
           echo "            valid['__invalid_keys__'] = invalid_list" >> convert_geojson.py
           echo "        return valid" >> convert_geojson.py
+
           echo "    elif isinstance(obj, list):" >> convert_geojson.py
           echo "        return [fix_invalid_keys(i) for i in obj]" >> convert_geojson.py
+
           echo "    else:" >> convert_geojson.py
           echo "        return obj" >> convert_geojson.py
+
 
           echo "with open('raw_geo.json') as f:" >> convert_geojson.py
           echo "    data = json.load(f)" >> convert_geojson.py
@@ -107,7 +115,6 @@ jobs:
       # ---------------------------------------------------------------------
       - name: Ensure RAW dataset exists
         run: |
-          echo "Ensuring RAW dataset exists..."
           bq --location=EU mk --dataset grand-water-473707-r8:raw || echo "Dataset already exists"
 
       # ---------------------------------------------------------------------
