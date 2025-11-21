@@ -1,55 +1,45 @@
 name: Load Amsterdam Parking Fee JSON into BigQuery (RAW)
 
 on:
-  workflow_dispatch:   # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   load-parking-fee-json:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Decode GCP service account key
       - name: Decode GCP service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
 
-      # 3. Authenticate with gcloud
       - name: Authenticate with gcloud
         run: |
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/key.json" >> $GITHUB_ENV
 
-      # 4. Locate the latest parking fee JSON file in GCS
       - name: Find latest parking fee JSON in GCS
         id: findfile
         run: |
-          echo "Searching for: gs://standard_parking_price/partking_fee_amsterdam_*.json"
-          LATEST_FILE=$(gsutil ls gs://standard_parking_price/partking_fee_amsterdam_*.json | sort | tail -n 1)
-          if [ -z "$LATEST_FILE" ]; then
-            echo "❌ No JSON files found in GCS!"
+          FILE=$(gsutil ls gs://standard_parking_price/partking_fee_amsterdam_*.json | sort | tail -n 1)
+          if [ -z "$FILE" ]; then
+            echo "No JSON file found."
             exit 1
           fi
-          echo "latest_file=$LATEST_FILE" >> $GITHUB_OUTPUT
-          echo "Found JSON file: $LATEST_FILE"
+          echo "latest_file=$FILE" >> $GITHUB_OUTPUT
+          echo "Found: $FILE"
 
-      # 5. Download GeoJSON from GCS
-      - name: Download GeoJSON from GCS
+      - name: Download GeoJSON
         run: |
-          FILE="${{ steps.findfile.outputs.latest_file }}"
-          echo "Downloading file: $FILE"
-          gsutil cp "$FILE" raw_geo.json
-          echo "Downloaded to raw_geo.json"
+          gsutil cp "${{ steps.findfile.outputs.latest_file }}" raw_geo.json
 
-      # 6. Convert GeoJSON → NDJSON
-      - name: Convert GeoJSON to NDJSON
+      # SAFE: Create Python script using YAML literal block
+      - name: Create conversion script
         run: |
-          echo "Converting GeoJSON to NDJSON..."
-          python3 - <<EOF
+          cat > convert_geojson.py <<EOF
 import json
 
 with open("raw_geo.json") as f:
@@ -61,16 +51,17 @@ with open("parking_fee.ndjson", "w") as out:
     for f in features:
         out.write(json.dumps(f) + "\\n")
 
-print(f"Converted {len(features)} features → parking_fee.ndjson")
+print("Converted", len(features), "features → parking_fee.ndjson")
 EOF
 
-      # 7. Load NDJSON into BigQuery RAW table
+      - name: Convert GeoJSON to NDJSON
+        run: |
+          python3 convert_geojson.py
+
       - name: Load NDJSON into BigQuery RAW table
         run: |
-          echo "Loading NDJSON into BigQuery..."
           bq load \
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
             grand-water-473707-r8.raw.raw_parking_fee_amsterdam \
             parking_fee.ndjson
-          echo "✔ Successfully loaded into raw.raw_parking_fee_amsterdam"
