@@ -28,8 +28,8 @@ jobs:
           declare -a ordered_sql_files=(
             "sql/staging/staging_google_parkbee_locations.sql"
             "sql/staging/staging_parkbee_garages.sql"
-            "sql/staging/staging_parkbee_locations_combined.sql"
             "sql/staging/staging_parking_fee_amsterdam.sql"
+            "sql/staging/staging_parkbee_parking_zones.sql"
           )
 
           for sql_file in "${ordered_sql_files[@]}"; do
