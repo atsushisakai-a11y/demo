@@ -11,7 +11,7 @@ WITH pb AS (
     price_currency,
     available_spaces,
     total_spaces,
-    scrape_datetime,
+    scrape_datetime_cet,
     ST_GEOGPOINT(longitude, latitude) AS pb_point
   FROM `grand-water-473707-r8.staging.staging_parkbee_garages`
 ),
@@ -42,7 +42,7 @@ joined AS (
     pb.price_cost AS parkbee_price_per_hour,
     pb.available_spaces,
     pb.total_spaces,
-    pb.scrape_datetime,
+    pb.scrape_datetime_cet,
 
     z.zone_id,
     z.hourly_rate AS city_price_per_hour,
