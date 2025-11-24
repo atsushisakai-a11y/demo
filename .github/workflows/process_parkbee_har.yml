@@ -1,4 +1,4 @@
-name: 1-1.ParkBee har to json to raw_parkbee_garages
+name: 1-1.ParkBee HAR → JSON → raw_parkbee_garages
 
 on:
   workflow_dispatch:
@@ -13,55 +13,83 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -------------------------------------------------
+      # 1. Checkout repository
+      # -------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # -------------------------------------------------
+      # 2. Setup Python
+      # -------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
+      # -------------------------------------------------
+      # 3. Decode GCP service account key
+      # -------------------------------------------------
       - name: Decode GCP service account key
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
 
+      # -------------------------------------------------
+      # 4. Authenticate with gcloud
+      # -------------------------------------------------
       - name: Authenticate with gcloud
         run: |
           gcloud auth activate-service-account --key-file=$HOME/key.json
           gcloud config set project grand-water-473707-r8
 
+      # -------------------------------------------------
+      # 5. Download HAR from GCS
+      # -------------------------------------------------
       - name: Download HAR file from GCS
         run: |
           echo "Downloading HAR file..."
           gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
           echo "Downloaded: ${{ github.event.inputs.har_filename }}"
 
-      - name: Run extraction script
+      # -------------------------------------------------
+      # 6. Run extraction script (updated with hourly price, duration, etc.)
+      # -------------------------------------------------
+      - name: Run HAR extraction script
         run: |
           echo "Extracting garages from HAR..."
           python scripts/extract_parkbee.py ${{ github.event.inputs.har_filename }}
 
+      # -------------------------------------------------
+      # 7. Upload JSON to GCS
+      # -------------------------------------------------
       - name: Upload JSON to GCS
         run: |
           JSON_FILE=$(ls parkbee_garages_*.json)
           echo "Uploading JSON file $JSON_FILE to GCS..."
           gsutil cp $JSON_FILE gs://parkbee-raw-data/$JSON_FILE
-          echo "Uploaded JSON to GCS: $JSON_FILE"
+          echo "Uploaded JSON: $JSON_FILE"
 
-      - name: Load JSON into BigQuery (temporary table)
+      # -------------------------------------------------
+      # 8. Load JSON → temporary table
+      # -------------------------------------------------
+      - name: Load JSON into BigQuery (temp table)
         run: |
           JSON_FILE=$(ls parkbee_garages_*.json)
           echo "Removing old temp table if exists..."
           bq rm -f -t raw.new_parkbee_garages_tmp || true
-          echo "Loading $JSON_FILE into raw.new_parkbee_garages_tmp..."
+
+          echo "Loading JSON into raw.new_parkbee_garages_tmp..."
           bq load \
             --source_format=NEWLINE_DELIMITED_JSON \
             --autodetect \
             raw.new_parkbee_garages_tmp \
             gs://parkbee-raw-data/$JSON_FILE
 
-      - name: Normalize temporary table schema
+      # -------------------------------------------------
+      # 9. Normalize schema → match raw table DDL
+      # -------------------------------------------------
+      - name: Normalize temp table schema
         run: |
-          echo "Normalizing temp table schema to match raw table..."
+          echo "Normalizing temp table schema..."
           bq query --use_legacy_sql=false "
           CREATE OR REPLACE TABLE \`raw.new_parkbee_garages_tmp\` AS
           SELECT
@@ -69,71 +97,33 @@ jobs:
             name,
             latitude,
             longitude,
-            STRUCT(
-              address.city AS city,
-              address.country AS country,
-              CAST(NULL AS STRING) AS street,
-              CAST(NULL AS STRING) AS number,
-              CAST(NULL AS STRING) AS postCode
-            ) AS address,
-            STRUCT(
-              STRUCT(
-                pricingAndAvailability.pricing.cost AS cost,
-                pricingAndAvailability.pricing.currency AS currency
-              ) AS pricing,
-              STRUCT(
-                pricingAndAvailability.availability.availableSpaces AS availableSpaces,
-                pricingAndAvailability.availability.totalSpaces AS totalSpaces
-              ) AS availability
-            ) AS pricingAndAvailability,
+            address,
+            pricingAndAvailability,
             scrape_datetime,
-            -- NEW FIELDS
-            TIMESTAMP(parking_from) AS parking_from,
-            TIMESTAMP(parking_to) AS parking_to,
+            parking_from,
+            parking_to,
             parking_duration_hours,
             hourly_price
           FROM \`raw.new_parkbee_garages_tmp\`;
           "
-          echo "Temp table normalized successfully."
+          echo "Schema normalized."
 
-      - name: Merge data into raw.raw_parkbee_garages
+      # -------------------------------------------------
+      # 10. OVERWRITE raw table (fresh load always)
+      # -------------------------------------------------
+      - name: Replace raw.raw_parkbee_garages with new data
         run: |
-          echo "Merging new data into raw.raw_parkbee_garages..."
+          echo "Replacing raw.raw_parkbee_garages with latest extracted data..."
           bq query --use_legacy_sql=false "
-          MERGE INTO \`raw.raw_parkbee_garages\` AS target
-          USING (
-            SELECT
-              id,
-              name,
-              latitude,
-              longitude,
-              address,
-              pricingAndAvailability,
-              scrape_datetime,
-              parking_from,
-              parking_to,
-              parking_duration_hours,
-              hourly_price
-            FROM \`raw.new_parkbee_garages_tmp\`
-          ) AS source
-          ON target.id = source.id
-             AND target.scrape_datetime = source.scrape_datetime
-          WHEN NOT MATCHED THEN
-            INSERT (
-              id, name, latitude, longitude, address, pricingAndAvailability,
-              scrape_datetime, parking_from, parking_to,
-              parking_duration_hours, hourly_price
-            )
-            VALUES (
-              source.id, source.name, source.latitude, source.longitude,
-              source.address, source.pricingAndAvailability,
-              source.scrape_datetime, source.parking_from, source.parking_to,
-              source.parking_duration_hours, source.hourly_price
-            );
+          CREATE OR REPLACE TABLE \`raw.raw_parkbee_garages\` AS
+          SELECT * FROM \`raw.new_parkbee_garages_tmp\`;
           "
-          echo "Merge complete!"
+          echo "raw.raw_parkbee_garages updated!"
 
-      - name: Clean up temporary table
+      # -------------------------------------------------
+      # 11. Cleanup temp table
+      # -------------------------------------------------
+      - name: Cleanup temp resources
         if: always()
         run: |
           echo "Removing temporary table..."
