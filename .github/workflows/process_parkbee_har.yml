@@ -86,11 +86,15 @@ jobs:
                 pricingAndAvailability.availability.totalSpaces AS totalSpaces
               ) AS availability
             ) AS pricingAndAvailability,
-            scrape_datetime
+            scrape_datetime,
+            -- NEW FIELDS
+            TIMESTAMP(parking_from) AS parking_from,
+            TIMESTAMP(parking_to) AS parking_to,
+            parking_duration_hours,
+            hourly_price
           FROM \`raw.new_parkbee_garages_tmp\`;
           "
           echo "Temp table normalized successfully."
-
 
       - name: Merge data into raw.raw_parkbee_garages
         run: |
@@ -105,17 +109,26 @@ jobs:
               longitude,
               address,
               pricingAndAvailability,
-              scrape_datetime
+              scrape_datetime,
+              parking_from,
+              parking_to,
+              parking_duration_hours,
+              hourly_price
             FROM \`raw.new_parkbee_garages_tmp\`
           ) AS source
-          ON target.id = source.id AND target.scrape_datetime = source.scrape_datetime
+          ON target.id = source.id
+             AND target.scrape_datetime = source.scrape_datetime
           WHEN NOT MATCHED THEN
             INSERT (
-              id, name, latitude, longitude, address, pricingAndAvailability, scrape_datetime
+              id, name, latitude, longitude, address, pricingAndAvailability,
+              scrape_datetime, parking_from, parking_to,
+              parking_duration_hours, hourly_price
             )
             VALUES (
-              source.id, source.name, source.latitude, source.longitude, source.address,
-              source.pricingAndAvailability, source.scrape_datetime
+              source.id, source.name, source.latitude, source.longitude,
+              source.address, source.pricingAndAvailability,
+              source.scrape_datetime, source.parking_from, source.parking_to,
+              source.parking_duration_hours, source.hourly_price
             );
           "
           echo "Merge complete!"
@@ -126,4 +139,3 @@ jobs:
           echo "Removing temporary table..."
           bq rm -f -t raw.new_parkbee_garages_tmp || true
           echo "Cleanup complete."
-
