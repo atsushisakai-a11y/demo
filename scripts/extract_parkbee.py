@@ -2,62 +2,79 @@ import json
 import sys
 from datetime import datetime, timezone
 
-"""
-ParkBee HAR → NDJSON Extractor
---------------------------------
-Extracts garage objects from a HAR file and adds:
+if len(sys.argv) != 2:
+    print("Usage: python extract_parkbee.py garages.har")
+    sys.exit(1)
 
-- parking_from
-- parking_to
-- parking_duration_hours
-- hourly_price
-- scrape_datetime
+har_file = sys.argv[1]
 
-Output is written as newline-delimited JSON (NDJSON),
-fully compatible with BigQuery ingestion.
-"""
-
-
+# ----------------------------------------------------------------------
+# Helper: Extract parking window (from, to, duration)
+# ----------------------------------------------------------------------
 def parse_parking_window(har):
     """
-    Scan entire HAR file for `searchGarages` request body
-    and extract:
-      - parking_from
-      - parking_to
-      - duration_hours
+    Finds parking from/to inside HAR.
+    Supports:
+      - variables.searchParams
+      - variables.bookingParams
+      - nested mutation/query blocks
+    Returns (from_iso, to_iso, duration_hours)
     """
 
     for entry in har.get("log", {}).get("entries", []):
         try:
             req = entry.get("request", {})
-            res = entry.get("response", {})
-            url = req.get("url", "")
+            txt = req.get("postData", {}).get("text", "")
 
-            if "/graphql" not in url:
+            if not txt or not txt.startswith("{"):
                 continue
 
-            # Extract request JSON
-            post_data = req.get("postData", {}).get("text", "")
-            if not post_data:
-                continue
+            body = json.loads(txt)
 
-            body = json.loads(post_data)
-
-            # Look for the ParkBee search query
+            # The field can be at different levels
             variables = body.get("variables", {})
-            if "searchParams" in variables:
-                params = variables["searchParams"]
 
-                parking_from = params.get("from")
-                parking_to = params.get("to")
+            candidate_blocks = []
 
-                if parking_from and parking_to:
-                    dt_from = datetime.fromisoformat(parking_from.replace("Z", "+00:00"))
-                    dt_to = datetime.fromisoformat(parking_to.replace("Z", "+00:00"))
+            # Case 1: direct variables
+            candidate_blocks.append(variables)
 
-                    duration_hours = round((dt_to - dt_from).total_seconds() / 3600, 2)
+            # Case 2: operations inside queries/mutations
+            if "operations" in variables:
+                for op in variables["operations"]:
+                    if "variables" in op:
+                        candidate_blocks.append(op["variables"])
 
-                    return parking_from, parking_to, duration_hours
+            # Scan each candidate
+            for block in candidate_blocks:
+
+                # ---- searchParams ----
+                if "searchParams" in block:
+                    sp = block["searchParams"]
+                    if "from" in sp and "to" in sp:
+                        dt_from = sp["from"]
+                        dt_to = sp["to"]
+                    else:
+                        continue
+
+                # ---- bookingParams ----
+                elif "bookingParams" in block:
+                    bp = block["bookingParams"]
+                    if "from" in bp and "to" in bp:
+                        dt_from = bp["from"]
+                        dt_to = bp["to"]
+                    else:
+                        continue
+
+                else:
+                    continue
+
+                # Parse into datetime objects
+                f = datetime.fromisoformat(dt_from.replace("Z", "+00:00"))
+                t = datetime.fromisoformat(dt_to.replace("Z", "+00:00"))
+                duration_hours = round((t - f).total_seconds() / 3600, 2)
+
+                return dt_from, dt_to, duration_hours
 
         except Exception:
             continue
@@ -65,99 +82,80 @@ def parse_parking_window(har):
     return None, None, None
 
 
-def extract_garages(har):
-    """
-    Extract unique garages from HAR searchGarages response.
-    """
+# ----------------------------------------------------------------------
+# Load HAR
+# ----------------------------------------------------------------------
+with open(har_file, "r") as f:
+    har = json.load(f)
 
-    garages = {}
+# Get parking time range
+parking_from, parking_to, parking_duration_hours = parse_parking_window(har)
 
-    for entry in har.get("log", {}).get("entries", []):
-        try:
-            req = entry["request"]
-            res = entry["response"]
-            url = req["url"]
+# ----------------------------------------------------------------------
+# Extract garages
+# ----------------------------------------------------------------------
+garages = {}
 
-            if "/graphql" not in url:
-                continue
+for entry in har["log"]["entries"]:
+    try:
+        req = entry["request"]
+        res = entry["response"]
+        url = req["url"]
 
-            text = res["content"].get("text", "")
-            if not text or not text.startswith("{"):
-                continue
-
-            body = json.loads(text)
-            if "data" not in body:
-                continue
-            if "searchGarages" not in body["data"]:
-                continue
-
-            for g in body["data"]["searchGarages"]:
-                gid = g.get("id")
-                if gid:
-                    garages[gid] = g
-
-        except Exception:
+        # Only GraphQL
+        if "/graphql" not in url:
             continue
 
-    return garages
+        text = res.get("content", {}).get("text", "")
+        if not text or not text.startswith("{"):
+            continue
 
+        body = json.loads(text)
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python extract_parkbee.py <har_file>")
-        sys.exit(1)
+        if "data" not in body:
+            continue
+        if "searchGarages" not in body["data"]:
+            continue
 
-    har_file = sys.argv[1]
+        for g in body["data"]["searchGarages"]:
+            gid = g.get("id")
+            if gid:
 
-    with open(har_file, "r") as f:
-        har = json.load(f)
+                # Calculate hourly price
+                pricing = g.get("pricingAndAvailability", {}).get("pricing", {})
+                total_cost = pricing.get("cost")
+                if total_cost is not None and parking_duration_hours:
+                    hourly_price = round(float(total_cost) / parking_duration_hours, 4)
+                else:
+                    hourly_price = None
 
-    # ---- Extract parking window ----
-    parking_from, parking_to, duration_hours = parse_parking_window(har)
+                garages[gid] = {
+                    "id": gid,
+                    "name": g.get("name"),
+                    "latitude": g.get("latitude"),
+                    "longitude": g.get("longitude"),
+                    "address": g.get("address"),
+                    "pricingAndAvailability": g.get("pricingAndAvailability"),
+                    "scrape_datetime": datetime.now(timezone.utc).isoformat(),
 
-    if parking_from:
-        print(f"🕒 Parking window: {parking_from} → {parking_to} ({duration_hours}h)")
-    else:
-        print("⚠️ Could NOT detect parking_from / parking_to — setting NULL.")
+                    # newly added fields
+                    "parking_from": parking_from,
+                    "parking_to": parking_to,
+                    "parking_duration_hours": parking_duration_hours,
+                    "hourly_price": hourly_price,
+                }
 
-    # ---- Extract garages ----
-    garages = extract_garages(har)
-    print(f"📦 Extracted {len(garages)} garages")
+    except Exception:
+        continue
 
-    # ---- Write NDJSON ----
-    output_name = f"parkbee_garages_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    scrape_datetime = datetime.now(timezone.utc).isoformat()
+print(f"📦 Extracted {len(garages)} garages")
 
-    with open(output_name, "w") as f:
-        for g in garages.values():
+# ----------------------------------------------------------------------
+# Save JSON
+# ----------------------------------------------------------------------
+output_file = f"parkbee_garages_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
 
-            # If cost exists, compute hourly price
-            try:
-                total_cost = g["pricingAndAvailability"]["pricing"]["cost"]
-                hourly_price = round(total_cost / duration_hours, 2) if duration_hours else None
-            except:
-                hourly_price = None
+with open(output_file, "w") as f:
+    json.dump(list(garages.values()), f, indent=2)
 
-            g_out = {
-                "id": g.get("id"),
-                "name": g.get("name"),
-                "latitude": g.get("latitude"),
-                "longitude": g.get("longitude"),
-                "address": g.get("address", {}),
-                "pricingAndAvailability": g.get("pricingAndAvailability", {}),
-                "scrape_datetime": scrape_datetime,
-
-                # NEW FIELDS
-                "parking_from": parking_from,
-                "parking_to": parking_to,
-                "parking_duration_hours": duration_hours,
-                "hourly_price": hourly_price,
-            }
-
-            f.write(json.dumps(g_out) + "\n")
-
-    print(f"💾 Saved NDJSON → {output_name}")
-
-
-if __name__ == "__main__":
-    main()
+print(f"💾 Saved → {output_file}")
