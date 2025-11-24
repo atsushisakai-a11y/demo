@@ -1,6 +1,6 @@
 CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parkbee_garages` AS
 SELECT
-  id as location_id,
+  id AS location_id,
   name,
   latitude,
   longitude,
@@ -10,8 +10,14 @@ SELECT
   pricingAndAvailability.pricing.currency AS price_currency,
   pricingAndAvailability.availability.availableSpaces AS available_spaces,
   pricingAndAvailability.availability.totalSpaces AS total_spaces,
-  scrape_datetime
-FROM
-  `grand-water-473707-r8.raw.raw_parkbee_garages`
-WHERE id is not null  
-  ;
+
+  -- Convert all timestamps to CET
+  (scrape_datetime AT TIME ZONE "Europe/Amsterdam") AS scrape_datetime_cet,
+  (parking_from    AT TIME ZONE "Europe/Amsterdam") AS parking_from_cet,
+  (parking_to      AT TIME ZONE "Europe/Amsterdam") AS parking_to_cet,
+
+  parking_duration_hours,
+  hourly_price
+
+FROM `grand-water-473707-r8.raw.raw_parkbee_garages`
+WHERE id IS NOT NULL;
