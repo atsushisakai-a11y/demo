@@ -65,6 +65,7 @@ jobs:
           declare -a dwh_sql_files=(
             "sql/dwh/dim_parkbee_locations.sql"
             "sql/dwh/fact_parkbee_locations.sql"
+            "sql/dwh/fact_parking_fee_amsterdam.sql"
           )
 
           for sql_file in "${dwh_sql_files[@]}"; do
