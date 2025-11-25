@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `grand-water-473707-r8.raw.google_charging_places` (
+CREATE OR REPLACE TABLE `grand-water-473707-r8.raw.raw_google_charging_places` (
   place_id             STRING,
   name                 STRING,
   address              STRING,
