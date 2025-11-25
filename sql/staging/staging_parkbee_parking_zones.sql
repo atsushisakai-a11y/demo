@@ -25,8 +25,8 @@ zones AS (
     geom,
 
     -- FIX: derive the centroid from the polygon
-    ST_Y(ST_CENTROID(zone_geography)) AS zone_center_lat,
-    ST_X(ST_CENTROID(zone_geography)) AS zone_center_lng
+    ST_Y(ST_CENTROID(geom)) AS zone_center_lat,
+    ST_X(ST_CENTROID(geom)) AS zone_center_lng
 
   FROM `grand-water-473707-r8.staging.staging_parking_fee_amsterdam`
 ),
@@ -64,7 +64,7 @@ joined AS (
 
   FROM pb
   LEFT JOIN zones z
-    ON ST_WITHIN(pb.pb_point, z.zone_geography)
+    ON ST_WITHIN(pb.pb_point, z.geom)
 )
 
 SELECT * FROM joined;
