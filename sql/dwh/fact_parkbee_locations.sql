@@ -1,7 +1,6 @@
 CREATE OR REPLACE TABLE `grand-water-473707-r8.dwh.fact_parkbee_locations` AS
 SELECT
   spg.location_id,
-  ST_GEOGPOINT(spg.longitude, spg.latitude) AS geom,
   spg.scrape_datetime_cet,
   spg.parking_from_cet,
   spg.parking_to_cet,
