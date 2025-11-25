@@ -22,7 +22,7 @@ zones AS (
     hourly_rate,
     periode,
     days,
-    zone_geography,
+    geom,
 
     -- FIX: derive the centroid from the polygon
     ST_Y(ST_CENTROID(zone_geography)) AS zone_center_lat,
