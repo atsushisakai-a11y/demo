@@ -5,7 +5,8 @@ SELECT
   city,
   name,
   latitude,
-  longitude
+  longitude,
+  ST_GEOGPOINT(spg.longitude, spg.latitude) AS geom
 FROM
   `grand-water-473707-r8.staging.staging_parkbee_garages` l
 ORDER BY
