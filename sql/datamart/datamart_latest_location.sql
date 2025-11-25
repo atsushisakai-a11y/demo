@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `grand-water-473707-r8.dwh.datamart_price_comparison` AS
+CREATE OR REPLACE TABLE `grand-water-473707-r8.datamart.datamart_price_comparison` AS
 WITH
   latest AS (
   SELECT
