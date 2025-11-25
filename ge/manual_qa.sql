@@ -51,3 +51,10 @@ order by 2 desc
   ALL
 ORDER BY
   1
+
+--Check park_from / park_to UTC / CET
+select r.id, r.parking_from, r.parking_to, s.parking_from_cet, s.parking_to_cet
+from `grand-water-473707-r8.raw.raw_parkbee_garages` r
+inner join `grand-water-473707-r8.staging.staging_parkbee_garages` s
+on s.location_id = r.id
+where r.id = '731663e5-7559-4914-a824-ef53ecbee8d2'
