@@ -1,0 +1,17 @@
+Location of scrapedatetime: response -> date
+
+"response": {
+          "status": 200,
+          "statusText": "",
+          "httpVersion": "h3",
+          "headers": [
+            {
+              "name": "access-control-allow-origin",
+              "value": "*"
+            },
+
+            },
+            {
+              "name": "date",
+              "value": "Wed, 19 Nov 2025 21:04:34 GMT"
+            },
