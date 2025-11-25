@@ -17,7 +17,7 @@ SELECT
 
 FROM `grand-water-473707-r8.raw.raw_google_charging_places`
 WHERE LOWER(types) LIKE '%parking%'
-  and rating is not null),
+  ),
  ranked AS (
   SELECT
     ds.*,
