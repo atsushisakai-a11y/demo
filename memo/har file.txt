@@ -1,5 +1,6 @@
+----------------------------------------------------------------------------------------------------
 Location of scrapedatetime: response -> date
-
+----------------------------------------------------------------------------------------------------
 "response": {
           "status": 200,
           "statusText": "",
@@ -15,3 +16,25 @@ Location of scrapedatetime: response -> date
               "name": "date",
               "value": "Wed, 19 Nov 2025 21:04:34 GMT"
             },
+
+----------------------------------------------------------------------------------------------------
+parking_from / parking_to
+----------------------------------------------------------------------------------------------------
+
+              "name": "x-amz-security-token",
+              "value": "IQoJb3JpZ2luX2VjEB0aCWV1LXdlc3QtMSJHMEUCIHiFDtfHH8QReAe/T85LjMoBbgCbhsHH9XNc1zWHt140AiEAocHk1W/IqbSeoZ/OL5Mqv3aGGOSN0MNGyL510YEt9/oqtwUI5v//////////ARAAGgw5MDQxMTk0MjQ3MDciDHt5rkEt47+HF/aE8SqLBdAwe2NyVI3J4vpn3xeyGRIK2PCApHXpJMMUJ8Vc2g42CADm+o02JsL63PAb6QvgXvBMidlFggWQmy+SlzxYwu8MsB84F11Fzgz6avno0PI0+I0BLmgQWBHZrQ3/Tq4TgvxX03S5O9jYOZu8CCLCgRDDFHo+J1tt10JUw78kXuHpFaimWAji5o9Mibj69fjsm1/8y/Dh4JacH1mVg/h98XmnKua73IVslwAgu5alGj4QuVssl4izewYUMqOn4H36tcDAV8fFSj9jlVV6J55iZs619d4T+keM+C6xNix6gzEf8VPHDPkje/MO1dHgWQkeSGXzcdf2Lq0bjBRpOJo4z1D4DLU3p+yno+0g4AJHy1mhQr/VOEO9XgrKV2mJp/Zo2dXLGi4gA0e9dIyXEBQWnqr1+aCOKYNEM6jYDLqbXe268+p5kfE7iQjmzHSp6lC2rVFF7e6u7qnn7H3iGHgx1/Lc/qD0zMEtRgzjZagB0T0WZkny+Qy2FQetbhcT+Cnsaqe949e0vwTlq6wHS7YHPGhOptFtZSruL3j001C6B1GEdSAki8SRQfkJvX5zJk0uPhJaaORVdlomctHL6pb9+WUL7tN07FTj1eR6aRVr+/w/DsrFqjvK3O++fKPvZiXBXsaghCkuUE4dXC8WGGv0dFpfWsu7wPDxFFy/T+6JtI5cWXODMNPvCYb4tO4yQDEsuRzK3STbhKc3HrMTOulax6FZNWxEhtF2bscOTtFWwYu46lMthkw5XYkGkFgWO31Ba2oUHw1xYfZMrFJfINEyQ+cM4qz7VKI/Auia//VYb3W/klHBuC/gb2wIbpyttEHjRNGb9O7/prgR8uKehYPhy5NrKZFLWZ5dO2qQizDJ4fjIBjreAlYiJ/yegNBpxk3vAcOQFMoPjD2oUyl1dMFqr8xbIooDyVcBPD3kgYk7qyt8gH6wlzIQT6vlqfxSKKKRaWc3Z0SKQmCQRsEs6S9Q0Dzg5hp490hMVJW7oiwjM0P2ehZX39UVmvBKX30MiIKr48snOvA9+8nNa80uRpRo5rd0T2zQI0F+spc2M+CkI5ndlqKSrnvLyO1pllA9GBS2UMDg46K2LNJ13ypPydJLPLNYOFPoN91Z8nSl49Yo+AOP83ut0JIuA1Xr9ePvdwzEbqgXulTcfToVYqPrvQskMVdgcA6dSyyUOPIVIsCdVaGvy91ky8kO2z7gnpUHTpDigGJRCqnO5UiY7zcXTAVwcAlfotSk1tnf6N4hsH30bT+xmjUBqNSRleJY4SVAggnHktNJ+huBkoosX478UlqDTMg1ugC75VTeBMAJqMMsyLNncSJppg+UdD2I0qGAKiiVvFTu"
+            },
+            {
+              "name": "x-amz-user-agent",
+              "value": "aws-amplify/3.0.7"
+            }
+          ],
+          "queryString": [],
+          "cookies": [],
+          "headersSize": -1,
+          "bodySize": 876,
+          "postData": {
+            "mimeType": "application/json; charset=UTF-8",
+            "text": "{\"operationName\":\"SearchGaragesQuery\",\"variables\":{\"latitude\":52.38737537587366,\"longitude\":4.838122646335478,\"radius\":3,\"pricing\":{\"startDateTime\":\"2025-11-19T21:30:00.000Z\",\"endDateTime\":\"2025-11-19T23:30:00.000Z\"}},\"query\":\"query SearchGaragesQuery($latitude: Float!, $longitude: Float!, $radius: Int!, $pricing: PricingParams!) {\\n  searchGarages(\\n    params: {latitude: $latitude, longitude: $longitude, radius: $radius, pricing: $pricing}\\n  ) {\\n    id\\n    name\\n    pricingAndAvailability {\\n      pricing {\\n        cost\\n        currency\\n        __typename\\n      }\\n      availability {\\n        availableSpaces\\n        totalSpaces\\n        __typename\\n      }\\n      __typename\\n    }\\n    latitude\\n    longitude\\n    address {\\n      city\\n      country\\n      __typename\\n    }\\n    photos {\\n      small\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}"
+          }
+        },
