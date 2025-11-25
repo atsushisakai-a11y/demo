@@ -2,7 +2,7 @@ CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_parking_fee_amste
 WITH lvl1 AS (
   SELECT
     zone_id,
-    SAFE.ST_GEOGFROMGEOJSON(location_json) AS zone_geography,
+    SAFE.ST_GEOGFROMGEOJSON(location_json) AS geom,
     description.__invalid_keys__[OFFSET(0)].value AS description,
     t AS tariff_struct
   FROM `grand-water-473707-r8.raw.raw_parking_fee_amsterdam`,
@@ -12,7 +12,7 @@ WITH lvl1 AS (
 lvl2 AS (
   SELECT
     zone_id,
-    zone_geography,
+    geom,
     description,
 
     -- Extract hourly rate (first-level key)
@@ -28,7 +28,7 @@ lvl2 AS (
 SELECT
   zone_id,
   description,
-  zone_geography,
+  geom,
 
   -- numeric price
   SAFE_CAST(REPLACE(hourly_rate_str, ',', '.') AS FLOAT64) AS hourly_rate,
@@ -37,7 +37,7 @@ SELECT
   days,
 
   -- centroid for join with ParkBee
-  ST_Y(ST_CENTROID(zone_geography)) AS zone_lat,
-  ST_X(ST_CENTROID(zone_geography)) AS zone_lng
+  ST_Y(ST_CENTROID(geom)) AS zone_lat,
+  ST_X(ST_CENTROID(geom)) AS zone_lng
 
 FROM lvl2;
