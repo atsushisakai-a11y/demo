@@ -6,10 +6,9 @@ SELECT
   spfa.description,
   spfa.hourly_rate,
   spfa.periode,
-  spfa.zone_geography,
   spfa.zone_lat,
   spfa.zone_lng,
-  ST_GEOGPOINT(spfa.zone_lng, spfa.zone_lat) AS geom,
+  spfa.geom
 FROM
   `grand-water-473707-r8.staging.staging_parking_fee_amsterdam` spfa
 ORDER BY
