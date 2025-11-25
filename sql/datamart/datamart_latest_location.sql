@@ -46,7 +46,7 @@ ON
 LEFT JOIN
   `grand-water-473707-r8.dwh.fact_parking_fee_amsterdam` z
 ON
-  ST_WITHIN(fpl.geom, z.geom)
+  ST_WITHIN(dpl.geom, z.geom)
 WHERE
   dpl.country = 'NL'
 ORDER BY
