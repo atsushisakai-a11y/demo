@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `grand-water-473707-r8.dwh.fact_google_places` AS
+CREATE OR REPLACE TABLE `grand-water-473707-r8.dwh.dim_google_places` AS
 SELECT
   sg.place_id,
   sg.name,
