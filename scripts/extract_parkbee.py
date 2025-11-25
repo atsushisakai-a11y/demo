@@ -1,162 +1,184 @@
 import json
 import sys
+import re
 from datetime import datetime
-from zoneinfo import ZoneInfo
+import pytz
 
-CET = ZoneInfo("Europe/Amsterdam")
-
-
-# ------------------------------------------------------
-# Helpers
-# ------------------------------------------------------
-
-def parse_datetime_to_cet(dt_str):
+# -----------------------------------------
+# Helper: Convert ISO8601 (with CET offset) → UTC
+# -----------------------------------------
+def to_utc(dt_str):
     """
-    Convert a UTC datetime string to CET timezone.
-    Supports formats like:
-      - '2025-11-21T19:45:00.000Z'
-      - 'Fri, 21 Nov 2025 14:28:40 GMT'
+    Convert ISO8601 datetime with offset to UTC Z-format.
+    Example:
+        2025-11-21T22:30:00+01:00 → 2025-11-21T21:30:00Z
     """
-    try:
-        if "GMT" in dt_str:
-            # Example: Fri, 21 Nov 2025 14:28:40 GMT
-            dt = datetime.strptime(dt_str, "%a, %d %b %Y %H:%M:%S GMT")
-            dt = dt.replace(tzinfo=ZoneInfo("UTC"))
-        else:
-            # Example: 2025-11-21T19:45:00.000Z
-            dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        return dt.astimezone(CET).isoformat()
-    except Exception:
+    if dt_str is None:
         return None
 
+    # Normalize Z notation
+    if dt_str.endswith("Z"):
+        dt_str = dt_str.replace("Z", "+00:00")
 
-def extract_scrape_datetime(entry):
-    """Extract scrape time from HTTP response headers."""
-    headers = entry.get("response", {}).get("headers", [])
-    for h in headers:
-        if h.get("name", "").lower() == "date":
-            return parse_datetime_to_cet(h["value"])
-    return None
+    dt = datetime.fromisoformat(dt_str)  # Respect embedded offset
+    dt_utc = dt.astimezone(pytz.UTC)
+    return dt_utc.isoformat().replace("+00:00", "Z")
 
 
-def extract_parking_window(entry):
-    """
-    Extract parking_from / parking_to from GraphQL request POST body.
-    Looks in postData.text → "variables" → "pricing".
-    """
+# -----------------------------------------
+# Read CLI argument
+# -----------------------------------------
+if len(sys.argv) != 2:
+    print("Usage: python extract_parkbee.py garages.har")
+    sys.exit(1)
+
+har_file = sys.argv[1]
+
+with open(har_file, "r") as f:
+    har = json.load(f)
+
+garages = {}
+parking_from = None
+parking_to = None
+scrape_datetime = None
+
+# -----------------------------------------
+# Step 1: Extract parking_from + parking_to from postData.variables.pricing
+# -----------------------------------------
+for entry in har["log"]["entries"]:
     req = entry.get("request", {})
-    post = req.get("postData", {})
-    body = post.get("text")
+    post = req.get("postData", {}).get("text", "")
 
-    if not body:
-        return None, None, None
+    if not post or not post.startswith("{"):
+        continue
 
     try:
-        data = json.loads(body)
-        vars_block = data.get("variables", {})
-        pricing = vars_block.get("pricing", {})
+        body = json.loads(post)
+    except:
+        continue
 
-        s = pricing.get("startDateTime")
-        e = pricing.get("endDateTime")
+    variables = body.get("variables", {})
 
-        if not s or not e:
-            return None, None, None
+    # Look inside pricing block
+    if "pricing" in variables:
+        pf = variables["pricing"].get("startDateTime")
+        pt = variables["pricing"].get("endDateTime")
 
-        start_cet = parse_datetime_to_cet(s)
-        end_cet = parse_datetime_to_cet(e)
+        if pf and pt:
+            parking_from = pf
+            parking_to = pt
 
-        duration_hours = None
+    # If already found both, stop searching
+    if parking_from and parking_to:
+        break
+
+# -----------------------------------------
+# Step 2: Find scrape_datetime from response.headers["date"]
+# -----------------------------------------
+for entry in har["log"]["entries"]:
+    resp = entry.get("response", {})
+    headers = resp.get("headers", [])
+
+    for h in headers:
+        if h.get("name", "").lower() == "date":
+            # Example: "Fri, 21 Nov 2025 14:28:40 GMT"
+            try:
+                dt = datetime.strptime(h["value"], "%a, %d %b %Y %H:%M:%S GMT")
+                dt = pytz.UTC.localize(dt)
+                scrape_datetime = dt.isoformat().replace("+00:00", "Z")
+            except:
+                continue
+
+    if scrape_datetime:
+        break
+
+# -----------------------------------------
+# Fallback datetime if none found
+# -----------------------------------------
+if not scrape_datetime:
+    scrape_datetime = datetime.utcnow().replace(tzinfo=pytz.UTC).isoformat().replace("+00:00", "Z")
+
+# -----------------------------------------
+# Convert extracted CET → UTC for BigQuery
+# -----------------------------------------
+parking_from_utc = to_utc(parking_from)
+parking_to_utc = to_utc(parking_to)
+
+# Calculate hours
+parking_duration_hours = None
+hourly_price = None
+
+if parking_from_utc and parking_to_utc:
+    dt_from = datetime.fromisoformat(parking_from_utc.replace("Z", "+00:00"))
+    dt_to = datetime.fromisoformat(parking_to_utc.replace("Z", "+00:00"))
+    duration = (dt_to - dt_from).total_seconds() / 3600
+    parking_duration_hours = round(duration, 2) if duration > 0 else None
+
+
+# -----------------------------------------
+# Step 3: Extract garage results
+# -----------------------------------------
+for entry in har["log"]["entries"]:
+    req = entry.get("request", {})
+    res = entry.get("response", {})
+    url = req.get("url", "")
+
+    if "/graphql" not in url:
+        continue
+
+    text = res.get("content", {}).get("text", "")
+    if not text or not text.startswith("{"):
+        continue
+
+    try:
+        body = json.loads(text)
+    except:
+        continue
+
+    data = body.get("data", {})
+    if "searchGarages" not in data:
+        continue
+
+    for g in data["searchGarages"]:
+        gid = g.get("id")
+        if not gid:
+            continue
+
+        item = {
+            "id": gid,
+            "name": g.get("name"),
+            "latitude": g.get("latitude"),
+            "longitude": g.get("longitude"),
+            "address": g.get("address"),
+            "pricingAndAvailability": g.get("pricingAndAvailability"),
+
+            # UTC timestamps for BigQuery ingestion
+            "scrape_datetime": scrape_datetime,
+            "parking_from": parking_from_utc,
+            "parking_to": parking_to_utc,
+            "parking_duration_hours": parking_duration_hours,
+            "hourly_price": None
+        }
+
+        # Compute hourly price safely
         try:
-            dt_start = datetime.fromisoformat(start_cet)
-            dt_end = datetime.fromisoformat(end_cet)
-            duration_hours = round((dt_end - dt_start).total_seconds() / 3600.0, 2)
+            cost = g["pricingAndAvailability"]["pricing"]["cost"]
+            if parking_duration_hours and parking_duration_hours > 0:
+                item["hourly_price"] = round(cost / parking_duration_hours, 2)
         except:
             pass
 
-        return start_cet, end_cet, duration_hours
-
-    except Exception:
-        return None, None, None
+        garages[gid] = item
 
 
-def extract_garages(entry):
-    """Extract garage list from GraphQL response block."""
-    resp = entry.get("response", {})
-    content = resp.get("content", {})
-    text = content.get("text")
+print(f"📦 Extracted {len(garages)} garages")
 
-    if not text:
-        return None
+# -----------------------------------------
+# Output file
+# -----------------------------------------
+output_name = f"parkbee_garages_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
 
-    try:
-        data = json.loads(text)
-        return data.get("data", {}).get("searchGarages") or []
-    except Exception:
-        return None
+with open(output_name, "w") as f:
+    json.dump(list(garages.values()), f, indent=2)
 
-
-# ------------------------------------------------------
-# MAIN EXTRACTOR
-# ------------------------------------------------------
-
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python extract_parkbee.py input.har")
-        sys.exit(1)
-
-    har_file = sys.argv[1]
-
-    with open(har_file, "r", encoding="utf8") as f:
-        har = json.load(f)
-
-    entries = har.get("log", {}).get("entries", [])
-
-    all_output = []
-
-    for entry in entries:
-        garages = extract_garages(entry)
-        if not garages:
-            continue
-
-        scrape_datetime = extract_scrape_datetime(entry)
-        parking_from, parking_to, parking_duration_hours = extract_parking_window(entry)
-
-        for g in garages:
-            price_cost = (
-                g.get("pricingAndAvailability", {})
-                 .get("pricing", {})
-                 .get("cost")
-            )
-
-            hourly_price = None
-            if price_cost is not None and parking_duration_hours:
-                try:
-                    hourly_price = round(price_cost / parking_duration_hours, 2)
-                except:
-                    hourly_price = None
-
-            all_output.append({
-                "id": g.get("id"),
-                "name": g.get("name"),
-                "latitude": g.get("latitude"),
-                "longitude": g.get("longitude"),
-                "address": g.get("address"),
-                "pricingAndAvailability": g.get("pricingAndAvailability"),
-                "scrape_datetime": scrape_datetime,               # CET
-                "parking_from": parking_from,                     # CET
-                "parking_to": parking_to,                         # CET
-                "parking_duration_hours": parking_duration_hours,
-                "hourly_price": hourly_price
-            })
-
-    out_file = f"parkbee_garages_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    with open(out_file, "w", encoding="utf8") as f:
-        for item in all_output:
-            f.write(json.dumps(item) + "\n")
-
-    print(f"📦 Extracted {len(all_output)} garages")
-    print(f"📄 Output file: {out_file}")
-
-
-if __name__ == "__main__":
-    main()
+print(f"💾 Saved → {output_name}")
