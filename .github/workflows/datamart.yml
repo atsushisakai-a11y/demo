@@ -33,11 +33,11 @@ jobs:
           bq query --use_legacy_sql=false < sql/datamart/datamart_google_places_nearest_parkbee.sql
           echo "✔ datamart_google_places_nearest_parkbee completed."
 
-      # 5. Run datamart: datamart_latest_location
-      - name: Build datamart_latest_location
+      # 5. Run datamart: sql/datamart/datamart_price_comparison.sql
+      - name: Build datamart_price_comparison
         run: |
-          echo "Running datamart_latest_location.sql ..."
-          bq query --use_legacy_sql=false < sql/datamart/datamart_latest_location.sql
+          echo "Running datamart_price_comparison.sql ..."
+          bq query --use_legacy_sql=false < sql/datamart/datamart_price_comparison.sql
           echo "✔ datamart_latest_location completed."
 
       # 6. Done
