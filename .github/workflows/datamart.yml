@@ -1,0 +1,45 @@
+name: 4.Datamart Build
+
+on:
+  workflow_dispatch:   # manual run
+  schedule:
+    - cron: "0 3 * * *"   # optional: run every day at 03:00 CET
+
+jobs:
+  build-datamart:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Decode GCP service account
+      - name: Decode GCP SA key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
+
+      # 3. Authenticate BigQuery
+      - name: Authenticate with gcloud
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/key.json" >> $GITHUB_ENV
+
+      # 4. Run datamart: datamart_google_places_nearest_parkbee
+      - name: Build datamart_google_places_nearest_parkbee
+        run: |
+          echo "Running datamart_google_places_nearest_parkbee.sql ..."
+          bq query --use_legacy_sql=false < sql/datamart/datamart_google_places_nearest_parkbee.sql
+          echo "✔ datamart_google_places_nearest_parkbee completed."
+
+      # 5. Run datamart: datamart_latest_location
+      - name: Build datamart_latest_location
+        run: |
+          echo "Running datamart_latest_location.sql ..."
+          bq query --use_legacy_sql=false < sql/datamart/datamart_latest_location.sql
+          echo "✔ datamart_latest_location completed."
+
+      # 6. Done
+      - name: Finished
+        run: echo "🎉 All datamarts successfully built!"
