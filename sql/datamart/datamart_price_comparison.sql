@@ -49,7 +49,8 @@ ON
   ST_WITHIN(dpl.geom, z.geom)
 WHERE
   dpl.country = 'NL'
-  and fpl.occupancy_rate > 0
+  and fpl.occupancy_rate > 0 --remove places with data issues
+  and z.hourly_rate > 0 --remove areas without public data
 ORDER BY
   1,
   2
