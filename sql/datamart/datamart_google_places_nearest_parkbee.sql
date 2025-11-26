@@ -74,7 +74,12 @@ SELECT
     WHEN distance_meters <= 1000 THEN '0.5–1 km (Slightly Far)'
     ELSE '> 1 km (Far)'
 END
-  AS distance_category
+  AS distance_category,
+  CASE
+    WHEN distance_meters <= 100 THEN 'Yes'
+    ELSE 'No'
+END
+  AS on_parkbee
 FROM
   join_parkbee
 WHERE
