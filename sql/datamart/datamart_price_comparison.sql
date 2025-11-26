@@ -49,6 +49,7 @@ ON
   ST_WITHIN(dpl.geom, z.geom)
 WHERE
   dpl.country = 'NL'
+  and fpl.occupancy_rate > 0
 ORDER BY
   1,
   2
