@@ -50,7 +50,7 @@ ON
 WHERE
   fpl.occupancy_rate > 0 --remove places with data issues
   and fpl.occupancy_rate < 1 --remove places with data issues
-  and fpl.hourly_price <= 15 --remove outlier
+  and fpl.hourly_price <= 20 --remove outlier
 ORDER BY
   1,
   2
