@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Create dbt profiles.yml safely
+      - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
           printf "%s\n" \
@@ -42,14 +42,13 @@ jobs:
           "      method: service-account" \
           "      project: grand-water-473707-r8" \
           "      dataset: staging" \
-          "      keyfile: ./key.json" \
+          "      keyfile: $PWD/key.json" \
           "      threads: 4" \
           "      location: EU" \
           > ~/.dbt/profiles.yml
 
       - name: Run dbt model
         run: |
-          cd demo
           MODEL="${{ github.event.inputs.model_name }}"
           echo "Running dbt model: $MODEL"
           dbt run --select "$MODEL"
