@@ -4,72 +4,62 @@ on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: "dbt model to run (e.g., staging_google_parking_places_dbt)"
+        description: "dbt model to run (e.g. staging_google_parking_places_dbt)"
         required: true
-        type: string
+        default: "staging_google_parking_places_dbt"
 
 jobs:
   run-dbt:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------------------------
-      # 1. Checkout repository
-      # -------------------------------------------------
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # -------------------------------------------------
       # 2. Setup Python
-      # -------------------------------------------------
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      # -------------------------------------------------
-      # 3. Install dbt-bigquery
-      # -------------------------------------------------
+      # 3. Install dbt for BigQuery
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
-          pip install dbt-bigquery
+          pip install "dbt-bigquery==1.10.3"
 
-      # -------------------------------------------------
-      # 4. Write GCP key JSON into a file
-      # -------------------------------------------------
+      # 4. Decode Base64 → GCP service account key file
       - name: Create GCP service account key file
         run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" > gcp_key.json
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/gcp_key.json
+          ls -l $HOME/gcp_key.json
 
-      # -------------------------------------------------
-      # 5. Create profiles.yml (NO secrets inside heredoc)
-      # -------------------------------------------------
-      - name: Create profiles.yml
+      # 5. Create dbt profiles.yml for BigQuery
+      - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << EOF
-          bigquery:
-            target: prod
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account-json
-                project: grand-water-473707-r8
-                dataset: raw
-                location: EU
-                keyfile_json: "$(cat gcp_key.json)"
-          EOF
+          cat << 'EOF' > ~/.dbt/profiles.yml
+bigquery:
+  target: prod
+  outputs:
+    prod:
+      type: bigquery
+      method: service-account
+      keyfile: /home/runner/gcp_key.json
+      project: grand-water-473707-r8
+      dataset: raw
+      location: EU
+EOF
+          echo "profiles.yml created:"
+          cat ~/.dbt/profiles.yml
 
-      # -------------------------------------------------
-      # 6. Debug repo
-      # -------------------------------------------------
-      - name: Debug listing
-        run: ls -R .
+      # 6. dbt debug (sanity check connection)
+      - name: Debug dbt connection
+        run: |
+          dbt debug --project-dir .
 
-      # -------------------------------------------------
-      # 7. Run dbt model
-      # -------------------------------------------------
+      # 7. Run the requested dbt model
       - name: Run dbt model
         run: |
           MODEL="${{ github.event.inputs.model_name }}"
