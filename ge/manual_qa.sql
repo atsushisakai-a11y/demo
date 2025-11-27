@@ -13,7 +13,9 @@ SELECT date_trunc(scrape_datetime, day) as scrape_datetime, address.country, cou
 drop table `grand-water-473707-r8.staging.staging_parkbee_garages`;
 delete from `grand-water-473707-r8.staging.staging_parkbee_garages` where 1 = 1;
 select * from `grand-water-473707-r8.staging.staging_parkbee_garages`
-select date_trunc(scrape_datetime_cet, day) as scrape_datetime_cet, country, count(*) from `grand-water-473707-r8.staging.staging_parkbee_garages` group by all
+select date_trunc(scrape_datetime_cet, day) as scrape_datetime_cet, country, count(*) from `grand-water-473707-r8.staging.staging_parkbee_garages` group by all;
+select * from `grand-water-473707-r8.staging.staging_google_parkbee_locations` limit 100;
+select * from `grand-water-473707-r8.staging.staging_google_parking_places` limit 100;
   
 --DWH
 select * from `grand-water-473707-r8.dwh.dim_parkbee_locations` order by 1;
