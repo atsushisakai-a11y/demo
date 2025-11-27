@@ -36,12 +36,19 @@ jobs:
           pip install dbt-bigquery
 
       # -------------------------------------------------
-      # 4. Create BigQuery profiles.yml
+      # 4. Write GCP key JSON into a file
+      # -------------------------------------------------
+      - name: Create GCP service account key file
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_JSON }}" > gcp_key.json
+
+      # -------------------------------------------------
+      # 5. Create profiles.yml (NO secrets inside heredoc)
       # -------------------------------------------------
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << 'EOF'
+          cat > ~/.dbt/profiles.yml << EOF
           bigquery:
             target: prod
             outputs:
@@ -51,17 +58,17 @@ jobs:
                 project: grand-water-473707-r8
                 dataset: raw
                 location: EU
-                keyfile_json: ${{ secrets.GCP_SA_KEY_JSON }}
+                keyfile_json: "$(cat gcp_key.json)"
           EOF
 
       # -------------------------------------------------
-      # 5. Debug repo contents
+      # 6. Debug repo
       # -------------------------------------------------
-      - name: Debug: list repo files
+      - name: Debug listing
         run: ls -R .
 
       # -------------------------------------------------
-      # 6. Run dbt model
+      # 7. Run dbt model
       # -------------------------------------------------
       - name: Run dbt model
         run: |
