@@ -7,8 +7,6 @@ WITH
     MAX(spg.scrape_datetime_cet) AS max_scrape_datetime_cet
   FROM
     `grand-water-473707-r8.staging.staging_parkbee_garages` spg
-  WHERE
-    spg.location_id = '4bed1f3e-1270-4873-883c-d01f2e3158b8'
   GROUP BY
     ALL )
 SELECT
