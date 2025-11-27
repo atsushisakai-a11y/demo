@@ -13,47 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------------------------
-      # 1. Checkout repo
-      # -------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # -------------------------------------------------
-      # 2. Setup Python
-      # -------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # -------------------------------------------------
-      # 3. Install dbt-bigquery
-      # -------------------------------------------------
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # -------------------------------------------------
-      # 4. Decode service account JSON from secret
-      # -------------------------------------------------
       - name: Decode GCP credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # -------------------------------------------------
-      # 5. Expose JSON key to environment for dbt
-      # -------------------------------------------------
       - name: Export GCP JSON key for dbt
         run: |
-          echo "GCP_SA_KEY_JSON<<EOF" >> $GITHUB_ENV
-          cat key.json >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          KEY_JSON=$(cat key.json | sed 's/"/\\"/g' | sed "s/'/\"/g")
+          echo "GCP_SA_KEY_JSON=$KEY_JSON" >> $GITHUB_ENV
 
-      # -------------------------------------------------
-      # 6. Create dbt profiles.yml (BigQuery profile)
-      # -------------------------------------------------
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -65,27 +46,21 @@ bigquery:
       type: bigquery
       method: service-account-json
       project: "grand-water-473707-r8"
-      dataset: "staging"     # 👈 FIXED — no more raw_staging
-      keyfile_json: $GCP_SA_KEY_JSON
+      dataset: "staging"
+      keyfile_json: "$GCP_SA_KEY_JSON"
       threads: 4
       location: EU
 EOF
 
-      # -------------------------------------------------
-      # 7. Run dbt model
-      # -------------------------------------------------
       - name: Run dbt model
         run: |
-          cd demo   # your repository root
+          cd demo
           MODEL="${{ github.event.inputs.model_name }}"
           echo "🏃 Running dbt model: $MODEL"
           dbt run --select "$MODEL"
 
-      # -------------------------------------------------
-      # 8. Show artifacts (optional but helpful)
-      # -------------------------------------------------
       - name: Show dbt run results
         if: always()
         run: |
-          echo "DBT Target Directory:"
+          echo "=== DBT target directory ==="
           ls -R demo/target
