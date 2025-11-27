@@ -26,28 +26,27 @@ jobs:
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      - name: Decode GCP credentials
+      - name: Decode GCP service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Export GCP JSON key for dbt
-        run: |
-          KEY_JSON=$(cat key.json | sed 's/"/\\"/g' | sed "s/'/\"/g")
-          echo "GCP_SA_KEY_JSON=$KEY_JSON" >> $GITHUB_ENV
-
-      - name: Create dbt profiles.yml
+      - name: Create profiles.json (no quoting issues)
         run: |
           mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
+          cp key.json ~/.dbt/profiles.json
+
+      - name: Create dbt profiles.yml safely
+        run: |
+          cat <<'EOF' > ~/.dbt/profiles.yml
 bigquery:
   target: prod
   outputs:
     prod:
       type: bigquery
       method: service-account-json
-      project: "grand-water-473707-r8"
-      dataset: "staging"
-      keyfile_json: "$GCP_SA_KEY_JSON"
+      project: grand-water-473707-r8
+      dataset: staging
+      keyfile_json: "{{ read_json('profiles.json') }}"
       threads: 4
       location: EU
 EOF
@@ -59,8 +58,7 @@ EOF
           echo "🏃 Running dbt model: $MODEL"
           dbt run --select "$MODEL"
 
-      - name: Show dbt run results
+      - name: Show dbt results
         if: always()
         run: |
-          echo "=== DBT target directory ==="
-          ls -R demo/target
+          echo "=== DBT completed ==="
