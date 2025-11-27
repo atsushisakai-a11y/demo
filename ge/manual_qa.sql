@@ -20,6 +20,7 @@ select * from `grand-water-473707-r8.staging.staging_google_parking_places` limi
 --DWH
 select * from `grand-water-473707-r8.dwh.dim_parkbee_locations` order by 1;
 select * from `grand-water-473707-r8.dwh.fact_parkbee_locations` limit 10;
+select * from `grand-water-473707-r8.dwh.dim_google_places`;
 
 ----------------------------------------------------------------------------
 --Count check
