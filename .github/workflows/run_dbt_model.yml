@@ -47,9 +47,6 @@ jobs:
           "      location: EU" \
           > ~/.dbt/profiles.yml
 
-      - name: Move service account key
-        run: mv key.json ./key.json
-
       - name: Run dbt model
         run: |
           cd demo
