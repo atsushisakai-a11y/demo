@@ -34,18 +34,18 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           printf "%s\n" \
-"bigquery:" \
-"  target: prod" \
-"  outputs:" \
-"    prod:" \
-"      type: bigquery" \
-"      method: service-account" \
-"      project: grand-water-473707-r8" \
-"      dataset: staging" \
-"      keyfile: ./key.json" \
-"      threads: 4" \
-"      location: EU" \
-> ~/.dbt/profiles.yml
+          "bigquery:" \
+          "  target: prod" \
+          "  outputs:" \
+          "    prod:" \
+          "      type: bigquery" \
+          "      method: service-account" \
+          "      project: grand-water-473707-r8" \
+          "      dataset: staging" \
+          "      keyfile: ./key.json" \
+          "      threads: 4" \
+          "      location: EU" \
+          > ~/.dbt/profiles.yml
 
       - name: Move service account key
         run: mv key.json ./key.json
