@@ -26,7 +26,7 @@ models:
 
     # All models inside /models/staging/
     staging:
-      +dataset: staging           # ✅ ensure BigQuery dataset is "staging"
+      +schema: staging           # ✅ ensure BigQuery dataset is "staging"
       +materialized: table
 
     # If you introduce more folders later, add them here
