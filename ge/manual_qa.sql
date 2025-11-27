@@ -12,6 +12,7 @@ SELECT * FROM `grand-water-473707-r8.raw.raw_google_charging_places` LIMIT 1000
 drop table `grand-water-473707-r8.staging.staging_parkbee_garages`;
 delete from `grand-water-473707-r8.staging.staging_parkbee_garages` where 1 = 1;
 select * from `grand-water-473707-r8.staging.staging_parkbee_garages`
+SELECT date_trunc(scrape_datetime, day) as scrape_datetime, address.country, count(*) FROM `grand-water-473707-r8.raw.raw_parkbee_garages` group by all
   
 --DWH
 select * from `grand-water-473707-r8.dwh.dim_parkbee_locations` order by 1;
