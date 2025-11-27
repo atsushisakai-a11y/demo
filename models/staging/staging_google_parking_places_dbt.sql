@@ -27,8 +27,6 @@ WITH source AS (
         parking_address,
         parking_summary,
         parking_types_raw,
-        country,
-        city,
         fetched_at
     FROM {{ source('raw', 'raw_google_charging_places') }}
 ),
@@ -70,8 +68,6 @@ SELECT
     parking_address,
     parking_summary,
     parking_types_raw,
-    country,
-    city,
     fetched_at,
     demand_score,
     demand_bucket,
