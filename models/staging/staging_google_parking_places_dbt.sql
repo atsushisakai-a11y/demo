@@ -1,6 +1,5 @@
 {{ config(
     materialized = "table",
-    dataset = "staging",
     alias = "staging_google_parking_places_dbt"
 ) }}
 
