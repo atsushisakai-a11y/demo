@@ -29,7 +29,7 @@ SELECT
   CASE
     WHEN fpl.hourly_price > z.hourly_rate THEN 'Public Cheaper'
     WHEN fpl.hourly_price < z.hourly_rate THEN 'ParkBee Cheaper'
-    ELSE 'Same'
+    ELSE 'No parking data'
 END
   AS price_position
 FROM
@@ -48,9 +48,7 @@ LEFT JOIN
 ON
   ST_WITHIN(dpl.geom, z.geom)
 WHERE
-  dpl.country = 'NL'
-  and fpl.occupancy_rate > 0 --remove places with data issues
-  and z.hourly_rate > 0 --remove areas without public data
+  fpl.occupancy_rate > 0 --remove places with data issues
 ORDER BY
   1,
   2
