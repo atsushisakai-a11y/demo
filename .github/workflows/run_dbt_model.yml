@@ -29,24 +29,21 @@ jobs:
       - name: Decode Base64 GCP key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/gcp_key.json
-          echo "Decoded key file:"
           ls -l $HOME/gcp_key.json
 
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << 'EOF'
-bigquery:
-  target: prod
-  outputs:
-    prod:
-      type: bigquery
-      method: service-account
-      keyfile: /home/runner/gcp_key.json
-      project: grand-water-473707-r8
-      dataset: raw
-      location: EU
-EOF
+          echo "bigquery:" >> ~/.dbt/profiles.yml
+          echo "  target: prod" >> ~/.dbt/profiles.yml
+          echo "  outputs:" >> ~/.dbt/profiles.yml
+          echo "    prod:" >> ~/.dbt/profiles.yml
+          echo "      type: bigquery" >> ~/.dbt/profiles.yml
+          echo "      method: service-account" >> ~/.dbt/profiles.yml
+          echo "      keyfile: /home/runner/gcp_key.json" >> ~/.dbt/profiles.yml
+          echo "      project: grand-water-473707-r8" >> ~/.dbt/profiles.yml
+          echo "      dataset: raw" >> ~/.dbt/profiles.yml
+          echo "      location: EU" >> ~/.dbt/profiles.yml
 
       - name: Show profiles.yml
         run: cat ~/.dbt/profiles.yml
