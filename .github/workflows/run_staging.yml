@@ -1,4 +1,4 @@
-name: 2.ParkBee staging queries
+name: 2.Staging
 
 on:
   workflow_dispatch:    # Manual trigger
