@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v3
 
       # -------------------------------------------------
-      # 2. Install Python
+      # 2. Setup Python
       # -------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -36,12 +36,13 @@ jobs:
           pip install dbt-bigquery
 
       # -------------------------------------------------
-      # 4. Create BigQuery profile
+      # 4. Create BigQuery profiles.yml
       # -------------------------------------------------
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
-          echo "bigquery:
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          bigquery:
             target: prod
             outputs:
               prod:
@@ -51,19 +52,19 @@ jobs:
                 dataset: raw
                 location: EU
                 keyfile_json: ${{ secrets.GCP_SA_KEY_JSON }}
-          " > ~/.dbt/profiles.yml
+          EOF
 
       # -------------------------------------------------
-      # 5. Debug print
+      # 5. Debug repo contents
       # -------------------------------------------------
       - name: Debug: list repo files
         run: ls -R .
 
       # -------------------------------------------------
-      # 6. Run dbt
+      # 6. Run dbt model
       # -------------------------------------------------
       - name: Run dbt model
         run: |
           MODEL="${{ github.event.inputs.model_name }}"
           echo "🏃 Running dbt model: $MODEL"
-          dbt run --select $MODEL --project-dir .
+          dbt run --select "$MODEL" --project-dir .
