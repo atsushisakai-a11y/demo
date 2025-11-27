@@ -1,4 +1,4 @@
-name: Run dbt model (manual trigger)
+name: Run dbt model (manual)
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
           pip install dbt-bigquery
 
       # -------------------------------------------------
-      # 4. Create BigQuery profile (profiles.yml)
+      # 4. Create BigQuery profile
       # -------------------------------------------------
       - name: Create profiles.yml
         run: |
@@ -54,27 +54,16 @@ jobs:
           " > ~/.dbt/profiles.yml
 
       # -------------------------------------------------
-      # 5. Move into dbt project folder
+      # 5. Debug print
       # -------------------------------------------------
-      - name: Go into dbt project
-        run: cd demo
-        shell: bash
+      - name: Debug: list repo files
+        run: ls -R .
 
       # -------------------------------------------------
-      # 6. Debug print
-      # -------------------------------------------------
-      - name: Debug print project files
-        run: |
-          cd demo
-          echo "dbt files:"
-          ls -R
-
-      # -------------------------------------------------
-      # 7. Run the dbt model
+      # 6. Run dbt
       # -------------------------------------------------
       - name: Run dbt model
         run: |
-          cd demo
           MODEL="${{ github.event.inputs.model_name }}"
           echo "🏃 Running dbt model: $MODEL"
           dbt run --select $MODEL --project-dir .
