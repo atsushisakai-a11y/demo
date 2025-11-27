@@ -33,7 +33,7 @@ jobs:
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
+          cat << 'EOF' > ~/.dbt/profiles.yml
 bigquery:
   target: prod
   outputs:
@@ -42,22 +42,20 @@ bigquery:
       method: service-account
       project: grand-water-473707-r8
       dataset: staging
-      keyfile: /home/runner/work/${{ github.repository }}/${{ github.repository }}/key.json
+      keyfile: ./key.json
       threads: 4
       location: EU
 EOF
 
-      - name: Move key.json into project workspace
-        run: |
-          mv key.json /home/runner/work/${{ github.repository }}/${{ github.repository }}/key.json
+      - name: Move keyfile into working directory
+        run: mv key.json ./key.json
 
       - name: Run dbt
         run: |
           cd demo
           MODEL="${{ github.event.inputs.model_name }}"
-          echo "🏃 Running dbt model: $MODEL"
+          echo "Running dbt model: $MODEL"
           dbt run --select "$MODEL"
 
-      - name: Show dbt results
-        if: always()
-        run: echo "DBT completed"
+      - name: Done
+        run: echo "dbt finished successfully"
