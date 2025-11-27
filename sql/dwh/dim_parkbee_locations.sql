@@ -1,26 +1,31 @@
 CREATE OR REPLACE TABLE
   `grand-water-473707-r8.dwh.dim_parkbee_locations` AS
 WITH
-  distincts AS (
+  latest AS (
   SELECT
-    DISTINCT spg.location_id,
-    spg.country,
-    spg.city,
-    spg.name,
-    spg.latitude,
-    spg.longitude
+    spg.location_id,
+    MAX(spg.scrape_datetime_cet) AS max_scrape_datetime_cet
   FROM
-    `grand-water-473707-r8.staging.staging_parkbee_garages` spg )
+    `grand-water-473707-r8.staging.staging_parkbee_garages` spg
+  WHERE
+    spg.location_id = '4bed1f3e-1270-4873-883c-d01f2e3158b8'
+  GROUP BY
+    ALL )
 SELECT
-  d.location_id,
-  d.country,
-  d.city,
-  d.name,
-  d.latitude,
-  d.longitude,
-  ST_GEOGPOINT(d.longitude, d.latitude) AS geom
+  spg.location_id,
+  spg.country,
+  spg.city,
+  spg.name,
+  spg.latitude,
+  spg.longitude,
+  ST_GEOGPOINT(spg.longitude, spg.latitude) AS geom
 FROM
-  distincts d
+  `grand-water-473707-r8.staging.staging_parkbee_garages` spg
+INNER JOIN
+  latest l
+ON
+  l.location_id = spg.location_id
+  AND l.max_scrape_datetime_cet = spg.scrape_datetime_cet
 ORDER BY
   1,
   2,
