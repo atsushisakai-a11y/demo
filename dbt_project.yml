@@ -1,13 +1,19 @@
-name: 'parkbee_dbt'
-version: '1.0'
-profile: 'bigquery'
+name: demo
+
+version: 1.0.0
+
+profile: bigquery
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target", "dbt_modules"]
 
 models:
-  parkbee_dbt:
-    raw:
-      +schema: raw
-      +materialized: table
-
+  demo:
+    +materialized: table
+    
     staging:
       +schema: staging
-      +materialized: table
+
+    sources:
+      +schema: raw
