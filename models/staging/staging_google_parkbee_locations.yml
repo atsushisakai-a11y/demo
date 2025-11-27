@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: staging_google_parkbee_locations
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+      - name: geom
+        tests:
+          - not_null
+
+      - name: lat
+        tests:
+          - not_null
+
+      - name: lng
+        tests:
+          - not_null
