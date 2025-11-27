@@ -2,10 +2,6 @@ CREATE OR REPLACE TABLE `grand-water-473707-r8.staging.staging_google_parkbee_lo
 SELECT
   rg.place_id,
   rg.name,
-  case when address like '%Amsterdam%' then ''NL
-  when address like 'Brussel' then 'BE'
-  else NULL
-  end as country,
   rg.address,
   rg.lat,
   rg.lng,
