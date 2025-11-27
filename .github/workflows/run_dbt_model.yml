@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           cat <<EOF > ~/.dbt/profiles.yml
-          bigquery_profile:
+          bigquery:
             target: prod
             outputs:
               prod:
@@ -64,6 +64,7 @@ jobs:
                 location: EU
                 priority: interactive
           EOF
+
 
       # -------------------------------
       # Run selected dbt model
