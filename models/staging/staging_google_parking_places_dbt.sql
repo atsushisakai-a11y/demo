@@ -1,0 +1,58 @@
+{{ config(
+    materialized = "table",
+    dataset = "staging",
+    alias = "staging_google_parking_places_dbt"
+) }}
+
+WITH source AS (
+    SELECT
+        place_id,
+        name,
+        address,
+        lat,
+        lng,
+        ST_GEOGPOINT(lng, lat) AS geom,
+        types,
+        rating,
+        user_ratings_total,
+        google_maps_url,
+        search_keyword,
+        search_radius_m,
+        connector_type,
+        power_kw,
+        available_count,
+        total_count,
+        charging_info_raw,
+        is_parking,
+        parking_address,
+        parking_summary,
+        parking_types_raw,
+        country,
+        city,
+        fetched_at
+    FROM {{ source('raw', 'raw_google_charging_places') }}
+),
+
+parking_demand AS (
+    SELECT
+        *,
+        user_ratings_total + IFNULL(rating * 10, 0) AS demand_score
+    FROM source
+    WHERE LOWER(types) LIKE '%parking%'
+),
+
+ranked AS (
+    SELECT
+        *,
+        NTILE(5) OVER (ORDER BY demand_score DESC) AS demand_bucket
+    FROM parking_demand
+)
+
+SELECT
+    *,
+    CASE
+        WHEN demand_bucket = 1 THEN 'High'
+        WHEN demand_bucket IN (2, 3) THEN 'Medium'
+        ELSE 'Low'
+    END AS demand_category
+FROM ranked;
