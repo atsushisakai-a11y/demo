@@ -1,8 +1,0 @@
-version: 2
-
-sources:
-  - name: osm_demo
-    database: grand-water-473707-r8
-    schema: osm_demo
-    tables:
-      - name: google_charging_places
