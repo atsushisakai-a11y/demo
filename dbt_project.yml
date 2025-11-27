@@ -1,0 +1,13 @@
+name: 'parkbee_dbt'
+version: '1.0'
+profile: 'bigquery'
+
+models:
+  parkbee_dbt:
+    raw:
+      +schema: raw
+      +materialized: table
+
+    staging:
+      +schema: staging
+      +materialized: table
