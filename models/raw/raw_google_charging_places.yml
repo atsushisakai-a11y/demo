@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: raw_google_charging_places
+    description: "Raw Google Places results with EV + parking details."
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+      - name: lat
+        tests:
+          - not_null
+
+      - name: lng
+        tests:
+          - not_null
+
+      - name: fetched_at
+        tests:
+          - not_null
