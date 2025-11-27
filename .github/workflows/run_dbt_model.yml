@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: "dbt model to run (e.g., staging_google_parking_places_dbt)"
+        description: "dbt model name to run"
         required: true
         type: string
 
@@ -30,28 +30,28 @@ jobs:
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Create profiles.json (no quoting issues)
+      - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cp key.json ~/.dbt/profiles.json
-
-      - name: Create dbt profiles.yml safely
-        run: |
-          cat <<'EOF' > ~/.dbt/profiles.yml
+          cat <<EOF > ~/.dbt/profiles.yml
 bigquery:
   target: prod
   outputs:
     prod:
       type: bigquery
-      method: service-account-json
+      method: service-account
       project: grand-water-473707-r8
       dataset: staging
-      keyfile_json: "{{ read_json('profiles.json') }}"
+      keyfile: /home/runner/work/${{ github.repository }}/${{ github.repository }}/key.json
       threads: 4
       location: EU
 EOF
 
-      - name: Run dbt model
+      - name: Move key.json into project workspace
+        run: |
+          mv key.json /home/runner/work/${{ github.repository }}/${{ github.repository }}/key.json
+
+      - name: Run dbt
         run: |
           cd demo
           MODEL="${{ github.event.inputs.model_name }}"
@@ -60,5 +60,4 @@ EOF
 
       - name: Show dbt results
         if: always()
-        run: |
-          echo "=== DBT completed ==="
+        run: echo "DBT completed"
