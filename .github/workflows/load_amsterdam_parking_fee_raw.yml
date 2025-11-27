@@ -1,4 +1,4 @@
-name: 1-2.Load Amsterdam Parking Fee JSON into BigQuery (RAW)
+name: 1-2.Amsterdam Parking Fee JSON into BigQuery (RAW)
 
 on:
   workflow_dispatch:
