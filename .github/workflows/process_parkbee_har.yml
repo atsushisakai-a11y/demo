@@ -1,271 +1,159 @@
-# ==============================================
-# EV + PARKING PLACES ETL (Google Maps → BigQuery)
-# Google Colab–friendly version (expanded + country + city)
-# ==============================================
+name: 1-1.ParkBee HAR → JSON → raw_parkbee_garages
 
-import os
-import time
-import requests
-import pandas as pd
-from itertools import product
-from google.colab import auth
-from google.cloud import bigquery
-from google.api_core.exceptions import ServiceUnavailable
+on:
+  workflow_dispatch:
+    inputs:
+      har_filename:
+        description: "HAR file name in GCS (e.g., parkbee_2025-01-18.har)"
+        required: true
+        type: string
 
-# ----------------------------
-# 1. Authenticate (Colab)
-# ----------------------------
-auth.authenticate_user()
-print("✅ Authenticated with your Google account via Colab")
+jobs:
+  har-to-bigquery:
+    runs-on: ubuntu-latest
 
-# ----------------------------
-# 2. Config
-# ----------------------------
-API_KEY = "AIzaSyCGRHJxefEa-eWFTGSVcb-AoM18d35Rdjg"  # Replace with your API key
-PROJECT_ID = "grand-water-473707-r8"
-DATASET_ID = "raw"
-TABLE_NAME = "raw_google_charging_places"
-LOCATION = "Brussels, Belgium"  # or Amsterdam, etc.
+    steps:
+      # -------------------------------------------------
+      # 1. Checkout repository
+      # -------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-SEARCH_KEYWORDS = [
-    "electric vehicle charging station",
-    "EV charging",
-    "Tesla Supercharger",
+      # -------------------------------------------------
+      # 2. Setup Python
+      # -------------------------------------------------
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    "parking",
-    "parking garage",
-    "public parking",
-]
+      # -------------------------------------------------
+      # 3. Decode GCP service account key
+      # -------------------------------------------------
+      - name: Decode GCP service account key
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/key.json
 
-SEARCH_RADII = [500]  # Grid logic covers city
+      # -------------------------------------------------
+      # 4. Authenticate with gcloud
+      # -------------------------------------------------
+      - name: Authenticate with gcloud
+        run: |
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
 
-# ----------------------------
-# 3. Google Maps helper functions
-# ----------------------------
-def geocode_location(location):
-    url = "https://maps.googleapis.com/maps/api/geocode/json"
-    resp = requests.get(url, params={"address": location, "key": API_KEY}).json()
-    loc = resp["results"][0]["geometry"]["location"]
-    return loc["lat"], loc["lng"]
+      # -------------------------------------------------
+      # 5. Download HAR from GCS
+      # -------------------------------------------------
+      - name: Download HAR file from GCS
+        run: |
+          echo "Downloading HAR file..."
+          gsutil cp gs://parkbee-har-data/${{ github.event.inputs.har_filename }} .
+          echo "Downloaded: ${{ github.event.inputs.har_filename }}"
 
+      # -------------------------------------------------
+      # 6. Run extraction script
+      # -------------------------------------------------
+      - name: Run HAR extraction script
+        run: |
+          echo "Extracting garages from HAR..."
+          python scripts/extract_parkbee.py ${{ github.event.inputs.har_filename }}
 
-def nearby_places(lat, lng, radius, keyword):
-    """Fetch nearby places with pagination."""
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    all_results = []
-    params = {"location": f"{lat},{lng}", "radius": radius, "keyword": keyword, "key": API_KEY}
+      # -------------------------------------------------
+      # 7. Upload JSON to GCS
+      # -------------------------------------------------
+      - name: Upload JSON to GCS
+        run: |
+          JSON_FILE=$(ls parkbee_garages_*.json)
+          echo "Uploading JSON file $JSON_FILE to GCS..."
+          gsutil cp $JSON_FILE gs://parkbee-raw-data/$JSON_FILE
+          echo "Uploaded JSON: $JSON_FILE"
 
-    while True:
-        resp = requests.get(url, params=params).json()
-        all_results.extend(resp.get("results", []))
+      # -------------------------------------------------
+      # 8. Load JSON → temporary table
+      # -------------------------------------------------
+      - name: Load JSON into BigQuery (temporary table)
+        run: |
+          JSON_FILE=$(ls parkbee_garages_*.json)
+          echo "Dropping previous temp table..."
+          bq rm -f -t raw.new_parkbee_garages_tmp || true
 
-        next_page = resp.get("next_page_token")
-        if not next_page:
-            break
+          echo "Loading JSON into raw.new_parkbee_garages_tmp..."
+          bq load \
+            --source_format=NEWLINE_DELIMITED_JSON \
+            --autodetect \
+            raw.new_parkbee_garages_tmp \
+            gs://parkbee-raw-data/$JSON_FILE
 
-        time.sleep(2)  # required by Google API
-        params = {"pagetoken": next_page, "key": API_KEY}
+      # -------------------------------------------------
+      # 9. Normalize schema → match raw table
+      # -------------------------------------------------
+      - name: Normalize temp schema
+        run: |
+          echo "Normalizing schema..."
+          bq query --use_legacy_sql=false "
+          CREATE OR REPLACE TABLE \`raw.new_parkbee_garages_tmp\` AS
+          SELECT
+            id,
+            name,
+            latitude,
+            longitude,
+            address,
+            pricingAndAvailability,
+            scrape_datetime,
+            parking_from,
+            parking_to,
+            parking_duration_hours,
+            hourly_price
+          FROM \`raw.new_parkbee_garages_tmp\`;
+          "
 
-    return all_results
+      # -------------------------------------------------
+      # 10. MERGE (UPSERT) → append new data only
+      # -------------------------------------------------
+      - name: Append (MERGE) into raw.raw_parkbee_garages
+        run: |
+          echo "Appending new data into raw.raw_parkbee_garages via MERGE..."
+          bq query --use_legacy_sql=false "
+          MERGE INTO \`raw.raw_parkbee_garages\` AS target
+          USING \`raw.new_parkbee_garages_tmp\` AS source
+          ON target.id = source.id
+          AND target.scrape_datetime = source.scrape_datetime
+          WHEN NOT MATCHED THEN
+            INSERT (
+              id,
+              name,
+              latitude,
+              longitude,
+              address,
+              pricingAndAvailability,
+              scrape_datetime,
+              parking_from,
+              parking_to,
+              parking_duration_hours,
+              hourly_price
+            )
+            VALUES (
+              source.id,
+              source.name,
+              source.latitude,
+              source.longitude,
+              source.address,
+              source.pricingAndAvailability,
+              source.scrape_datetime,
+              source.parking_from,
+              source.parking_to,
+              source.parking_duration_hours,
+              source.hourly_price
+            );
+          "
+          echo "Historical data preserved — new rows appended."
 
-
-# ----------------------------
-# Extract EV + Parking + Country + City
-# ----------------------------
-def get_ev_parking_details(place_id):
-    """Extract EV charging details, parking metadata, country, and city."""
-    url = "https://maps.googleapis.com/maps/api/place/details/json"
-    params = {
-        "place_id": place_id,
-        "fields": (
-            "name,charging_station,types,editorial_summary,formatted_address,"
-            "address_components"
-        ),
-        "key": API_KEY,
-    }
-
-    resp = requests.get(url, params=params).json()
-    result = resp.get("result", {})
-
-    components = result.get("address_components", [])
-
-    # ---- COUNTRY (short ISO2) ----
-    country_code = next(
-        (c["short_name"] for c in components if "country" in c.get("types", [])),
-        None
-    )
-
-    # ---- CITY (fallback for NL, BE, etc.) ----
-    city = (
-        next((c["long_name"] for c in components if "locality" in c["types"]), None)
-        or next((c["long_name"] for c in components if "postal_town" in c["types"]), None)
-        or next((c["long_name"] for c in components if "administrative_area_level_2" in c["types"]), None)
-    )
-
-    # EV charging details
-    charging = result.get("charging_station")
-    types = result.get("types", [])
-
-    data = {
-        "country": country_code,
-        "city": city,
-
-        # EV charging
-        "connector_type": None,
-        "power_kw": None,
-        "available_count": None,
-        "total_count": None,
-        "charging_info_raw": None,
-
-        # Parking fields
-        "is_parking": "parking" in types or "parking_garage" in types or "parking_lot" in types,
-        "parking_address": result.get("formatted_address"),
-        "parking_summary": result.get("editorial_summary", {}).get("overview"),
-        "parking_types_raw": ",".join(types),
-    }
-
-    if charging:
-        cp_list = charging.get("charge_points", [])
-        if cp_list:
-            cp = cp_list[0]
-            data["connector_type"] = cp.get("type")
-            data["power_kw"] = cp.get("power")
-            data["available_count"] = cp.get("available_count")
-            data["total_count"] = cp.get("count")
-            data["charging_info_raw"] = charging
-
-    return data
-
-
-# ----------------------------
-# 4. Fetch data across grid
-# ----------------------------
-def build_keyword_places_df(keywords, city_name, search_radii):
-    city_lat, city_lng = geocode_location(city_name)
-
-    # 10 km bounding box
-    lat_range = [city_lat - 0.05, city_lat + 0.05]
-    lng_range = [city_lng - 0.08, city_lng + 0.08]
-
-    grid_size = 5
-    lat_points = [lat_range[0] + i * (lat_range[1] - lat_range[0]) / (grid_size - 1)
-                  for i in range(grid_size)]
-    lng_points = [lng_range[0] + j * (lng_range[1] - lng_range[0]) / (grid_size - 1)
-                  for j in range(grid_size)]
-
-    all_places = []
-
-    for keyword, radius in product(keywords, search_radii):
-        for lat, lng in product(lat_points, lng_points):
-            print(f"🔍 Searching '{keyword}' @ ({lat:.4f}, {lng:.4f}), {radius}m")
-            results = nearby_places(lat, lng, radius, keyword)
-
-            for r in results:
-                place_id = r.get("place_id")
-                details = get_ev_parking_details(place_id)
-
-                all_places.append({
-                    "place_id": place_id,
-                    "name": r.get("name"),
-                    "address": r.get("vicinity"),
-                    "lat": r["geometry"]["location"]["lat"],
-                    "lng": r["geometry"]["location"]["lng"],
-                    "types": ",".join(r.get("types", [])),
-                    "rating": r.get("rating"),
-                    "user_ratings_total": r.get("user_ratings_total"),
-                    "google_maps_url": f"https://www.google.com/maps/place/?q=place_id:{place_id}",
-                    "search_keyword": keyword,
-                    "search_radius_m": radius,
-
-                    # EV
-                    "connector_type": details["connector_type"],
-                    "power_kw": details["power_kw"],
-                    "available_count": details["available_count"],
-                    "total_count": details["total_count"],
-                    "charging_info_raw": str(details["charging_info_raw"]),
-
-                    # Parking
-                    "is_parking": details["is_parking"],
-                    "parking_address": details["parking_address"],
-                    "parking_summary": details["parking_summary"],
-                    "parking_types_raw": details["parking_types_raw"],
-
-                    # NEW FIELDS
-                    "country": details["country"],
-                    "city": details["city"],
-
-                    "fetched_at": pd.Timestamp.utcnow(),
-                })
-
-            time.sleep(0.2)
-
-    df = pd.DataFrame(all_places)
-    df = df.drop_duplicates(subset=["place_id"])
-    print(f"📦 Final unique places: {len(df)}")
-    return df
-
-
-# ----------------------------
-# 5. Run extraction
-# ----------------------------
-df = build_keyword_places_df(SEARCH_KEYWORDS, LOCATION, SEARCH_RADII)
-print(df.head())
-
-
-# ----------------------------
-# 6. Upload to BigQuery
-# ----------------------------
-client = bigquery.Client(project=PROJECT_ID)
-dataset_ref = f"{PROJECT_ID}.{DATASET_ID}"
-table_ref = f"{dataset_ref}.{TABLE_NAME}"
-
-# Ensure dataset exists
-try:
-    client.get_dataset(dataset_ref)
-except:
-    client.create_dataset(bigquery.Dataset(dataset_ref))
-    print(f"📁 Created dataset: {dataset_ref}")
-
-# Updated schema INCLUDING country + city
-schema = [
-    bigquery.SchemaField("place_id", "STRING"),
-    bigquery.SchemaField("name", "STRING"),
-    bigquery.SchemaField("address", "STRING"),
-    bigquery.SchemaField("lat", "FLOAT"),
-    bigquery.SchemaField("lng", "FLOAT"),
-    bigquery.SchemaField("types", "STRING"),
-    bigquery.SchemaField("rating", "FLOAT"),
-    bigquery.SchemaField("user_ratings_total", "INTEGER"),
-    bigquery.SchemaField("google_maps_url", "STRING"),
-    bigquery.SchemaField("search_keyword", "STRING"),
-    bigquery.SchemaField("search_radius_m", "INTEGER"),
-
-    # EV fields
-    bigquery.SchemaField("connector_type", "STRING"),
-    bigquery.SchemaField("power_kw", "FLOAT"),
-    bigquery.SchemaField("available_count", "FLOAT"),
-    bigquery.SchemaField("total_count", "FLOAT"),
-    bigquery.SchemaField("charging_info_raw", "STRING"),
-
-    # Parking
-    bigquery.SchemaField("is_parking", "BOOL"),
-    bigquery.SchemaField("parking_address", "STRING"),
-    bigquery.SchemaField("parking_summary", "STRING"),
-    bigquery.SchemaField("parking_types_raw", "STRING"),
-
-    # NEW
-    bigquery.SchemaField("country", "STRING"),
-    bigquery.SchemaField("city", "STRING"),
-
-    bigquery.SchemaField("fetched_at", "TIMESTAMP"),
-]
-
-job_config = bigquery.LoadJobConfig(
-    schema=schema,
-    write_disposition="WRITE_APPEND",
-)
-
-load_job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
-load_job.result()
-
-print("🎉 ETL pipeline completed — EV + Parking + City/Country uploaded!")
+      # -------------------------------------------------
+      # 11. Cleanup temp table
+      # -------------------------------------------------
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Removing temporary table..."
+          bq rm -f -t raw.new_parkbee_garages_tmp || true
+          echo "Cleanup complete."
