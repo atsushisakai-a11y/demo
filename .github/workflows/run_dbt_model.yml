@@ -1,82 +1,80 @@
-name: Run DBT Model (Manual Trigger)
+name: Run dbt model (manual trigger)
 
 on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: "dbt model to run (default: staging_google_parking_places_dbt)"
-        default: "staging_google_parking_places_dbt"
-        required: false
+        description: "dbt model to run (e.g., staging_google_parking_places_dbt)"
+        required: true
+        type: string
 
 jobs:
   run-dbt:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------
-      # Checkout repo
-      # -------------------------------
-      - name: Checkout repository
+      # -------------------------------------------------
+      # 1. Checkout repository
+      # -------------------------------------------------
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # -------------------------------
-      # Setup Python
-      # -------------------------------
+      # -------------------------------------------------
+      # 2. Install Python
+      # -------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      # -------------------------------
-      # Install dbt-bigquery
-      # -------------------------------
+      # -------------------------------------------------
+      # 3. Install dbt-bigquery
+      # -------------------------------------------------
       - name: Install dbt-bigquery
         run: |
+          pip install --upgrade pip
           pip install dbt-bigquery
 
-      # -------------------------------
-      # Authenticate to GCP
-      # -------------------------------
-      - name: Authenticate to Google Cloud
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > $HOME/key.json
-          gcloud auth activate-service-account --key-file=$HOME/key.json
-          gcloud config set project grand-water-473707-r8
-
-      # -------------------------------
-      # Setup dbt profile dynamically
-      # -------------------------------
-      - name: Create dbt profiles.yml
+      # -------------------------------------------------
+      # 4. Create BigQuery profile (profiles.yml)
+      # -------------------------------------------------
+      - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
-          bigquery:
+          echo "bigquery:
             target: prod
             outputs:
               prod:
                 type: bigquery
-                method: service-account
+                method: service-account-json
                 project: grand-water-473707-r8
-                dataset: staging
-                keyfile: $HOME/key.json
-                threads: 4
-                timeout_seconds: 300
+                dataset: raw
                 location: EU
-                priority: interactive
-          EOF
+                keyfile_json: ${{ secrets.GCP_SA_KEY_JSON }}
+          " > ~/.dbt/profiles.yml
 
+      # -------------------------------------------------
+      # 5. Move into dbt project folder
+      # -------------------------------------------------
+      - name: Go into dbt project
+        run: cd demo
+        shell: bash
 
-      # -------------------------------
-      # Run selected dbt model
-      # -------------------------------
+      # -------------------------------------------------
+      # 6. Debug print
+      # -------------------------------------------------
+      - name: Debug print project files
+        run: |
+          cd demo
+          echo "dbt files:"
+          ls -R
+
+      # -------------------------------------------------
+      # 7. Run the dbt model
+      # -------------------------------------------------
       - name: Run dbt model
         run: |
+          cd demo
           MODEL="${{ github.event.inputs.model_name }}"
           echo "🏃 Running dbt model: $MODEL"
-          dbt run --project-dir . --profiles-dir ~/.dbt --models $MODEL
-
-      # -------------------------------
-      # Show results
-      # -------------------------------
-      - name: Print completed models
-        run: dbt ls --project-dir . --profiles-dir ~/.dbt
+          dbt run --select $MODEL --project-dir .
