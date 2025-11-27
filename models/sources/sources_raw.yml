@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: raw
+    database: grand-water-473707-r8
+    schema: raw
+
+    tables:
+      - name: raw_google_charging_places
