@@ -1,4 +1,4 @@
-name: 3.ParkBee dwh queries
+name: 3.DWH
 
 on:
   workflow_dispatch:     # Manual trigger
