@@ -66,6 +66,7 @@ jobs:
             "sql/dwh/dim_google_places.sql"
             "sql/dwh/dim_parkbee_locations.sql"
             "sql/dwh/fact_parkbee_locations.sql"
+            "sql/dwh/fact_parking_candidate_locations.sql"
             "sql/dwh/fact_parking_fee_amsterdam.sql"
           )
 
