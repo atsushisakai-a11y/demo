@@ -29,7 +29,7 @@ SELECT
   CASE
     WHEN fpl.hourly_price > z.hourly_rate THEN 'Public Cheaper'
     WHEN fpl.hourly_price < z.hourly_rate THEN 'ParkBee Cheaper'
-    ELSE 'No parking data'
+    ELSE 'No public parking data'
 END
   AS price_position
 FROM
