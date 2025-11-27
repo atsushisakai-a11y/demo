@@ -1,58 +1,91 @@
-name: Run dbt model (manual)
+name: Run dbt model (manual trigger)
 
 on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: "dbt model to run (e.g. staging_google_parking_places_dbt)"
+        description: "dbt model to run (e.g., staging_google_parking_places_dbt)"
         required: true
-        default: "staging_google_parking_places_dbt"
+        type: string
 
 jobs:
   run-dbt:
     runs-on: ubuntu-latest
 
     steps:
+      # -------------------------------------------------
+      # 1. Checkout repo
+      # -------------------------------------------------
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
+      # -------------------------------------------------
+      # 2. Setup Python
+      # -------------------------------------------------
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
+      # -------------------------------------------------
+      # 3. Install dbt-bigquery
+      # -------------------------------------------------
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
-          pip install "dbt-bigquery==1.10.3"
+          pip install dbt-bigquery
 
-      - name: Decode Base64 GCP key
+      # -------------------------------------------------
+      # 4. Decode service account JSON from secret
+      # -------------------------------------------------
+      - name: Decode GCP credentials
         run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > $HOME/gcp_key.json
-          ls -l $HOME/gcp_key.json
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
+      # -------------------------------------------------
+      # 5. Expose JSON key to environment for dbt
+      # -------------------------------------------------
+      - name: Export GCP JSON key for dbt
+        run: |
+          echo "GCP_SA_KEY_JSON<<EOF" >> $GITHUB_ENV
+          cat key.json >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      # -------------------------------------------------
+      # 6. Create dbt profiles.yml (BigQuery profile)
+      # -------------------------------------------------
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          echo "bigquery:" >> ~/.dbt/profiles.yml
-          echo "  target: prod" >> ~/.dbt/profiles.yml
-          echo "  outputs:" >> ~/.dbt/profiles.yml
-          echo "    prod:" >> ~/.dbt/profiles.yml
-          echo "      type: bigquery" >> ~/.dbt/profiles.yml
-          echo "      method: service-account" >> ~/.dbt/profiles.yml
-          echo "      keyfile: /home/runner/gcp_key.json" >> ~/.dbt/profiles.yml
-          echo "      project: grand-water-473707-r8" >> ~/.dbt/profiles.yml
-          echo "      dataset: raw" >> ~/.dbt/profiles.yml
-          echo "      location: EU" >> ~/.dbt/profiles.yml
+          cat <<EOF > ~/.dbt/profiles.yml
+bigquery:
+  target: prod
+  outputs:
+    prod:
+      type: bigquery
+      method: service-account-json
+      project: "grand-water-473707-r8"
+      dataset: "staging"     # 👈 FIXED — no more raw_staging
+      keyfile_json: $GCP_SA_KEY_JSON
+      threads: 4
+      location: EU
+EOF
 
-      - name: Show profiles.yml
-        run: cat ~/.dbt/profiles.yml
-
-      - name: dbt debug
-        run: dbt debug --project-dir .
-
+      # -------------------------------------------------
+      # 7. Run dbt model
+      # -------------------------------------------------
       - name: Run dbt model
         run: |
+          cd demo   # your repository root
           MODEL="${{ github.event.inputs.model_name }}"
           echo "🏃 Running dbt model: $MODEL"
-          dbt run --select "$MODEL" --project-dir .
+          dbt run --select "$MODEL"
+
+      # -------------------------------------------------
+      # 8. Show artifacts (optional but helpful)
+      # -------------------------------------------------
+      - name: Show dbt run results
+        if: always()
+        run: |
+          echo "DBT Target Directory:"
+          ls -R demo/target
