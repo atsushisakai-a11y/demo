@@ -30,27 +30,27 @@ jobs:
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Create dbt profiles.yml
+      - name: Create dbt profiles.yml safely
         run: |
           mkdir -p ~/.dbt
-          cat << 'EOF' > ~/.dbt/profiles.yml
-bigquery:
-  target: prod
-  outputs:
-    prod:
-      type: bigquery
-      method: service-account
-      project: grand-water-473707-r8
-      dataset: staging
-      keyfile: ./key.json
-      threads: 4
-      location: EU
-EOF
+          printf "%s\n" \
+"bigquery:" \
+"  target: prod" \
+"  outputs:" \
+"    prod:" \
+"      type: bigquery" \
+"      method: service-account" \
+"      project: grand-water-473707-r8" \
+"      dataset: staging" \
+"      keyfile: ./key.json" \
+"      threads: 4" \
+"      location: EU" \
+> ~/.dbt/profiles.yml
 
-      - name: Move keyfile into working directory
+      - name: Move service account key
         run: mv key.json ./key.json
 
-      - name: Run dbt
+      - name: Run dbt model
         run: |
           cd demo
           MODEL="${{ github.event.inputs.model_name }}"
