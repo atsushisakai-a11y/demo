@@ -25,10 +25,6 @@ CREATE OR REPLACE TABLE `grand-water-473707-r8.raw.raw_google_charging_places` (
   parking_summary      STRING,
   parking_types_raw    STRING,
 
-  -- NEW geographic metadata
-  country              STRING,   -- e.g., "NL", "BE"
-  city                 STRING,   -- e.g., "Amsterdam", "Brussels"
-
   fetched_at           TIMESTAMP
 )
 OPTIONS (
