@@ -1,0 +1,81 @@
+name: Run DBT Model (Manual Trigger)
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_name:
+        description: "dbt model to run (default: staging_google_parking_places_dbt)"
+        default: "staging_google_parking_places_dbt"
+        required: false
+
+jobs:
+  run-dbt:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------------
+      # Checkout repo
+      # -------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # -------------------------------
+      # Setup Python
+      # -------------------------------
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # -------------------------------
+      # Install dbt-bigquery
+      # -------------------------------
+      - name: Install dbt-bigquery
+        run: |
+          pip install dbt-bigquery
+
+      # -------------------------------
+      # Authenticate to GCP
+      # -------------------------------
+      - name: Authenticate to Google Cloud
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > $HOME/key.json
+          gcloud auth activate-service-account --key-file=$HOME/key.json
+          gcloud config set project grand-water-473707-r8
+
+      # -------------------------------
+      # Setup dbt profile dynamically
+      # -------------------------------
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          bigquery_profile:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                dataset: staging
+                keyfile: $HOME/key.json
+                threads: 4
+                timeout_seconds: 300
+                location: EU
+                priority: interactive
+          EOF
+
+      # -------------------------------
+      # Run selected dbt model
+      # -------------------------------
+      - name: Run dbt model
+        run: |
+          MODEL="${{ github.event.inputs.model_name }}"
+          echo "🏃 Running dbt model: $MODEL"
+          dbt run --project-dir . --profiles-dir ~/.dbt --models $MODEL
+
+      # -------------------------------
+      # Show results
+      # -------------------------------
+      - name: Print completed models
+        run: dbt ls --project-dir . --profiles-dir ~/.dbt
