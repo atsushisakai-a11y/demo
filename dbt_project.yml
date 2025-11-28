@@ -3,7 +3,7 @@ version: '1.0.0'
 config-version: 2
 
 # Use the BigQuery profile defined in profiles.yml
-profile: 'bigquery'
+profile: 'demo' #profile: 'bigquery'
 
 # Where dbt will look for models, tests, etc.
 model-paths: ["models"]
