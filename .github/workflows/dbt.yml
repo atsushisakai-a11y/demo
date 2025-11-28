@@ -1,4 +1,4 @@
-name: Build dbt docs
+name: Build dbt Docs
 
 on:
   workflow_dispatch: {}
@@ -14,20 +14,39 @@ jobs:
         with:
           python-version: '3.11'
 
-      - run: pip install dbt-bigquery
+      - name: Install dbt-bigquery
+        run: pip install dbt-bigquery
 
-      - name: Authenticate with BigQuery
+      - name: Decode & write service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-        shell: bash
+
+      - name: Create .dbt folder + profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          demo:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                dataset: staging
+                keyfile: /home/runner/work/${{ github.repository }}/key.json
+                threads: 4
+                timeout_seconds: 300
+                location: EU
+          EOF
+
+      - name: Install dbt dependencies
+        run: dbt deps
 
       - name: Generate dbt docs
-        run: |
-          dbt deps
-          dbt docs generate
+        run: dbt docs generate
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target
+          name: dbt-docs
+          path: target/
