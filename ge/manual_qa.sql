@@ -25,6 +25,8 @@ select country, first_seen_date, count(*) from `grand-water-473707-r8.dwh.dim_pa
   
 --DATAMART
 select * from `grand-water-473707-r8.datamart.datamart_google_places_nearest_parkbee`
+select country, scrape_date,count(distinct location_id) as location_ids, count(*) as locations
+from `grand-water-473707-r8.datamart.datamart_price_comparison` group by all order by 1,2 limit 100;
 
 ----------------------------------------------------------------------------
 --Count check
