@@ -1,0 +1,83 @@
+name: Publish dbt Docs to GitHub Pages
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - uses: actions/checkout@v3
+
+      # 2. Setup Python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 3. Install dbt
+      - name: Install dbt-bigquery
+        run: pip install dbt-bigquery
+
+      # 4. Write service account key
+      - name: Write service account key
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+
+      # 5. Create dbt profile
+      - name: Create profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          demo:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                dataset: staging
+                keyfile: /home/runner/work/${{ github.repository }}/key.json
+                threads: 4
+                timeout_seconds: 300
+                location: EU
+          EOF
+
+      # 6. Move into project folder
+      - name: Change directory
+        run: cd demo
+        working-directory: demo
+
+      # 7. Install dbt packages
+      - name: dbt deps
+        run: dbt deps
+        working-directory: demo
+
+      # 8. Generate dbt docs
+      - name: dbt docs generate
+        run: dbt docs generate
+        working-directory: demo
+
+      # 9. Upload artifact for pages
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: demo/target
+
+  deploy:
+    needs: build-docs
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
