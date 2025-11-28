@@ -1,0 +1,33 @@
+name: Build dbt docs
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: pip install dbt-bigquery
+
+      - name: Authenticate with BigQuery
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+        shell: bash
+
+      - name: Generate dbt docs
+        run: |
+          dbt deps
+          dbt docs generate
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target
