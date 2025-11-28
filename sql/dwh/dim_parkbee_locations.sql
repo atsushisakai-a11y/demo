@@ -18,8 +18,8 @@ SELECT
   spg.latitude,
   spg.longitude,
   ST_GEOGPOINT(spg.longitude, spg.latitude) AS geom,
-  date_trunc(l.first_seen_datetime, date) as first_seen_date,
-  date_trunc(l.last_seen_datetime, date) as last_seen_date
+  date_trunc(l.first_seen_datetime, day) as first_seen_date,
+  date_trunc(l.last_seen_datetime, day) as last_seen_date
 FROM
   `grand-water-473707-r8.staging.staging_parkbee_garages` spg
 INNER JOIN
