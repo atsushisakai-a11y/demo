@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           printf "%s\n" \
-          "bigquery:" \
+          "demo:" \
           "  target: prod" \
           "  outputs:" \
           "    prod:" \
