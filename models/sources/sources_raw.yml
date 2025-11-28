@@ -7,3 +7,4 @@ sources:
 
     tables:
       - name: raw_google_charging_places
+      - name: raw_parkbee_garages
