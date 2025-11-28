@@ -14,10 +14,10 @@ jobs:
 
     steps:
       # 1. Checkout repo
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 2. Setup Python
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -48,26 +48,21 @@ jobs:
                 location: EU
           EOF
 
-      # 6. Move into project folder
-      - name: Change directory
-        run: cd demo
-        working-directory: demo
-
-      # 7. Install dbt packages
-      - name: dbt deps
+      # 6. Install dbt packages
+      - name: Install deps
         run: dbt deps
         working-directory: demo
 
-      # 8. Generate dbt docs
-      - name: dbt docs generate
+      # 7. Generate dbt docs
+      - name: Generate docs
         run: dbt docs generate
         working-directory: demo
 
-      # 9. Upload artifact for pages
+      # 8. Upload docs for GitHub Pages
       - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3   # ← UPDATED
         with:
-          path: demo/target
+          path: demo/target/
 
   deploy:
     needs: build-docs
@@ -80,4 +75,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4    # ← UPDATED
