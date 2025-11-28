@@ -13,23 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
       - uses: actions/checkout@v4
 
-      # 2. Setup Python
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Install dbt
       - name: Install dbt-bigquery
         run: pip install dbt-bigquery
 
-      # 4. Write service account key
       - name: Write service account key
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # 5. Create dbt profile
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -48,21 +43,16 @@ jobs:
                 location: EU
           EOF
 
-      # 6. Install dbt packages
-      - name: Install deps
+      - name: Install dbt deps
         run: dbt deps
-        working-directory: demo
 
-      # 7. Generate dbt docs
-      - name: Generate docs
+      - name: Generate dbt docs
         run: dbt docs generate
-        working-directory: demo
 
-      # 8. Upload docs for GitHub Pages
       - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3   # ← UPDATED
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: demo/target/
+          path: target/   # NO "demo/" prefix
 
   deploy:
     needs: build-docs
@@ -75,4 +65,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4    # ← UPDATED
+        uses: actions/deploy-pages@v4
