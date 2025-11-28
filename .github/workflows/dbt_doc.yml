@@ -1,4 +1,4 @@
-name: Build dbt Docs
+name: 10.Build dbt Docs
 
 on:
   workflow_dispatch: {}
