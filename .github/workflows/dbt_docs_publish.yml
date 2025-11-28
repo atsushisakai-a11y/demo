@@ -37,7 +37,7 @@ jobs:
                 method: service-account
                 project: grand-water-473707-r8
                 dataset: staging
-                keyfile: /home/runner/work/${{ github.repository }}/key.json
+                keyfile: /home/runner/work/demo/demo/key.json
                 threads: 4
                 timeout_seconds: 300
                 location: EU
