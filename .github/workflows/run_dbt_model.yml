@@ -47,6 +47,12 @@ jobs:
                 location: EU
           EOF
 
+      - name: Show profiles.yml
+        run: |
+          echo "----- ~/.dbt/profiles.yml -----"
+          cat ~/.dbt/profiles.yml
+          echo "--------------------------------"
+
       - name: Run dbt model
         run: |
           MODEL="${{ github.event.inputs.model_name }}"
