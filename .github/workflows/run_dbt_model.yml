@@ -33,19 +33,19 @@ jobs:
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          printf "%s\n" \
-          "demo:" \
-          "  target: prod" \
-          "  outputs:" \
-          "    prod:" \
-          "      type: bigquery" \
-          "      method: service-account" \
-          "      project: grand-water-473707-r8" \
-          "      keyfile: $PWD/key.json" \
-          "      schema: \"\"" \
-          "      threads: 4" \
-          "      location: EU" \
-          > ~/.dbt/profiles.yml
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          demo:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                keyfile: key.json
+                schema: ""
+                threads: 4
+                location: EU
+          EOF
 
       - name: Run dbt model
         run: |
