@@ -2,10 +2,8 @@ name: 'demo'
 version: '1.0.0'
 config-version: 2
 
-# Use the BigQuery profile defined in profiles.yml
-profile: 'demo' #profile: 'bigquery'
+profile: 'demo'
 
-# Where dbt will look for models, tests, etc.
 model-paths: ["models"]
 analysis-paths: ["analysis"]
 test-paths: ["tests"]
@@ -18,19 +16,13 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
-# -----------------------------
-#  MODEL CONFIGURATION
-# -----------------------------
 models:
   demo:
 
-    # All models inside /models/staging/
     staging:
-      #+schema: staging           # ✅ ensure BigQuery dataset is "staging"
+      +schema: staging
       +materialized: table
 
-    # If you introduce more folders later, add them here
-    # example:
-    # mart:
-    #   +dataset: datamart
-    #   +materialized: table
+    dwh:
+      +schema: dwh
+      +materialized: table
