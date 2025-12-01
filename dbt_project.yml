@@ -19,7 +19,8 @@ clean-targets:
 models:
   demo:
 
-    +schema: ""   # Disable dbt’s automatic schema naming
+    # Disable dbt's default “append folder to schema” behavior
+    +schema: null
 
     staging:
       +schema: staging
