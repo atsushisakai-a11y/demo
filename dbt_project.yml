@@ -23,9 +23,9 @@ models:
     +schema: null
 
     staging:
-      +schema: staging
+      #+schema: staging
       +materialized: table
 
     dwh:
-      +schema: dwh
+      #+schema: dwh
       +materialized: table
