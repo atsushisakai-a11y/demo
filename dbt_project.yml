@@ -19,6 +19,8 @@ clean-targets:
 models:
   demo:
 
+    +schema: ""   # Disable dbt’s automatic schema naming
+
     staging:
       +schema: staging
       +materialized: table
