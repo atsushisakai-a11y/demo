@@ -41,7 +41,6 @@ jobs:
           "      type: bigquery" \
           "      method: service-account" \
           "      project: grand-water-473707-r8" \
-          "      dataset: staging" \
           "      keyfile: $PWD/key.json" \
           "      threads: 4" \
           "      location: EU" \
