@@ -20,7 +20,7 @@ models:
   demo:
 
     # Disable dbt's default “append folder to schema” behavior
-    +schema: null
+    #+schema: null
 
     staging:
       #+schema: staging
