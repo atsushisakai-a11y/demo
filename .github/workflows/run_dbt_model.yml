@@ -42,6 +42,7 @@ jobs:
           "      method: service-account" \
           "      project: grand-water-473707-r8" \
           "      keyfile: $PWD/key.json" \
+          "      schema: \"\"" \
           "      threads: 4" \
           "      location: EU" \
           > ~/.dbt/profiles.yml
