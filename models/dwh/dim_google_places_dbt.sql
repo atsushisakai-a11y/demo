@@ -17,7 +17,7 @@ SELECT
     MIN(sg.fetched_at) AS first_seen_date,
     MAX(sg.fetched_at) AS last_seen_date
 
-FROM {{ ref('staging_google_parkbee_locations_dbt') }} AS sg
+FROM {{ ref('staging_google_parking_places_dbt') }} AS sg
 
 GROUP BY ALL
 ORDER BY 1, 2;
