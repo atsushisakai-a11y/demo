@@ -19,13 +19,17 @@ clean-targets:
 models:
   demo:
 
-    # Disable dbt's default “append folder to schema” behavior
-    +schema: null
+    # allows GitHub Actions to override dataset for ANY dbt command
+    +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
 
     staging:
       +schema: staging
-      +materialized: table
+      +tags: ["staging"]
 
     dwh:
       +schema: dwh
-      +materialized: table
+      +tags: ["dwh"]
+
+    marts:
+      +schema: marts
+      +tags: ["marts"]
