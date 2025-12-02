@@ -110,17 +110,26 @@ jobs:
         run: |
           dbt docs generate
       
+          rm -rf public
           mkdir -p public
+      
+          # Copy exactly the required files
           cp target/index.html public/
-          cp target/manifest.json public/
           cp target/catalog.json public/
+          cp target/manifest.json public/
           cp target/graph.gpickle public/
       
+          # Copy assets only if they exist
           if [ -d "target/assets" ]; then
-              cp -r target/assets public/assets
+              mkdir -p public/assets
+              cp -r target/assets/* public/assets/
           fi
+      
+          # Safety: ensure no symlinks
+          find public -type l -exec rm -f {} \;
         env:
           DBT_DATASET_OVERRIDE: "staging"
+
           
       # Upload docs as artifact (optional)
       - name: Upload docs artifact
