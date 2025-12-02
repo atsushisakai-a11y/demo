@@ -111,6 +111,8 @@ jobs:
           dbt docs generate
           mkdir -p public
           cp -r target/* public/
+        env:
+          DBT_DATASET_OVERRIDE: "staging"
 
       # Upload docs as artifact (optional)
       - name: Upload docs artifact
