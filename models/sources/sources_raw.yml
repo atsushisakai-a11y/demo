@@ -8,3 +8,4 @@ sources:
     tables:
       - name: raw_google_charging_places
       - name: raw_parkbee_garages
+      - name: raw_parking_fee_amsterdam
