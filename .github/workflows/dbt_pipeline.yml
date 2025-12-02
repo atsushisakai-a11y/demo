@@ -110,7 +110,12 @@ jobs:
         run: |
           dbt docs generate
           mkdir -p public
-          cp -r target/* public/
+          cp target/index.html public/
+          cp target/manifest.json public/
+          cp target/catalog.json public/
+          cp target/graph.gpickle public/
+          cp -r target/assets public/assets
+          
         env:
           DBT_DATASET_OVERRIDE: "staging"
 
