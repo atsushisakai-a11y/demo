@@ -20,4 +20,4 @@ SELECT
 FROM {{ ref('staging_google_parking_places_dbt') }} AS sg
 
 GROUP BY ALL
-ORDER BY 1, 2;
+ORDER BY 1, 2
