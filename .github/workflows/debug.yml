@@ -1,0 +1,21 @@
+name: Debug
+
+# Trigger manually or after DWH pipeline completes
+on:
+  workflow_dispatch:      # Manual execution
+  workflow_run:           # Auto-trigger after DWH pipeline
+    workflows: ["Run ParkBee SQL Pipelines on BigQuery"]
+    types:
+      - completed
+
+jobs:
+  run-ge-qa:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Show dbt project name
+        run: dbt --version
+      
+      - name: Debug dbt vars
+        run: echo $(dbt debug)

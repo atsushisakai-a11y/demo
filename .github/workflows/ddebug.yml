@@ -1,5 +1,0 @@
-- name: Show dbt project name
-  run: dbt --version
-
-- name: Debug dbt vars
-  run: echo $(dbt debug)
