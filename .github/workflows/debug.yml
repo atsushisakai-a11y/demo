@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # 5. Create minimal profiles.yml
+      # 5. Create profiles.yml
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -47,20 +47,24 @@ jobs:
                 location: EU
           EOF
 
-      # 6. Print working directory (important)
+      # 6. Show working directory
       - name: Show working directory
         run: pwd
 
-      # 7. List project files (important)
-      - name: Show project tree
+      # 7. List project files
+      - name: List directory tree
         run: |
           echo "==== PROJECT TREE ===="
           ls -R .
 
-      # 8. Show dbt version
+      # 8. dbt Version
       - name: DBT Version
         run: dbt --version
 
-      # 9. Run dbt debug
+      # 9. dbt Debug
       - name: DBT Debug
         run: dbt debug
+
+      # 10. dbt LS for the problematic model
+      - name: DBT LS (model path)
+        run: dbt ls --select dim_google_places_dbt --output path
