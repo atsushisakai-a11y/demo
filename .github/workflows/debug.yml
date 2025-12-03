@@ -68,3 +68,9 @@ jobs:
       # 10. dbt LS for the problematic model
       - name: DBT LS (model path)
         run: dbt ls --select dim_google_places_dbt --output path
+
+      # 11. show parsed project name
+      - name: Show parsed project name
+        run: dbt --version
+
+        
