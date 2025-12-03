@@ -78,9 +78,9 @@ jobs:
           dbt debug
 
       # 12. Print dbt project info
-      - name: Print dbt project info
-        working-directory: ./demo
-        run: dbt debug
+      #- name: Print dbt project info
+      #  working-directory: ./demo
+      #  run: dbt debug
 
       # 13. Print repo structure
       - name: Show repo structure
