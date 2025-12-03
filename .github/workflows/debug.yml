@@ -71,6 +71,9 @@ jobs:
 
       # 11. show parsed project name
       - name: Show parsed project name
-        run: dbt --version
-
+        run: |
+          echo "====== DBT VERSION ======"
+          dbt --version
+          echo "====== DBT DEBUG PROJECT INFO ======"
+          dbt debug
         
