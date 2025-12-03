@@ -1,45 +1,48 @@
-name: dbt pipeline (staging → dwh → marts + tests + docs)
+name: Run dbt Pipeline
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-
-permissions:
-  contents: write           # needed for pages push
-  pages: write              # publish docs site
-  id-token: write           # actions deploy tokens
+    inputs:
+      model_name:
+        description: "Optional: Run a specific dbt model"
+        required: false
+        type: string
 
 jobs:
-
-  dbt-run:
+  run-dbt-pipeline:
     runs-on: ubuntu-latest
-    environment:
-      name: production
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
-      # 1. Checkout repo
-      - name: Checkout repo
+      # -------------------------
+      # 1. CHECKOUT REPO
+      # -------------------------
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Python setup
+      # -------------------------
+      # 2. SETUP PYTHON + INSTALL DBT
+      # -------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # 3. Install dbt
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # 4. GCP service account
-      - name: Decode GCP key
+      # -------------------------
+      # 3. GCP SERVICE ACCOUNT
+      # -------------------------
+      - name: Decode GCP service account key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # 5. Create profiles.yml
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -52,111 +55,61 @@ jobs:
                 method: service-account
                 project: grand-water-473707-r8
                 keyfile: key.json
-                dataset: staging   # default fallback, required for dbt docs
+                dataset: staging
                 threads: 4
                 location: EU
           EOF
 
-      - name: Show profiles.yml
-        run: cat ~/.dbt/profiles.yml
-
-
-      ###############################################################
-      # 6. STAGING LAYER
-      ###############################################################
-      - name: Run STAGING models
-        run: dbt run --select tag:staging
-        env:
-          DBT_DATASET_OVERRIDE: "staging"
-
-      - name: Test STAGING models
-        run: dbt test --select tag:staging
-        env:
-          DBT_DATASET_OVERRIDE: "staging"
-
-
-      ###############################################################
-      # 7. DWH LAYER
-      ###############################################################
-      - name: Run DWH models
-        run: dbt run --select tag:dwh
-        env:
-          DBT_DATASET_OVERRIDE: "dwh"
-
-      - name: Test DWH models
-        run: dbt test --select tag:dwh
-        env:
-          DBT_DATASET_OVERRIDE: "dwh"
-
-
-      ###############################################################
-      # 8. MARTS LAYER
-      ###############################################################
-      - name: Run MARTS models
-        run: dbt run --select tag:marts
-        env:
-          DBT_DATASET_OVERRIDE: "marts"
-
-      - name: Test MARTS models
-        run: dbt test --select tag:marts
-        env:
-          DBT_DATASET_OVERRIDE: "marts"
-
-
-      ###############################################################
-      # 9. Generate dbt docs
-      ###############################################################
-      - name: Generate dbt docs
+      # -------------------------
+      # IMPORTANT FIX: RUN FROM PROJECT ROOT
+      # -------------------------
+      - name: Confirm working directory
         run: |
-          dbt docs generate
-      
-          rm -rf public
-          mkdir -p public
-      
-          # Copy exactly the required files
-          cp target/index.html public/
-          cp target/catalog.json public/
-          cp target/manifest.json public/
-          cp target/graph.gpickle public/
-      
-          # Copy assets only if they exist
-          if [ -d "target/assets" ]; then
-              mkdir -p public/assets
-              cp -r target/assets/* public/assets/
-          fi
-      
-          # Safety: ensure no symlinks
-          find public -type l -exec rm -f {} \;
-        env:
-          DBT_DATASET_OVERRIDE: "staging"
+          echo "PWD: $(pwd)"
+          ls -al .
 
-          
-      # Upload docs as artifact (optional)
+      # -------------------------
+      # 4. RUN DBT
+      # (automatically runs staging → dwh → marts)
+      # -------------------------
+      - name: Run dbt build (full)
+        if: ${{ github.event.inputs.model_name == '' }}
+        run: |
+          echo "Running full dbt pipeline..."
+          dbt build
+
+      - name: Run single dbt model
+        if: ${{ github.event.inputs.model_name != '' }}
+        run: |
+          MODEL="${{ github.event.inputs.model_name }}"
+          echo "Running dbt model: $MODEL"
+          dbt run --select "$MODEL"
+
+      # -------------------------
+      # 5. GENERATE DBT DOCS
+      # -------------------------
+      - name: Generate dbt docs
+        run: dbt docs generate
+
+      # -------------------------
+      # 6. COPY DOCS INTO PUBLIC FOLDER
+      # -------------------------
+      - name: Prepare docs for GitHub Pages
+        run: |
+          mkdir -p public
+          cp -r target/* public/
+
+      # -------------------------
+      # 7. UPLOAD ARTIFACT (correct action)
+      # -------------------------
       - name: Upload docs artifact
-        #uses: actions/upload-artifact@v4
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
           path: public
-          retention-days: 7   # optional
 
-  ###############################################################
-  # 10. Deploy dbt docs to GitHub Pages
-  ###############################################################
-  deploy-docs:
-    needs: dbt-run
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
+      # -------------------------
+      # 8. DEPLOY TO GITHUB PAGES
+      # -------------------------
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          folder: public
