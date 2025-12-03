@@ -81,3 +81,11 @@ jobs:
       - name: Print dbt project info
         working-directory: ./demo
         run: dbt debug
+
+      # 13. Print repo structure
+      - name: Show repo structure
+        run: |
+          echo "=== WORKING DIRECTORY ==="
+          pwd
+          echo "=== REPO TREE ==="
+          ls -R .
