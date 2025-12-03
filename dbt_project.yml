@@ -1,8 +1,9 @@
-name: 'demo'
-version: '1.0.0'
+name: "demo"
+project-name: "demo"   # <-- IMPORTANT: forces dbt to use the correct project name in CI/CD
+version: "1.0.0"
 config-version: 2
 
-profile: 'demo'
+profile: "demo"
 
 model-paths: ["models"]
 analysis-paths: ["analysis"]
@@ -17,19 +18,30 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  demo:
+  demo:                   # <-- must match project-name above
 
-    # allows GitHub Actions to override dataset for ANY dbt command
+    # Global override (optional)
+    # Allows switching schema via environment variable: DBT_DATASET_OVERRIDE
     +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
 
+    # -----------------------------
+    # STAGING MODELS
+    # -----------------------------
     staging:
-      +schema: staging
+      +schema: "staging"
       +tags: ["staging"]
 
+    # -----------------------------
+    # DWH MODELS
+    # -----------------------------
     dwh:
-      +schema: dwh
+      +schema: "dwh"
       +tags: ["dwh"]
 
+    # -----------------------------
+    # MARTS MODELS (optional)
+    # If folder doesn’t exist yet, dbt just warns; no error
+    # -----------------------------
     marts:
-      +schema: marts
+      +schema: "marts"
       +tags: ["marts"]
