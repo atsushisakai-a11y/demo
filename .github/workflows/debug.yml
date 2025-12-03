@@ -76,4 +76,8 @@ jobs:
           dbt --version
           echo "====== DBT DEBUG PROJECT INFO ======"
           dbt debug
-        
+
+      # 12. Print dbt project info
+      - name: Print dbt project info
+        working-directory: ./demo
+        run: dbt debug
