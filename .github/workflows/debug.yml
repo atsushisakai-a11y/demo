@@ -19,4 +19,48 @@ jobs:
           python-version: "3.11"
 
       # 3. Install dbt-bigquery
-      - name: Install dbt-bi
+      - name: Install dbt-bigquery
+        run: |
+          pip install --upgrade pip
+          pip install dbt-bigquery
+
+      # 4. Decode GCP key
+      - name: Decode GCP SA Key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+
+      # 5. Create minimal profiles.yml
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          demo:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                keyfile: key.json
+                dataset: staging
+                threads: 4
+                location: EU
+          EOF
+
+      # 6. Print working directory (important)
+      - name: Show working directory
+        run: pwd
+
+      # 7. List project files (important)
+      - name: Show project tree
+        run: |
+          echo "==== PROJECT TREE ===="
+          ls -R .
+
+      # 8. Show dbt version
+      - name: DBT Version
+        run: dbt --version
+
+      # 9. Run dbt debug
+      - name: DBT Debug
+        run: dbt debug
