@@ -7,17 +7,22 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
+
+  # Base config for ALL models in the "demo" project namespace
   demo:
     +schema: demo
 
-    staging:
-      +schema: staging
-      +tags: ["staging"]
+  # Folder: models/demo/staging
+  demo.staging:
+    +schema: staging
+    +tags: ["staging"]
 
-    dwh:
-      +schema: dwh
-      +tags: ["dwh"]
+  # Folder: models/demo/dwh
+  demo.dwh:
+    +schema: dwh
+    +tags: ["dwh"]
 
-    datamart:
-      +schema: datamart
-      +tags: ["datamart"]
+  # Folder: models/demo/datamart
+  demo.datamart:
+    +schema: datamart
+    +tags: ["datamart"]
