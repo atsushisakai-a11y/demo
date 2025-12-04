@@ -14,9 +14,9 @@ models:
       +schema: "staging"
       +tags: ["staging"]
 
-  #  dwh:
-  #    +schema: "dwh"
-  #    +tags: ["dwh"]
+    dwh:
+      +schema: "dwh"
+      +tags: ["dwh"]
 
   #  datamart:
   #    +schema: "datamart"
