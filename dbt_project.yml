@@ -10,7 +10,7 @@ models:
 
   # Base config for ALL models in the "demo" project namespace
   demo:
-    +schema: demo
+    #+schema: demo
 
   # Folder: models/demo/staging
     staging:
