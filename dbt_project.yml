@@ -7,9 +7,9 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo:  # <-- dbt namespace for all models under models/demo/*
-    # default schema if none overridden
-    # +schema: "demo"
+  demo:
+    # default schema for models under models/demo/*
+    +schema: "demo"
 
     staging:
       +schema: "staging"
