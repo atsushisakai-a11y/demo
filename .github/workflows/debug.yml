@@ -114,3 +114,9 @@ jobs:
           pwd
           echo "--- Tree ---"
           find models -maxdepth 3
+
+      # 18. dbt ls
+      - name: dbt ls
+        run: |
+          dbt ls --output json
+          
