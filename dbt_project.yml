@@ -14,10 +14,10 @@ models:
   # FOLDER → SCHEMA MAPPING
   # ================================
   staging:
-    dataset: "staging"
+    +schema: "staging"
 
   dwh:
-    dataset: "dwh"
+    +schema: "dwh"
 
-  marts:
-    dataset: "marts"
+  datamart:
+    +schema: "datamart"
