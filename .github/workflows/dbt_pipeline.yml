@@ -61,59 +61,55 @@ jobs:
           EOF
 
       # -------------------------
-      # IMPORTANT FIX: RUN FROM PROJECT ROOT
+      # 4. OPTIONAL DIAGNOSTIC: CONFIRM WORKING DIR (keep this!)
       # -------------------------
       - name: Confirm working directory
-        working-directory: ./demo
         run: |
           echo "PWD: $(pwd)"
+          echo "-------- tree --------"
           ls -al .
 
       # -------------------------
-      # 4. RUN DBT (staging → dwh → marts)
+      # 5. RUN DBT (Build = staging → dwh → marts)
       # -------------------------
-      - name: Run dbt build (full)
+      - name: Run dbt build (full pipeline)
         if: ${{ github.event.inputs.model_name == '' }}
-        working-directory: ./demo         # <-- ADD HERE
         run: |
           echo "Running full dbt pipeline..."
           dbt build
 
-      - name: Run single dbt model
+      - name: Run a single dbt model
         if: ${{ github.event.inputs.model_name != '' }}
-        working-directory: ./demo         # <-- ADD HERE
         run: |
           MODEL="${{ github.event.inputs.model_name }}"
           echo "Running dbt model: $MODEL"
           dbt run --select "$MODEL"
 
       # -------------------------
-      # 5. GENERATE DBT DOCS
+      # 6. GENERATE DBT DOCS
       # -------------------------
       - name: Generate dbt docs
-        working-directory: ./demo         # <-- ADD HERE
         run: dbt docs generate
 
       # -------------------------
-      # 6. COPY DOCS INTO PUBLIC FOLDER
+      # 7. COPY DOCS INTO PUBLIC FOLDER FOR PAGES
       # -------------------------
       - name: Prepare docs for GitHub Pages
-        working-directory: ./demo         # <-- ADD HERE
         run: |
           mkdir -p public
           cp -r target/* public/
 
       # -------------------------
-      # 7. UPLOAD ARTIFACT (correct action)
+      # 8. UPLOAD ARTIFACT FOR GITHUB PAGES
       # -------------------------
       - name: Upload docs artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: demo/public       # <-- IMPORTANT: paths must match project folder
+          path: public
 
       # -------------------------
-      # 8. DEPLOY TO GITHUB PAGES
+      # 9. DEPLOY DBT DOCS TO GITHUB PAGES
       # -------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
