@@ -10,7 +10,7 @@ models:
 
   # Base config for ALL models in the "demo" project namespace
   demo:
-    #+schema: demo
+    +schema: demo
 
   # Folder: models/demo/staging
     staging:
@@ -19,8 +19,8 @@ models:
 
   # Folder: models/demo/dwh
     dwh:
-      +schema: ["dwh"]
-      +tags: ["dwh"]
+      #+schema: ["dwh"]
+      #+tags: ["dwh"]
 
   # Folder: models/demo/datamart
   #demo.datamart:
