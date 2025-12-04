@@ -7,12 +7,12 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  #demo:
-  #  +schema: "demo"
+  demo:
+    +schema: "demo"
 
-  #  staging:
-  #    +schema: "staging"
-  #    +tags: ["staging"]
+    staging:
+      +schema: "staging"
+      +tags: ["staging"]
 
   #  dwh:
   #    +schema: "dwh"
