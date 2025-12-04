@@ -106,3 +106,11 @@ jobs:
         run: |
           echo "--- Searching for dbt_project.yml ---"
           find /home/runner/work/demo -name dbt_project.yml -print
+
+      # 17. Debug models directory
+      - name: Debug models directory
+        run: |
+          echo "--- PWD ---"
+          pwd
+          echo "--- Tree ---"
+          find models -maxdepth 3
