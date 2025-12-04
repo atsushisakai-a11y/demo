@@ -7,17 +7,17 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo:
-    +schema: "demo"
+  demo:                          # matches: models/demo/*
+    +schema: demo                # default for models directly under models/demo (if any)
 
-    staging:
-      +schema: "staging"
+    staging:                     # matches: models/demo/staging/*
+      +schema: staging
       +tags: ["staging"]
 
-    dwh:
-      +schema: "dwh"
+    dwh:                         # matches: models/demo/dwh/*
+      +schema: dwh
       +tags: ["dwh"]
 
-    datamart:
-      +schema: "datamart"
+    datamart:                    # matches: models/demo/datamart/*
+      +schema: datamart
       +tags: ["datamart"]
