@@ -64,22 +64,24 @@ jobs:
       # IMPORTANT FIX: RUN FROM PROJECT ROOT
       # -------------------------
       - name: Confirm working directory
+        working-directory: ./demo
         run: |
           echo "PWD: $(pwd)"
           ls -al .
 
       # -------------------------
-      # 4. RUN DBT
-      # (automatically runs staging → dwh → marts)
+      # 4. RUN DBT (staging → dwh → marts)
       # -------------------------
       - name: Run dbt build (full)
         if: ${{ github.event.inputs.model_name == '' }}
+        working-directory: ./demo         # <-- ADD HERE
         run: |
           echo "Running full dbt pipeline..."
           dbt build
 
       - name: Run single dbt model
         if: ${{ github.event.inputs.model_name != '' }}
+        working-directory: ./demo         # <-- ADD HERE
         run: |
           MODEL="${{ github.event.inputs.model_name }}"
           echo "Running dbt model: $MODEL"
@@ -89,12 +91,14 @@ jobs:
       # 5. GENERATE DBT DOCS
       # -------------------------
       - name: Generate dbt docs
+        working-directory: ./demo         # <-- ADD HERE
         run: dbt docs generate
 
       # -------------------------
       # 6. COPY DOCS INTO PUBLIC FOLDER
       # -------------------------
       - name: Prepare docs for GitHub Pages
+        working-directory: ./demo         # <-- ADD HERE
         run: |
           mkdir -p public
           cp -r target/* public/
@@ -106,7 +110,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: public
+          path: demo/public       # <-- IMPORTANT: paths must match project folder
 
       # -------------------------
       # 8. DEPLOY TO GITHUB PAGES
