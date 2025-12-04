@@ -68,6 +68,7 @@ jobs:
       # 5. RUN PIPELINE PHASE 1 → STAGING
       # ============================================================
       - name: Run STAGING models
+        working-directory: ./demo
         env:
           DBT_DATASET_OVERRIDE: staging
         run: |
@@ -78,6 +79,7 @@ jobs:
       # 6. RUN PIPELINE PHASE 2 → DWH
       # ============================================================
       - name: Run DWH models
+        working-directory: ./demo
         env:
           DBT_DATASET_OVERRIDE: dwh
         run: |
@@ -88,6 +90,7 @@ jobs:
       # 7. RUN PIPELINE PHASE 3 → DATAMART
       # ============================================================
       - name: Run DATAMART models
+        working-directory: ./demo
         env:
           DBT_DATASET_OVERRIDE: datamart
         run: |
