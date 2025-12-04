@@ -89,3 +89,9 @@ jobs:
           pwd
           echo "=== REPO TREE ==="
           ls -R .
+
+      # 14. Check dim sql location
+      - name: Inspect model folder names (with invisible chars)
+        run: |
+          echo "--- Inspecting models directory (showing hidden characters) ---"
+          find models -maxdepth 2 -type d | sed -e 's/[[:space:]]/·/g'
