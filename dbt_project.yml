@@ -17,6 +17,6 @@ models:
     +schema: "dwh"
     +tags: ["dwh"]
 
-  marts:
+  datamart:
     +schema: "datamart"
     +tags: ["datamart"]
