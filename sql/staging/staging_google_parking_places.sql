@@ -12,8 +12,7 @@ SELECT
   rating,
   user_ratings_total,
   fetched_at,
-  user_ratings_total
-    + IFNULL(rating * 10, 0) AS demand_score
+  user_ratings_total * rating AS demand_score
 
 FROM `grand-water-473707-r8.raw.raw_google_charging_places`
 WHERE LOWER(types) LIKE '%parking%'
