@@ -7,20 +7,16 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo: {}     # your project namespace — MUST be here, but EMPTY
-
-  # ---------------------------
-  # Folder → Schema mapping
-  # ---------------------------
+  demo: {}     # project namespace - MUST exist
 
   staging:
     +schema: "staging"
-    +materialized: table
+    +tags: ["staging"]
 
   dwh:
     +schema: "dwh"
-    +materialized: table
+    +tags: ["dwh"]
 
   marts:
-    +schema: "marts"
-    +materialized: table
+    +schema: "datamart"
+    +tags: ["marts"]
