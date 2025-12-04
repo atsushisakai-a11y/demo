@@ -19,16 +19,29 @@ clean-targets:
 models:
   demo:
 
+    # Global override so GitHub Actions can control the dataset if needed
     +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
 
+    # ---------------------
+    # Models under: models/staging/*
+    # ---------------------
     staging:
       +schema: "staging"
+      +materialized: table
       +tags: ["staging"]
 
+    # ---------------------
+    # Models under: models/dwh/*
+    # ---------------------
     dwh:
       +schema: "dwh"
+      +materialized: table
       +tags: ["dwh"]
 
+    # ---------------------
+    # Models under: models/marts/*
+    # ---------------------
     marts:
       +schema: "marts"
+      +materialized: table
       +tags: ["marts"]
