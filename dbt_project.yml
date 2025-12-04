@@ -7,17 +7,17 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo: {}
+  demo:
     +materialized: table
 
   # ================================
   # FOLDER → SCHEMA MAPPING
   # ================================
   staging:
-    +schema: "staging"
+    dataset: "staging"
 
   dwh:
-    +schema: "dwh"
+    dataset: "dwh"
 
   marts:
-    +schema: "marts"
+    dataset: "marts"
