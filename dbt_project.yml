@@ -8,7 +8,6 @@ model-paths: ["models"]
 
 models:
   demo:
-    # default schema for models under models/demo/*
     +schema: "demo"
 
     staging:
