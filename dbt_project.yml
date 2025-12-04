@@ -7,8 +7,6 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo: {}
-
   staging:
     +schema: "staging"
     +tags: ["staging"]
