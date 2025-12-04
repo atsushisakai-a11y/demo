@@ -7,17 +7,20 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo:
-    +materialized: table
+  demo: {}     # your project namespace — MUST be here, but EMPTY
 
-  # ================================
-  # FOLDER → SCHEMA MAPPING
-  # ================================
+  # ---------------------------
+  # Folder → Schema mapping
+  # ---------------------------
+
   staging:
     +schema: "staging"
+    +materialized: table
 
   dwh:
     +schema: "dwh"
+    +materialized: table
 
-  datamart:
-    +schema: "datamart"
+  marts:
+    +schema: "marts"
+    +materialized: table
