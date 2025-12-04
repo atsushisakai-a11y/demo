@@ -92,7 +92,7 @@ jobs:
           DBT_DATASET_OVERRIDE: datamart
         run: |
           echo "Running DATAMART pipeline (DBT_DATASET_OVERRIDE=datamart)"
-          dbt build --select tag:marts+
+          dbt build --select tag:datamart+
 
       # -------------------------
       # 8. GENERATE DBT DOCS
