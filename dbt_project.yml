@@ -13,7 +13,7 @@ models:
     +schema: demo
 
   # Folder: models/demo/staging
-  demo.staging:
+  staging:
     +schema: staging
     +tags: ["staging"]
 
