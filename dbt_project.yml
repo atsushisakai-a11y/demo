@@ -19,8 +19,8 @@ models:
 
   # Folder: models/demo/dwh
     dwh:
-      +dataset: dwh
-   # +tags: ["dwh"]
+      +schema: ["dwh"]
+      +tags: ["dwh"]
 
   # Folder: models/demo/datamart
   #demo.datamart:
