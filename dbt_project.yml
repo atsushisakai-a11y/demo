@@ -7,17 +7,17 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo:
-    +schema: "demo"
+  #demo:
+  #  +schema: "demo"
 
-    staging:
-      +schema: "staging"
-      +tags: ["staging"]
+  #  staging:
+  #    +schema: "staging"
+  #    +tags: ["staging"]
 
-    dwh:
-      +schema: "dwh"
-      +tags: ["dwh"]
+  #  dwh:
+  #    +schema: "dwh"
+  #    +tags: ["dwh"]
 
-    datamart:
-      +schema: "datamart"
-      +tags: ["datamart"]
+  #  datamart:
+  #    +schema: "datamart"
+  #    +tags: ["datamart"]
