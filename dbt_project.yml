@@ -7,7 +7,7 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo:
+  demo: {}
     +materialized: table
 
   # ================================
