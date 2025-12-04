@@ -11,14 +11,14 @@ models:
   # Base config for ALL models in the "demo" project namespace
   demo:
     +schema: dwh
-
+    dwh:
   # Folder: models/demo/staging
   staging:
     +schema: staging
       #+tags: ["staging"]
 
   # Folder: models/demo/dwh
-    dwh:
+
       #+schema: ["dwh"]
       #+tags: ["dwh"]
 
