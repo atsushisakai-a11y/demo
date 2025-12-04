@@ -20,3 +20,4 @@ models:
   datamart:
     +schema: "datamart"
     +tags: ["datamart"]
+a
