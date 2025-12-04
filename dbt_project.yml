@@ -7,14 +7,12 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  # This applies to ALL models, but overridden below
   demo:
     +materialized: table
 
-# -------------------------------------
-# FOLDER → SCHEMA MAPPING (CORRECTED)
-# These keys MUST match folder names
-# -------------------------------------
+  # ================================
+  # FOLDER → SCHEMA MAPPING
+  # ================================
   staging:
     +schema: "staging"
 
