@@ -2,6 +2,11 @@ name: Run dbt Pipeline
 
 on:
   workflow_dispatch:
+    inputs:
+      model_name:
+        description: "Optional: run a single dbt model"
+        required: false
+        type: string
 
 jobs:
   run-dbt-pipeline:
@@ -12,115 +17,99 @@ jobs:
       id-token: write
 
     steps:
-      # -------------------------
-      # 1. CHECKOUT REPO
-      # -------------------------
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    # -------------------------
+    # 1. CHECKOUT
+    # -------------------------
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # -------------------------
-      # 2. SETUP PYTHON + INSTALL DBT
-      # -------------------------
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    # -------------------------
+    # 2. PYTHON + DBT
+    # -------------------------
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
 
-      - name: Install dbt-bigquery
-        run: |
-          pip install --upgrade pip
-          pip install dbt-bigquery
+    - name: Install dbt-bigquery
+      run: |
+        pip install --upgrade pip
+        pip install dbt-bigquery
 
-      # -------------------------
-      # 3. GCP SERVICE ACCOUNT
-      # -------------------------
-      - name: Decode GCP service account key
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+    # -------------------------
+    # 3. GCP SERVICE ACCOUNT / PROFILE
+    # -------------------------
+    - name: Decode GCP service account key
+      run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Create dbt profiles.yml
-        run: |
-          mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << EOF
-          demo:
-            target: prod
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: grand-water-473707-r8
-                keyfile: key.json
-                schema: staging
-                threads: 4
-                location: EU
-          EOF
+    - name: Create profiles.yml
+      run: |
+        mkdir -p ~/.dbt
+        cat > ~/.dbt/profiles.yml << EOF
+        demo:
+          target: prod
+          outputs:
+            prod:
+              type: bigquery
+              method: service-account
+              project: grand-water-473707-r8
+              keyfile: key.json
+              dataset: staging  # overridden by folder schema settings
+              threads: 4
+              location: EU
+        EOF
 
-      # -------------------------
-      # 4. DEBUG DIRECTORY STRUCTURE
-      # -------------------------
-      - name: Confirm working directory
-        run: |
-          echo "PWD: $(pwd)"
-          echo "--- Repo tree ---"
-          ls -R .
+    # -------------------------
+    # 4. VERIFY ENVIRONMENT
+    # -------------------------
+    - name: Show folder tree
+      run: |
+        echo "--- REPO TREE ---"
+        ls -R .
 
-      # ============================================================
-      # 5. RUN PIPELINE PHASE 1 → STAGING
-      # ============================================================
-      - name: Run STAGING models
-        env:
-          DBT_DATASET_OVERRIDE: staging
-        run: |
-          echo "Running STAGING pipeline (DBT_DATASET_OVERRIDE=staging)"
-          dbt build --select tag:staging+
+    - name: dbt Debug
+      run: dbt debug
 
-      # ============================================================
-      # 6. RUN PIPELINE PHASE 2 → DWH
-      # ============================================================
-      - name: Run DWH models
-        env:
-          DBT_DATASET_OVERRIDE: dwh
-        run: |
-          echo "Running DWH pipeline (DBT_DATASET_OVERRIDE=dwh)"
-          dbt build --select tag:dwh+
+    # -------------------------
+    # 5. RUN FULL DBT PIPELINE
+    # Automatically detects:
+    #   staging folder → schema=staging
+    #   dwh folder     → schema=dwh
+    #   datamart folder→ schema=datamart
+    # -------------------------
+    - name: Run full dbt pipeline
+      if: ${{ github.event.inputs.model_name == '' }}
+      run: |
+        echo "Running full dbt build (auto: staging → dwh → datamart)"
+        dbt build
 
-      # ============================================================
-      # 7. RUN PIPELINE PHASE 3 → DATAMART
-      # ============================================================
-      - name: Run DATAMART models
-        env:
-          DBT_DATASET_OVERRIDE: datamart
-        run: |
-          echo "Running DATAMART pipeline (DBT_DATASET_OVERRIDE=datamart)"
-          dbt build --select tag:datamart+
+    # OR run single model
+    - name: Run single dbt model
+      if: ${{ github.event.inputs.model_name != '' }}
+      run: |
+        MODEL="${{ github.event.inputs.model_name }}"
+        echo "Running single dbt model: $MODEL"
+        dbt run --select "$MODEL"
 
-      # -------------------------
-      # 8. GENERATE DBT DOCS
-      # -------------------------
-      - name: Generate dbt docs
-        env:
-          DBT_DATASET_OVERRIDE: dwh
-        run: dbt docs generate
+    # -------------------------
+    # 6. GENERATE DBT DOCS
+    # -------------------------
+    - name: Generate docs
+      run: dbt docs generate
 
-      # -------------------------
-      # 9. PREPARE DOCS FOR GITHUB PAGES
-      # -------------------------
-      - name: Prepare docs for GitHub Pages
-        run: |
-          mkdir -p public
-          cp -r target/* public/
+    - name: Prepare docs for GitHub Pages
+      run: |
+        mkdir -p public
+        cp -r target/* public/
 
-      # -------------------------
-      # 10. UPLOAD ARTIFACT
-      # -------------------------
-      - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: github-pages
-          path: public
+    # -------------------------
+    # 7. UPLOAD & DEPLOY DOCS
+    # -------------------------
+    - name: Upload docs artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        name: github-pages
+        path: public
 
-      # -------------------------
-      # 11. DEPLOY DOCS
-      # -------------------------
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
