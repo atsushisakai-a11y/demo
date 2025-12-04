@@ -14,12 +14,12 @@ models:
 
   # Folder: models/demo/staging
     staging:
-      +schema: staging
-      +tags: ["staging"]
+      #+schema: staging
+      #+tags: ["staging"]
 
   # Folder: models/demo/dwh
     dwh:
-      +schema: dwh
+      #+schema: dwh
    # +tags: ["dwh"]
 
   # Folder: models/demo/datamart
