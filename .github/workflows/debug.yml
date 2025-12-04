@@ -95,3 +95,9 @@ jobs:
         run: |
           echo "--- Inspecting models directory (showing hidden characters) ---"
           find models -maxdepth 2 -type d | sed -e 's/[[:space:]]/·/g'
+
+      # 15. Show raw dbt_project.yml
+      - name: Show raw dbt_project.yml (with visible whitespace)
+        run: |
+          sed -n '1,200p' dbt_project.yml | sed -e 's/\t/<TAB>/g' -e 's/ /·/g'
+          
