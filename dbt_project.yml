@@ -13,8 +13,8 @@ models:
     +schema: dwh
 
   # Folder: models/demo/staging
-    staging:
-      +schema: staging
+  staging:
+    +schema: staging
       #+tags: ["staging"]
 
   # Folder: models/demo/dwh
