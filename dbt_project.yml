@@ -7,16 +7,18 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  +materialized: table
+  demo:  # <-- dbt namespace for all models under models/demo/*
+    # default schema if none overridden
+    +schema: "demo"
 
-  staging:
-    +schema: "staging"
-    +tags: ["staging"]
+    staging:
+      +schema: "staging"
+      +tags: ["staging"]
 
-  dwh:
-    +schema: "dwh"
-    +tags: ["dwh"]
+    dwh:
+      +schema: "dwh"
+      +tags: ["dwh"]
 
-  datamart:
-    +schema: "datamart"
-    +tags: ["datamart"]
+    datamart:
+      +schema: "datamart"
+      +tags: ["datamart"]
