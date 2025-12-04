@@ -1,14 +1,23 @@
 name: "demo"
 version: "1.0.0"
-#config-version: 2
+config-version: 2
 
 profile: "demo"
 
 model-paths: ["models"]
 
 models:
-  staging:
-    +schema: dwh
-  # Base config for ALL models in the "demo" project namespace
   demo:
-    +schema: dwh
+    +schema: "demo"
+
+    staging:
+      +schema: "staging"
+      +tags: ["staging"]
+
+    dwh:
+      +schema: "dwh"
+      +tags: ["dwh"]
+
+    datamart:
+      +schema: "datamart"
+      +tags: ["datamart"]
