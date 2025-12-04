@@ -100,4 +100,9 @@ jobs:
       - name: Show raw dbt_project.yml (with visible whitespace)
         run: |
           sed -n '1,200p' dbt_project.yml | sed -e 's/\t/<TAB>/g' -e 's/ /·/g'
-          
+
+      # 16. FIND dbt_project.yml in workspace
+      - name: FIND dbt_project.yml in workspace
+        run: |
+          echo "--- Searching for dbt_project.yml ---"
+          find /home/runner/work/demo -name dbt_project.yml -print
