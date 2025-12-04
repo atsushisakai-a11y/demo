@@ -2,16 +2,6 @@ name: Run dbt Pipeline
 
 on:
   workflow_dispatch:
-    inputs:
-      dataset:
-        description: "Target BigQuery dataset (staging, dwh, marts)"
-        required: false
-        default: "staging"
-        type: string
-      model_name:
-        description: "Optional: Run a specific dbt model"
-        required: false
-        type: string
 
 jobs:
   run-dbt-pipeline:
@@ -60,52 +50,36 @@ jobs:
                 method: service-account
                 project: grand-water-473707-r8
                 keyfile: key.json
-                dataset: staging
+                schema: staging
                 threads: 4
                 location: EU
           EOF
 
       # -------------------------
-      # DEBUG WORKING DIR
+      # 4. DEBUG WORKING DIRECTORY
       # -------------------------
       - name: Confirm working directory
         run: |
           echo "PWD: $(pwd)"
-          echo "--- Repo structure ---"
+          echo "--- Repo tree ---"
           ls -R .
 
       # -------------------------
-      # 4. RUN DBT PIPELINE
+      # 5. RUN FULL DBT PIPELINE
       # -------------------------
-      - name: Run dbt build (full pipeline)
-        if: ${{ github.event.inputs.model_name == '' }}
-        env:
-          DBT_DATASET_OVERRIDE: ${{ github.event.inputs.dataset }}
+      - name: Run dbt build
         run: |
-          echo "Running dbt pipeline into dataset: $DBT_DATASET_OVERRIDE"
+          echo "Running full dbt pipeline..."
           dbt build
 
-      - name: Run single dbt model
-        if: ${{ github.event.inputs.model_name != '' }}
-        env:
-          DBT_DATASET_OVERRIDE: ${{ github.event.inputs.dataset }}
-        run: |
-          MODEL="${{ github.event.inputs.model_name }}"
-          echo "Running dbt model: $MODEL into dataset: $DBT_DATASET_OVERRIDE"
-          dbt run --select "$MODEL"
-
       # -------------------------
-      # 5. GENERATE DBT DOCS
+      # 6. GENERATE DBT DOCS
       # -------------------------
       - name: Generate dbt docs
-        env:
-          DBT_DATASET_OVERRIDE: ${{ github.event.inputs.dataset }}
-        run: |
-          echo "Generating dbt docs for dataset: $DBT_DATASET_OVERRIDE"
-          dbt docs generate
+        run: dbt docs generate
 
       # -------------------------
-      # 6. PREPARE DOCS FOR PAGES
+      # 7. PREPARE DOCS FOR GITHUB PAGES
       # -------------------------
       - name: Prepare docs for GitHub Pages
         run: |
@@ -113,7 +87,7 @@ jobs:
           cp -r target/* public/
 
       # -------------------------
-      # 7. UPLOAD ARTIFACT
+      # 8. UPLOAD ARTIFACT
       # -------------------------
       - name: Upload docs artifact
         uses: actions/upload-pages-artifact@v3
@@ -122,7 +96,7 @@ jobs:
           path: public
 
       # -------------------------
-      # 8. DEPLOY DOCS TO GITHUB PAGES
+      # 9. DEPLOY DOCS TO GITHUB PAGES
       # -------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
