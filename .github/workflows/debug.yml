@@ -119,4 +119,8 @@ jobs:
       - name: dbt ls
         run: |
           dbt ls --output json
+      # 19. dbt ls --select dim_google_places_dbt --output json
+      - name: dbt ls --select dim_google_places_dbt --output json
+        run: |
+          dbt ls --select dim_google_places_dbt --output json
           
