@@ -56,7 +56,7 @@ jobs:
           EOF
 
       # -------------------------
-      # 4. DEBUG WORKING DIRECTORY
+      # 4. DEBUG DIRECTORY STRUCTURE
       # -------------------------
       - name: Confirm working directory
         run: |
@@ -64,22 +64,46 @@ jobs:
           echo "--- Repo tree ---"
           ls -R .
 
-      # -------------------------
-      # 5. RUN FULL DBT PIPELINE
-      # -------------------------
-      - name: Run dbt build
+      # ============================================================
+      # 5. RUN PIPELINE PHASE 1 → STAGING
+      # ============================================================
+      - name: Run STAGING models
+        env:
+          DBT_DATASET_OVERRIDE: staging
         run: |
-          echo "Running full dbt pipeline..."
-          dbt build
+          echo "Running STAGING pipeline (DBT_DATASET_OVERRIDE=staging)"
+          dbt build --select tag:staging+
+
+      # ============================================================
+      # 6. RUN PIPELINE PHASE 2 → DWH
+      # ============================================================
+      - name: Run DWH models
+        env:
+          DBT_DATASET_OVERRIDE: dwh
+        run: |
+          echo "Running DWH pipeline (DBT_DATASET_OVERRIDE=dwh)"
+          dbt build --select tag:dwh+
+
+      # ============================================================
+      # 7. RUN PIPELINE PHASE 3 → DATAMART
+      # ============================================================
+      - name: Run DATAMART models
+        env:
+          DBT_DATASET_OVERRIDE: datamart
+        run: |
+          echo "Running DATAMART pipeline (DBT_DATASET_OVERRIDE=datamart)"
+          dbt build --select tag:marts+
 
       # -------------------------
-      # 6. GENERATE DBT DOCS
+      # 8. GENERATE DBT DOCS
       # -------------------------
       - name: Generate dbt docs
+        env:
+          DBT_DATASET_OVERRIDE: dwh
         run: dbt docs generate
 
       # -------------------------
-      # 7. PREPARE DOCS FOR GITHUB PAGES
+      # 9. PREPARE DOCS FOR GITHUB PAGES
       # -------------------------
       - name: Prepare docs for GitHub Pages
         run: |
@@ -87,7 +111,7 @@ jobs:
           cp -r target/* public/
 
       # -------------------------
-      # 8. UPLOAD ARTIFACT
+      # 10. UPLOAD ARTIFACT
       # -------------------------
       - name: Upload docs artifact
         uses: actions/upload-pages-artifact@v3
@@ -96,7 +120,7 @@ jobs:
           path: public
 
       # -------------------------
-      # 9. DEPLOY DOCS TO GITHUB PAGES
+      # 11. DEPLOY DOCS
       # -------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
