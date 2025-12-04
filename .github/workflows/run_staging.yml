@@ -31,7 +31,6 @@ jobs:
             "sql/staging/staging_parkbee_parking_zones.sql"
             "sql/staging/staging_google_parking_places.sql"
           )
-        # sql/staging/staging_google_parkbee_locations.sql
 
           for sql_file in "${ordered_sql_files[@]}"; do
             echo "💡 Running $sql_file..."
