@@ -19,4 +19,4 @@ models:
 
   marts:
     +schema: "datamart"
-    +tags: ["marts"]
+    +tags: ["datamart"]
