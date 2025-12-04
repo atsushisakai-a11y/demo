@@ -76,7 +76,7 @@ SELECT
 END
   AS distance_category,
   CASE
-    WHEN distance_meters <= 100 or lower(google_place_name) like '%parkbee%' THEN 'Yes'
+    WHEN lower(google_place_name) like '%parkbee%' THEN 'Yes'
     ELSE 'No'
 END
   AS on_parkbee
