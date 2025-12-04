@@ -7,7 +7,7 @@ profile: "demo"
 model-paths: ["models"]
 
 models:
-  demo: {}     # project namespace - MUST exist
+  demo: {}
 
   staging:
     +schema: "staging"
