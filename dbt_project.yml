@@ -18,11 +18,11 @@ models:
     +tags: ["staging"]
 
   # Folder: models/demo/dwh
-  demo.dwh:
-    +schema: dwh
-    +tags: ["dwh"]
+  #demo.dwh:
+   # +schema: dwh
+   # +tags: ["dwh"]
 
   # Folder: models/demo/datamart
-  demo.datamart:
-    +schema: datamart
-    +tags: ["datamart"]
+  #demo.datamart:
+   # +schema: datamart
+   # +tags: ["datamart"]
