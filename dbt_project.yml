@@ -5,43 +5,21 @@ config-version: 2
 profile: "demo"
 
 model-paths: ["models"]
-analysis-paths: ["analysis"]
-test-paths: ["tests"]
-seed-paths: ["seeds"]
-macro-paths: ["macros"]
-snapshot-paths: ["snapshots"]
-
-target-path: "target"
-clean-targets:
-  - "target"
-  - "dbt_packages"
 
 models:
+  # This applies to ALL models, but overridden below
   demo:
+    +materialized: table
 
-    # Global override so GitHub Actions can control the dataset if needed
-    +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
+# -------------------------------------
+# FOLDER → SCHEMA MAPPING (CORRECTED)
+# These keys MUST match folder names
+# -------------------------------------
+  staging:
+    +schema: "staging"
 
-    # ---------------------
-    # Models under: models/staging/*
-    # ---------------------
-    staging:
-      +schema: "staging"
-      +materialized: table
-      +tags: ["staging"]
+  dwh:
+    +schema: "dwh"
 
-    # ---------------------
-    # Models under: models/dwh/*
-    # ---------------------
-    dwh:
-      +schema: "dwh"
-      +materialized: table
-      +tags: ["dwh"]
-
-    # ---------------------
-    # Models under: models/marts/*
-    # ---------------------
-    marts:
-      +schema: "marts"
-      +materialized: table
-      +tags: ["marts"]
+  marts:
+    +schema: "marts"
