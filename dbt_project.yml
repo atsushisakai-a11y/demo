@@ -17,7 +17,7 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  #demo:
+  demo:
 
     +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
 
