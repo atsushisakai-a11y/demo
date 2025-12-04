@@ -1,5 +1,6 @@
 {{ config(
     materialized = "table"
+    tags=["dwh"]
 ) }}
 
 SELECT
