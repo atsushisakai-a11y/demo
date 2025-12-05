@@ -73,6 +73,13 @@ jobs:
           dbt run --select tag:datamart
 
       # --------------------------------------------
+      # 3. DBT test
+      # --------------------------------------------
+
+      - name: Run dbt tests
+        run: dbt test          
+
+      # --------------------------------------------
       # 4. GENERATE DBT DOCS (lineage graph)
       # --------------------------------------------
       - name: Generate dbt docs
