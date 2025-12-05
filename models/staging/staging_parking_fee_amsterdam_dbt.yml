@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: staging_parking_fee_amsterdam_dbt
+    columns:
+      - name: zone_id
+        tests:
+          - not_null
+      - name: hourly_rate
+        tests:
+          - not_null
+      - name: geom
+        tests:
+          - not_null
