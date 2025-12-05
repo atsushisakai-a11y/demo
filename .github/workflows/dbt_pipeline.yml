@@ -4,117 +4,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-dbt-pipeline:
+  run-dbt:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
 
     steps:
-      # ---------------------------------------
-      # 1. Checkout repo
-      # ---------------------------------------
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout repo
+      - uses: actions/checkout@v3
 
-      # ---------------------------------------
-      # 2. Setup Python + dbt-bigquery
-      # ---------------------------------------
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+      # Setup Python + dbt
+      - uses: actions/setup-python@v4
+        with: { python-version: "3.11" }
 
-      - name: Install dbt-bigquery
-        run: |
+      - run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # ---------------------------------------
-      # 3. Write profiles.yml 
-      # schema controlled by DBT_DATASET_OVERRIDE
-      # ---------------------------------------
-      - name: Create profiles.yml
-        run: |
-          mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << 'EOF'
-          demo:
-            target: prod
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: grand-water-473707-r8
-                keyfile: key.json
-                schema: "{{ env_var('DBT_DATASET_OVERRIDE', 'staging') }}"
-                threads: 4
-                location: EU
-          EOF
+      # Provide service account
+      - run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # ---------------------------------------
-      # 4. Decode GCP service account key
-      # ---------------------------------------
-      - name: Decode GCP key
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+      # Confirm dbt_project.yml is correct
+      - run: cat dbt_project.yml
 
-      # ---------------------------------------
-      # 5. STAGING RUN
-      # ---------------------------------------
+      # ----- RUN STAGING -----
       - name: Run staging models
-        env:
-          DBT_DATASET_OVERRIDE: "staging"
         run: |
-          echo "=== Running STAGING models into dataset: staging ==="
+          echo "Running staging models..."
           dbt run --select tag:staging
 
-      # ---------------------------------------
-      # 6. DWH RUN
-      # ---------------------------------------
+      # ----- RUN DWH -----
       - name: Run DWH models
-        env:
-          DBT_DATASET_OVERRIDE: "dwh"
         run: |
-          echo "=== Running DWH models into dataset: dwh ==="
+          echo "Running DWH models..."
           dbt run --select tag:dwh
 
-      # ---------------------------------------
-      # 7. DATAMART RUN
-      # ---------------------------------------
-      - name: Run DATAMART models
-        env:
-          DBT_DATASET_OVERRIDE: "datamart"
+      # ----- RUN DATAMART -----
+      - name: Run datamart models
         run: |
-          echo "=== Running DATAMART models into dataset: datamart ==="
+          echo "Running datamart models..."
           dbt run --select tag:datamart
-
-      # ---------------------------------------
-      # 8. Generate dbt docs
-      # ---------------------------------------
-      - name: Generate dbt docs
-        env:
-          DBT_DATASET_OVERRIDE: "dwh"
-        run: dbt docs generate
-
-      # ---------------------------------------
-      # 9. Prepare static site for GitHub Pages
-      # ---------------------------------------
-      - name: Prepare docs site
-        run: |
-          mkdir -p public
-          cp -r target/* public/
-
-      # ---------------------------------------
-      # 10. Upload artifact
-      # ---------------------------------------
-      - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-
-      # ---------------------------------------
-      # 11. Deploy to GitHub Pages
-      # ---------------------------------------
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
