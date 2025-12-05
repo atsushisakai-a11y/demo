@@ -49,4 +49,4 @@ FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
 
 INNER JOIN latest l
     ON l.location_id = fpl.location_id
-    AND l.max_scrape_datetime_cet = fpl.scrape_da
+    AND l.max_scrape_datetime_cet = fpl.scrape_datetime_cet
