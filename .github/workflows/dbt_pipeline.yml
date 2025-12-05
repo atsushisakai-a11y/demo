@@ -8,36 +8,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo
       - uses: actions/checkout@v3
 
-      # Setup Python + dbt
       - uses: actions/setup-python@v4
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
 
-      - run: |
+      - name: Install dbt-bigquery
+        run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # Provide service account
+      # Decode service account
       - run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # Confirm dbt_project.yml is correct
-      - run: cat dbt_project.yml
+      # ---- FIX: PROFILES DIRECTORY ----
+      - name: Configure dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cp profiles.yml ~/.dbt/profiles.yml
 
-      # ----- RUN STAGING -----
+      # ---- Run staging ----
       - name: Run staging models
         run: |
           echo "Running staging models..."
           dbt run --select tag:staging
 
-      # ----- RUN DWH -----
+      # ---- Run DWH ----
       - name: Run DWH models
         run: |
           echo "Running DWH models..."
           dbt run --select tag:dwh
 
-      # ----- RUN DATAMART -----
+      # ---- Run Datamart ----
       - name: Run datamart models
         run: |
           echo "Running datamart models..."
