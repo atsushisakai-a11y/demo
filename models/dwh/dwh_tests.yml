@@ -1,0 +1,70 @@
+version: 2
+
+models:
+
+  # ------------------------------
+  # DIM GOOGLE PLACES
+  # ------------------------------
+  - name: dim_google_places_dbt
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+  # ------------------------------
+  # DIM PARKBEE LOCATIONS
+  # ------------------------------
+  - name: dim_parkbee_locations_dbt
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+          - unique
+
+      - name: latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        tests:
+          - not_null
+
+  # ------------------------------
+  # FACT PARKBEE LOCATIONS
+  # ------------------------------
+  - name: fact_parkbee_locations_dbt
+    columns:
+      - name: location_id
+        tests:
+          - relationships:
+              to: ref('dim_parkbee_locations_dbt')
+              field: location_id
+
+      - name: occupancy_rate
+        tests:
+          - value_between:
+              column_name: occupancy_rate
+              min_value: 0
+              max_value: 1
+
+      - name: hourly_price
+        tests:
+          - not_null
+
+  # ------------------------------
+  # FACT PARKING FEE AMSTERDAM
+  # ------------------------------
+  - name: fact_parking_fee_amsterdam_dbt
+    columns:
+      - name: zone_id
+        tests:
+          - not_null
+
+      - name: geom
+        tests:
+          - not_null
+
+      - name: hourly_rate
+        tests:
+          - not_null
