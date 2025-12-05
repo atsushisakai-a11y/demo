@@ -30,22 +30,22 @@ jobs:
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
       # 5. Create profiles.yml
-      - name: Create dbt profiles.yml
-        run: |
-          mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << EOF
-          demo:
-            target: prod
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: grand-water-473707-r8
-                keyfile: key.json
-                dataset: staging
-                threads: 4
-                location: EU
-          EOF
+      #- name: Create dbt profiles.yml
+      #  run: |
+      #    mkdir -p ~/.dbt
+      #    cat > ~/.dbt/profiles.yml << EOF
+      #    demo:
+      #      target: prod
+      #      outputs:
+      #        prod:
+      #          type: bigquery
+      #          method: service-account
+      #          project: grand-water-473707-r8
+      #          keyfile: key.json
+      #          dataset: staging
+      #          threads: 4
+      #          location: EU
+      #    EOF
 
       # 6. Show working directory
       - name: Show working directory
