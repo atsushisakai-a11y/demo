@@ -34,4 +34,4 @@ FROM joined
 ORDER BY
     location_id,
     country,
-    city;
+    city
