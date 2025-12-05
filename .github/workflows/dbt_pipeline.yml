@@ -54,7 +54,7 @@ jobs:
               method: service-account
               project: grand-water-473707-r8
               keyfile: key.json
-              schema: {{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}
+              schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
               threads: 4
               location: EU
         EOF
