@@ -1,0 +1,67 @@
+version: 2
+
+models:
+
+  # ==========================================================
+  # DATAMART — GOOGLE PLACES NEAREST PARKBEE
+  # ==========================================================
+  - name: datamart_google_places_nearest_parkbee_dbt
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+      - name: google_place_name
+        tests:
+          - not_null
+
+      - name: parkbee_location_id
+        tests:
+          - not_null
+
+      - name: distance_meters
+        tests:
+          - not_null
+
+      - name: distance_category
+        tests:
+          - not_null
+
+      - name: on_parkbee
+        tests:
+          - accepted_values:
+              values: ['Yes', 'No']
+
+  # ==========================================================
+  # DATAMART — PRICE COMPARISON
+  # ==========================================================
+  - name: datamart_price_comparison_dbt
+    columns:
+      - name: scrape_date
+        tests:
+          - not_null
+
+      - name: location_id
+        tests:
+          - not_null
+
+      - name: hourly_price
+        tests:
+          - not_null
+
+      - name: public_hourly_price
+        tests:
+          - not_null
+
+      - name: price_gap
+        tests:
+          - not_null
+
+      - name: price_position
+        tests:
+          - accepted_values:
+              values:
+                - 'Public Cheaper'
+                - 'ParkBee Cheaper'
+                - 'No public parking data'
