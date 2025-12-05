@@ -54,7 +54,7 @@ jobs:
               method: service-account
               project: grand-water-473707-r8
               keyfile: key.json
-              dataset: "{{ env_var('DBT_DEFAULT_SCHEMA', 'demo') }}"
+              dataset: "{{ env_var('DBT_DEFAULT_SCHEMA') }}"
               threads: 4
               location: EU
         EOF
