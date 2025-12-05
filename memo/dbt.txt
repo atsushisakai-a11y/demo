@@ -1,0 +1,12 @@
+dbt by default concatenate default schema & custom schema.
+If default schema is "demo" and custom schema is "staging", then a table is created in "demo_staging"
+Which looks like: {{ default_schema }}_{{ custom_schema_name | trim }}
+See: https://docs.getdbt.com/docs/build/custom-schemas
+  
+  schemas can be set in 3 locations which is:
+  1. profiles.yml
+  2. dbt_project.yml
+  3. queries
+Go deeper, more priority and overwriting values for parameters happens usually, however it is not the case for schema
+
+  
