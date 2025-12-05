@@ -1,0 +1,62 @@
+version: 2
+
+models:
+
+  # ------------------------------------------------------
+  # STAGING GOOGLE PARKING PLACES
+  # ------------------------------------------------------
+  - name: staging_google_parking_places_dbt
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+
+      - name: name
+        tests:
+          - not_null
+
+      - name: lat
+        tests:
+          - not_null
+
+      - name: lng
+        tests:
+          - not_null
+
+  # ------------------------------------------------------
+  # STAGING PARKBEE GARAGES
+  # ------------------------------------------------------
+  - name: staging_parkbee_garages_dbt
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+
+      - name: latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        tests:
+          - not_null
+
+      - name: scrape_datetime_cet
+        tests:
+          - not_null
+
+  # ------------------------------------------------------
+  # STAGING PARKING FEE AMSTERDAM
+  # ------------------------------------------------------
+  - name: staging_parking_fee_amsterdam_dbt
+    columns:
+      - name: zone_id
+        tests:
+          - not_null
+
+      - name: hourly_rate
+        tests:
+          - not_null
+
+      - name: geom
+        tests:
+          - not_null
