@@ -37,8 +37,8 @@ SELECT
     zone_id,
     description,
     geom,   -- original polygon
-
-    SAFE_CAST(REPLACE(hourly_rate_str, ',', '.') AS FLOAT64) AS hourly_rate,
+    --SAFE_CAST(REPLACE(hourly_rate_str, ',', '.') AS FLOAT64) AS hourly_rate,
+    SAFE_CAST(REPLACE(REGEXP_EXTRACT(hourly_rate_str, r'([^;\[]+)'), ',', '.') AS FLOAT64) AS hourly_rate,
     periode,
     days,
 
