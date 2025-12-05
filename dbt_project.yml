@@ -8,7 +8,7 @@ model-paths: ["models"]
 
 models:
   demo:
-    +schema: "{{ env_var('DBT_DATASET_OVERRIDE', target.schema) }}"
+    +schema: "{{ env_var('DBT_DATASET_OVERRIDE', '') }}"
     staging:
       +schema: "staging"
       +tags: ["staging"]
