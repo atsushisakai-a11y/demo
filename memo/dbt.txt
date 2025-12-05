@@ -25,3 +25,7 @@ Now to prevent from this concatenations,  below macro needs to be placed in "mac
     {%- endif -%}
 
 {%- endmacro %}
+----------------------------------------------------------------------------------------------------------------
+Why dbt over sql?
+
+https://medium.com/@akanksha_singh/why-every-data-engineer-is-talking-about-dbt-and-how-it-actually-works-80f383364abc
