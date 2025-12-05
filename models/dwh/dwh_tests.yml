@@ -43,10 +43,8 @@ models:
 
       - name: occupancy_rate
         tests:
-          - value_between:
-              column_name: occupancy_rate
-              min_value: 0
-              max_value: 1
+          - dbt_utils.expression_is_true:
+              expression: "occupancy_rate BETWEEN 0 AND 1"              
 
       - name: hourly_price
         tests:
