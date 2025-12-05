@@ -19,7 +19,7 @@ WITH dim_fact_google AS (
         fpcl.user_ratings_total,
         fpcl.demand_score,
         fpcl.demand_category
-    FROM {{ ref('fact_parking_candidate_locations') }} AS fpcl
+    FROM {{ ref('fact_parking_candidate_locations_dbt') }} AS fpcl
     INNER JOIN {{ ref('dim_google_places') }} AS dgp
         ON dgp.place_id = fpcl.place_id
 ),
@@ -59,7 +59,7 @@ join_parkbee AS (
         ) AS rn
 
     FROM dim_fact_google dfg
-    CROSS JOIN {{ ref('dim_parkbee_locations') }} AS dpl
+    CROSS JOIN {{ ref('dim_parkbee_locations_dbt') }} AS dpl
 )
 
 -- ======================================
