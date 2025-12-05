@@ -30,7 +30,7 @@ jobs:
       - name: Load GCP Credentials
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # --- Create dbt profile (schema = public, overridden by dbt_project.yml) ---
+      # --- Create dbt profile ---
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -73,65 +73,39 @@ jobs:
           dbt run --select tag:datamart
 
       # --------------------------------------------
-      # 4. GENERATE DBT DOCS (lineage graph included)
+      # 4. GENERATE DBT DOCS (lineage graph)
       # --------------------------------------------
-      - name: Generate dbt docs
-        run: |
-          dbt docs generate
-
-      # --------------------------------------------
-      # 5. PREPARE DOCS FOR GITHUB PAGES
-      # --------------------------------------------
-      - name: Prepare public folder
-        run: |
-          mkdir -p public
-          cp -r target/* public/
-
-      # --------------------------------------------
-      # 6. UPLOAD ARTIFACT (correct action)
-      # --------------------------------------------
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-          name: github-pages
-
-      # --------------------------------------------
-      # 7. DEPLOY TO GITHUB PAGES
-      # --------------------------------------------
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
-
-      # --------------------------------------------
-      # 8. PUBLISH GITHUB PAGES
-      # --------------------------------------------
-      # ---- Generate dbt docs ----
       - name: Generate dbt docs
         run: |
           echo "Generating dbt docs..."
           dbt docs generate
-      
-      # ---- Move docs to public folder ----
-      - name: Prepare docs for GitHub Pages
+
+      # --------------------------------------------
+      # 5. PREPARE PUBLIC FOLDER
+      # --------------------------------------------
+      - name: Prepare public folder
         run: |
           mkdir -p public
           cp target/index.html public/ || echo "index.html missing"
           cp target/manifest.json public/ || echo "manifest.json missing"
           cp target/catalog.json public/ || echo "catalog.json missing"
-      
+
           if [ -d "target/assets" ]; then
             cp -r target/assets public/assets
           else
-            echo "assets/ folder missing"
+            echo "assets folder missing — dbt 1.5+ often removes it"
           fi
 
-      # Upload artifact for GitHub Pages
-      - name: Upload docs artifact
+      # --------------------------------------------
+      # 6. UPLOAD ARTIFACT (only once!)
+      # --------------------------------------------
+      - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
-      # Deploy to GitHub Pages
+      # --------------------------------------------
+      # 7. DEPLOY TO GITHUB PAGES (only once!)
+      # --------------------------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        
