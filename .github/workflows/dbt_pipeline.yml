@@ -54,7 +54,7 @@ jobs:
               method: service-account
               project: grand-water-473707-r8
               keyfile: key.json
-              dataset: staging  # overridden by folder schema settings
+              dataset: "{{ env_var('DBT_DEFAULT_SCHEMA', 'demo') }}"
               threads: 4
               location: EU
         EOF
