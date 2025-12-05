@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: dim_google_places_dbt
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_parkbee_locations_dbt
+    columns:
+      - name: place_id
+        tests:
+          - relationships:
+              to: ref('dim_google_places_dbt')
+              field: place_id
