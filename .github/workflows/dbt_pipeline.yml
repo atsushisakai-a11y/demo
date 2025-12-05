@@ -16,6 +16,9 @@ jobs:
       pages: write
       id-token: write
 
+    env:
+      DBT_DATASET_OVERRIDE: ""      # ← important      
+
     steps:
     # -------------------------
     # 1. CHECKOUT
