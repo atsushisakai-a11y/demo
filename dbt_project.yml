@@ -10,13 +10,13 @@ models:
   demo:
   #  +schema: "{{ env_var('DBT_DATASET_OVERRIDE', '') }}"
     staging:
-    #  +schema: "staging"
+      +schema: "staging"
       +tags: ["staging"]
 
     dwh:
-    #  +schema: "dwh"
+      +schema: "dwh"
       +tags: ["dwh"]
 
     datamart:
-    #  +schema: "datamart"
+      +schema: "datamart"
       +tags: ["datamart"]
