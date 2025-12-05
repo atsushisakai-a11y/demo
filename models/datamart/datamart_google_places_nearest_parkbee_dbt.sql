@@ -103,4 +103,4 @@ SELECT
 FROM join_parkbee
 WHERE rn = 1
 
-ORDER BY distance_meters ASC;
+ORDER BY distance_meters ASC
