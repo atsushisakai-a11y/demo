@@ -101,3 +101,15 @@ jobs:
       # --------------------------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+
+      # --------------------------------------------
+      # 8. PUBLISH GITHUB PAGES
+      # --------------------------------------------
+      - name: Prepare dbt docs site
+        run: |
+          mkdir -p public
+          cp target/index.html public/
+          cp target/manifest.json public/
+          cp target/catalog.json public/
+          cp -r target/assets public/assets
+        
