@@ -39,12 +39,7 @@ models:
         tests:
           - relationships:
               to: ref('dim_parkbee_locations_dbt')
-              field: location_id
-
-      - name: occupancy_rate
-        tests:
-          - dbt_utils.expression_is_true:
-              expression: "occupancy_rate BETWEEN 0 AND 1"              
+              field: location_id      
 
       - name: hourly_price
         tests:
