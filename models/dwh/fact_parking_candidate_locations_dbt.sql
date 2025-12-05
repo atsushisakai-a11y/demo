@@ -10,4 +10,4 @@ SELECT
     demand_score,
     demand_category
 FROM
-    {{ ref('staging_google_parking_places_dbt') }};
+    {{ ref('staging_google_parking_places_dbt') }}
