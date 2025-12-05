@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: staging_google_parking_places_dbt
+    description: "Google Places staging table for parking/EV locations"
+    columns:
+      - name: place_id
+        tests:
+          - not_null
+          - unique
+
+      - name: lat
+        tests:
+          - not_null
+
+      - name: lng
+        tests:
+          - not_null
+
+      - name: rating
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              config:
+                severity: warn
