@@ -55,4 +55,4 @@ WHERE
 
 ORDER BY
     scrape_date,
-    fpl.parking_from_cet;
+    fpl.parking_from_cet
