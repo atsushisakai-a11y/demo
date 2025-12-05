@@ -50,7 +50,7 @@ LEFT JOIN {{ ref('fact_parking_fee_amsterdam_dbt') }} z
 
 WHERE
     fpl.occupancy_rate >= 0
-    AND fpl.occupancy_rate =< 1
+    AND fpl.occupancy_rate <= 1
     AND fpl.hourly_price <= 20
 
 ORDER BY
