@@ -56,7 +56,7 @@ models:
       - name: hourly_rate
         tests:
           - not_null
-          store_failures: true
+            store_failures: true
 
       - name: geom
         tests:
