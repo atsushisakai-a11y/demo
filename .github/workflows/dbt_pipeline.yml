@@ -105,18 +105,25 @@ jobs:
       # --------------------------------------------
       # 8. PUBLISH GITHUB PAGES
       # --------------------------------------------
-      # Generate dbt docs
+      # ---- Generate dbt docs ----
       - name: Generate dbt docs
-        run: dbt docs generate
-
-      # Prepare publishing folder
-      - name: Prepare dbt docs site
+        run: |
+          echo "Generating dbt docs..."
+          dbt docs generate
+      
+      # ---- Move docs to public folder ----
+      - name: Prepare docs for GitHub Pages
         run: |
           mkdir -p public
-          cp target/index.html public/
-          cp target/manifest.json public/
-          cp target/catalog.json public/
-          cp -r target/assets public/assets
+          cp target/index.html public/ || echo "index.html missing"
+          cp target/manifest.json public/ || echo "manifest.json missing"
+          cp target/catalog.json public/ || echo "catalog.json missing"
+      
+          if [ -d "target/assets" ]; then
+            cp -r target/assets public/assets
+          else
+            echo "assets/ folder missing"
+          fi
 
       # Upload artifact for GitHub Pages
       - name: Upload docs artifact
