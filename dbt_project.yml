@@ -8,8 +8,7 @@ model-paths: ["models"]
 
 models:
   demo:
-    +schema: "demo"
-
+  
     staging:
       +schema: "staging"
       +tags: ["staging"]
@@ -18,6 +17,6 @@ models:
       +schema: "dwh"
       +tags: ["dwh"]
 
-  #  datamart:
-  #    +schema: "datamart"
-  #    +tags: ["datamart"]
+    datamart:
+      +schema: "datamart"
+      +tags: ["datamart"]
