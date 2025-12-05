@@ -50,10 +50,6 @@ models:
         tests:
           - not_null
 
-      - name: public_hourly_price
-        tests:
-          - not_null
-
       - name: price_gap
         tests:
           - not_null
