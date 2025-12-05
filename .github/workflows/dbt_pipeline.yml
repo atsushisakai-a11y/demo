@@ -57,7 +57,7 @@ jobs:
               method: service-account
               project: grand-water-473707-r8
               keyfile: key.json
-              schema: "{{ env_var('DBT_DATASET_OVERRIDE', '') }}"
+              schema: "placeholder"   # Must be non-empty!
               threads: 4
               location: EU
         EOF
