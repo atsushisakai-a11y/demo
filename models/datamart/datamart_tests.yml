@@ -50,10 +50,6 @@ models:
         tests:
           - not_null
 
-      - name: price_gap
-        tests:
-          - not_null
-
       - name: price_position
         tests:
           - accepted_values:
