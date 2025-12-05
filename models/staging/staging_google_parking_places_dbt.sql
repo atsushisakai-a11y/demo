@@ -70,9 +70,10 @@ SELECT
     fetched_at,
     demand_score,
     demand_bucket,
-    CASE
-        WHEN demand_bucket = 1 THEN 'High'
-        WHEN demand_bucket IN (2, 3) THEN 'Medium'
-        ELSE 'Low'
-    END AS demand_category
+  CASE
+    WHEN name in ('Parkeergarage De Opgang','Markenhoven','Parking Panorama','Parking Place Eugène Flagey') THEN 'High - Recommended'
+    WHEN demand_bucket = 1 THEN 'High'
+    WHEN demand_bucket IN (2,3) THEN 'Medium'
+    ELSE 'Low'
+  END AS demand_category    
 FROM ranked
