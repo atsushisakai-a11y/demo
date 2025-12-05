@@ -127,4 +127,10 @@ jobs:
       - name: dbt ls --select dim_google_places_dbt --output json
         run: |
           dbt ls --select dim_google_places_dbt --output json
+
+      # 20. Debug show target folder
+      - name: Debug show target folder
+        run: |
+          echo "=== TARGET FOLDER CONTENTS ==="
+          ls -R target || echo "target folder does not exist"
           
