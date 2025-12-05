@@ -13,10 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # --- Checkout ---
+      # ----------------------------------------
+      # 1. CHECKOUT REPO
+      # ----------------------------------------
       - uses: actions/checkout@v3
 
-      # --- Python & dbt install ---
+      # ----------------------------------------
+      # 2. PYTHON + DBT INSTALL
+      # ----------------------------------------
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
@@ -26,11 +30,15 @@ jobs:
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # --- Decode service account ---
+      # ----------------------------------------
+      # 3. LOAD SERVICE ACCOUNT
+      # ----------------------------------------
       - name: Load GCP Credentials
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # --- Create dbt profile ---
+      # ----------------------------------------
+      # 4. CREATE PROFILES.YML
+      # ----------------------------------------
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -48,48 +56,53 @@ jobs:
                 location: EU
           EOF
 
-      # --------------------------------------------
-      # 1. RUN STAGING
-      # --------------------------------------------
+      # ----------------------------------------
+      # 5. INSTALL DBT PACKAGES
+      # ----------------------------------------
+      - name: Install dbt packages
+        run: dbt deps
+
+      # ----------------------------------------
+      # 6. RUN STAGING MODELS
+      # ----------------------------------------
       - name: Run staging models
         run: |
           echo "Running staging models..."
           dbt run --select tag:staging
 
-      # --------------------------------------------
-      # 2. RUN DWH
-      # --------------------------------------------
+      # ----------------------------------------
+      # 7. RUN DWH MODELS
+      # ----------------------------------------
       - name: Run DWH models
         run: |
           echo "Running DWH models..."
           dbt run --select tag:dwh
 
-      # --------------------------------------------
-      # 3. RUN DATAMART
-      # --------------------------------------------
+      # ----------------------------------------
+      # 8. RUN DATAMART MODELS
+      # ----------------------------------------
       - name: Run datamart models
         run: |
           echo "Running datamart models..."
           dbt run --select tag:datamart
 
-      # --------------------------------------------
-      # 3. DBT test
-      # --------------------------------------------
-
+      # ----------------------------------------
+      # 9. RUN ALL TESTS
+      # ----------------------------------------
       - name: Run dbt tests
-        run: dbt test          
-
-      # --------------------------------------------
-      # 4. GENERATE DBT DOCS (lineage graph)
-      # --------------------------------------------
-      - name: Generate dbt docs
         run: |
-          echo "Generating dbt docs..."
-          dbt docs generate
+          echo "Running dbt tests..."
+          dbt test
 
-      # --------------------------------------------
-      # 5. PREPARE PUBLIC FOLDER
-      # --------------------------------------------
+      # ----------------------------------------
+      # 10. GENERATE DBT DOCS
+      # ----------------------------------------
+      - name: Generate dbt docs
+        run: dbt docs generate
+
+      # ----------------------------------------
+      # 11. PREPARE DOCUMENTATION FOR GITHUB PAGES
+      # ----------------------------------------
       - name: Prepare public folder
         run: |
           mkdir -p public
@@ -100,19 +113,20 @@ jobs:
           if [ -d "target/assets" ]; then
             cp -r target/assets public/assets
           else
-            echo "assets folder missing — dbt 1.5+ often removes it"
+            echo "No assets folder"
           fi
 
-      # --------------------------------------------
-      # 6. UPLOAD ARTIFACT (only once!)
-      # --------------------------------------------
+      # ----------------------------------------
+      # 12. UPLOAD ARTIFACT FOR PAGES
+      # ----------------------------------------
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
+          name: github-pages
 
-      # --------------------------------------------
-      # 7. DEPLOY TO GITHUB PAGES (only once!)
-      # --------------------------------------------
+      # ----------------------------------------
+      # 13. DEPLOY DOCUMENTATION TO GITHUB PAGES
+      # ----------------------------------------
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
