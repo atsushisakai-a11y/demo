@@ -23,10 +23,22 @@ jobs:
       - run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
       # ---- FIX: PROFILES DIRECTORY ----
-      - name: Configure dbt profiles.yml
+      - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cp profiles.yml ~/.dbt/profiles.yml
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          demo:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: grand-water-473707-r8
+                keyfile: key.json
+                schema: public
+                threads: 4
+                location: EU
+          EOF
 
       # ---- Run staging ----
       - name: Run staging models
