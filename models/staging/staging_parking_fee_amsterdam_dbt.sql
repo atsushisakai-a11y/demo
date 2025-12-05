@@ -47,3 +47,4 @@ SELECT
     ST_X(ST_CENTROID(geom)) AS zone_lng
 
 FROM lvl2
+WHERE hourly_rate_str is not null
