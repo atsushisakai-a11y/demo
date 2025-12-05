@@ -54,6 +54,7 @@ jobs:
               method: service-account
               project: grand-water-473707-r8
               keyfile: key.json
+              schema: ""
               threads: 4
               location: EU
         EOF
