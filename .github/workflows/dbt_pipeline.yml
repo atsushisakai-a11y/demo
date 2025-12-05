@@ -63,8 +63,8 @@ jobs:
       # 5. STAGING RUN
       # ---------------------------------------
       - name: Run staging models
-        env:
-          DBT_DATASET_OVERRIDE: "staging"
+        #env:
+        #  DBT_DATASET_OVERRIDE: "staging"
         run: |
           echo "=== Running STAGING models into dataset: staging ==="
           dbt run --select tag:staging
@@ -73,8 +73,8 @@ jobs:
       # 6. DWH RUN
       # ---------------------------------------
       - name: Run DWH models
-        env:
-          DBT_DATASET_OVERRIDE: "dwh"
+        #env:
+        #  DBT_DATASET_OVERRIDE: "dwh"
         run: |
           echo "=== Running DWH models into dataset: dwh ==="
           dbt run --select tag:dwh
@@ -83,8 +83,8 @@ jobs:
       # 7. DATAMART RUN
       # ---------------------------------------
       - name: Run DATAMART models
-        env:
-          DBT_DATASET_OVERRIDE: "datamart"
+        #env:
+        #  DBT_DATASET_OVERRIDE: "datamart"
         run: |
           echo "=== Running DATAMART models into dataset: datamart ==="
           dbt run --select tag:datamart
