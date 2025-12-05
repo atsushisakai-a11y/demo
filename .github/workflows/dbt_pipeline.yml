@@ -3,13 +3,20 @@ name: Run dbt Pipeline
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   run-dbt:
     runs-on: ubuntu-latest
 
     steps:
+      # --- Checkout ---
       - uses: actions/checkout@v3
 
+      # --- Python & dbt install ---
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
@@ -19,10 +26,11 @@ jobs:
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # Decode service account
-      - run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+      # --- Decode service account ---
+      - name: Load GCP Credentials
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # ---- FIX: PROFILES DIRECTORY ----
+      # --- Create dbt profile (schema = public, overridden by dbt_project.yml) ---
       - name: Create profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -40,20 +48,56 @@ jobs:
                 location: EU
           EOF
 
-      # ---- Run staging ----
+      # --------------------------------------------
+      # 1. RUN STAGING
+      # --------------------------------------------
       - name: Run staging models
         run: |
           echo "Running staging models..."
           dbt run --select tag:staging
 
-      # ---- Run DWH ----
+      # --------------------------------------------
+      # 2. RUN DWH
+      # --------------------------------------------
       - name: Run DWH models
         run: |
           echo "Running DWH models..."
           dbt run --select tag:dwh
 
-      # ---- Run Datamart ----
+      # --------------------------------------------
+      # 3. RUN DATAMART
+      # --------------------------------------------
       - name: Run datamart models
         run: |
           echo "Running datamart models..."
           dbt run --select tag:datamart
+
+      # --------------------------------------------
+      # 4. GENERATE DBT DOCS (lineage graph included)
+      # --------------------------------------------
+      - name: Generate dbt docs
+        run: |
+          dbt docs generate
+
+      # --------------------------------------------
+      # 5. PREPARE DOCS FOR GITHUB PAGES
+      # --------------------------------------------
+      - name: Prepare public folder
+        run: |
+          mkdir -p public
+          cp -r target/* public/
+
+      # --------------------------------------------
+      # 6. UPLOAD ARTIFACT (correct action)
+      # --------------------------------------------
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+          name: github-pages
+
+      # --------------------------------------------
+      # 7. DEPLOY TO GITHUB PAGES
+      # --------------------------------------------
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
