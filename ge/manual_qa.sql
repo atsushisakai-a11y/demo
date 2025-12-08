@@ -8,6 +8,12 @@ delete from `grand-water-473707-r8.raw.raw_parkbee_garages` where 1 = 1;
 
 SELECT * FROM `grand-water-473707-r8.raw.raw_google_charging_places` LIMIT 1000
 SELECT address.country, date_trunc(scrape_datetime, day) as scrape_datetime, count(*) FROM `grand-water-473707-r8.raw.raw_parkbee_garages` group by all order by 1,2
+SELECT
+address.country,
+cast(date_trunc(scrape_datetime, day) as date) as scrape_datetime,
+EXTRACT(HOUR FROM parking_from) AS parking_from_hour,
+count(*)
+FROM `grand-water-473707-r8.raw.raw_parkbee_garages` group by all order by 1,2,3,4
 
   SELECT
 address.country,
