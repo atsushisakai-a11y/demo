@@ -27,4 +27,4 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Run GX checkpoint
-        run: great_expectations checkpoint run dim_parkbee_locations
+        run: ge checkpoint run dim_parkbee_locations
