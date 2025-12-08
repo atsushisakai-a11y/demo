@@ -16,9 +16,9 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install Great Expectations (with CLI)
         run: |
-          pip install great_expectations
+          pip install "great_expectations<1.0"
           pip install sqlalchemy-bigquery
 
       # ----------------------------------------
