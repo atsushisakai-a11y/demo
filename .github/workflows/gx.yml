@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
@@ -19,11 +21,20 @@ jobs:
           pip install great_expectations
           pip install sqlalchemy-bigquery
 
+      # ----------------------------------------
+      # AUTHENTICATION (same method as dbt)
+      # ----------------------------------------
       - name: Load GCP Credentials
-        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Export Credentials Path
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+      - name: Export GOOGLE_APPLICATION_CREDENTIALS
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      - name: Run Great Expectations
-        run: great_expectations checkpoint run dim_parkbee_locations
+      # ----------------------------------------
+      # RUN GREAT EXPECTATIONS
+      # ----------------------------------------
+      - name: Run GX checkpoint
+        run: |
+          great_expectations checkpoint run dim_parkbee_locations
