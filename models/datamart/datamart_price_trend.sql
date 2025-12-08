@@ -20,6 +20,8 @@ SELECT
   dpl.city,
   dpl.name,
   dpl.location_id,
+  dpl.latitude,
+  dpl.longitude,
   CAST(fpl.parking_from_cet AS date) AS parking_date,
   fpl.parking_from_hour,
   fpl.parking_from_weekday,
