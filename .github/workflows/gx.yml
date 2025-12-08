@@ -22,7 +22,7 @@ jobs:
           pip install sqlalchemy-bigquery
 
       - name: Authenticate GCP
-        uses: google-github-actions/auth@v1d
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
