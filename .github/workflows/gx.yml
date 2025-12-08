@@ -8,23 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install GX + BigQuery dependencies
+      - name: Install dependencies
         run: |
           pip install great_expectations
           pip install sqlalchemy-bigquery
 
-      - name: Authenticate GCP
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Load GCP Credentials
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Run GX checkpoint
+      - name: Export Credentials Path
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+
+      - name: Run Great Expectations
         run: great_expectations checkpoint run dim_parkbee_locations
