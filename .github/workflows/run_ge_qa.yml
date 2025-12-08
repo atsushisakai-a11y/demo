@@ -1,4 +1,4 @@
-name: Run Great Expectations QA on ParkBee DWH
+name: 3. Run Great Expectations QA on ParkBee DWH
 
 # Trigger manually or after DWH pipeline completes
 on:
