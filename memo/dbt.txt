@@ -1,3 +1,19 @@
+----------------------------------------------------------------------------------------------------------------
+DBT test and GX test are different. And mix of both 2 types of tests make data quality even better.
+
+⭐ 8. Best Practices for dbt + Great Expectations
+✔️ dbt tests = basic structural checks
+unique
+not null
+foreign key relationships
+
+✔️ GX tests = deeper statistical/semantic checks
+distribution drift
+regex formats
+row count thresholds
+time-based anomalies
+----------------------------------------------------------------------------------------------------------------
+
 dbt by default concatenate default schema & custom schema.
 If default schema is "demo" and custom schema is "staging", then a table is created in "demo_staging"
 Which looks like: {{ default_schema }}_{{ custom_schema_name | trim }}
