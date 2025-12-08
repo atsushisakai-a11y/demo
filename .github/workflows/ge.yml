@@ -1,14 +1,14 @@
 name: great-expectations-validation
 
 on:
-  workflow_dispatch:   # only runs when manually triggered
+  workflow_dispatch:
 
 jobs:
   gx_validation:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -16,16 +16,15 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Great Expectations & BigQuery dependencies
+      - name: Install GX + BigQuery dependencies
         run: |
           pip install great_expectations
           pip install sqlalchemy-bigquery
 
-      - name: Authenticate to Google Cloud
+      - name: Authenticate GCP
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Run Great Expectations checkpoint
-        run: |
-          great_expectations checkpoint run dim_parkbee_locations
+      - name: Run GX checkpoint
+        run: great_expectations checkpoint run dim_parkbee_locations
