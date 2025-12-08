@@ -31,7 +31,7 @@ SELECT
 FROM
   `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` fpl
 INNER JOIN
-  `grand-water-473707-r8.dwh.dim_parkbee_locations_dbt` dpl
+  {{ ref('dim_parkbee_locations_dbt') }} dpl
 ON
   dpl.location_id = fpl.location_id
 INNER JOIN
