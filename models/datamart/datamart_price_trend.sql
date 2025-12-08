@@ -8,7 +8,7 @@ WITH
     fpl.location_id,
     COUNT(*) AS counts
   FROM
-    `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` fpl
+    {{ ref('fact_parkbee_locations_dbt') }} fpl
   WHERE
     CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
   GROUP BY
@@ -29,7 +29,7 @@ SELECT
   fpl.hourly_price,
   fpl.occupancy_rate
 FROM
-  `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` fpl
+  {{ ref('fact_parkbee_locations_dbt') }} fpl
 INNER JOIN
   {{ ref('dim_parkbee_locations_dbt') }} dpl
 ON
