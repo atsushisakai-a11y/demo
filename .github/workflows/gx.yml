@@ -22,9 +22,9 @@ jobs:
           pip install sqlalchemy-bigquery
 
       - name: Authenticate GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v1d
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Run GX checkpoint
-        run: ge checkpoint run dim_parkbee_locations
+        run: great_expectations checkpoint run dim_parkbee_locations
