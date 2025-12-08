@@ -1,0 +1,72 @@
+{
+  "expectation_suite_name": "dim_parkbee_locations",
+  "meta": {
+    "notes": "Data quality checks for ParkBee locations dimension table."
+  },
+  "expectations": [
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "location_id" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "country" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "city" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "name" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "latitude",
+        "min_value": -90,
+        "max_value": 90,
+        "allow_cross_type_comparisons": true
+      }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "longitude",
+        "min_value": -180,
+        "max_value": 180,
+        "allow_cross_type_comparisons": true
+      }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "geom" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "first_seen_date" }
+    },
+
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "last_seen_date" }
+    },
+
+    {
+      "expectation_type": "expect_column_pair_values_A_to_be_less_than_B",
+      "kwargs": {
+        "column_A": "first_seen_date",
+        "column_B": "last_seen_date"
+      }
+    }
+  ],
+  "data_asset_type": null
+}
