@@ -37,6 +37,9 @@ select country, scrape_date,count(distinct location_id) as location_ids, count(*
 from `grand-water-473707-r8.datamart.datamart_price_comparison` group by all order by 1,2 limit 100;
 select location_id,count(*) from `grand-water-473707-r8.datamart.datamart_price_comparison` group by all having count(*) > 1
 
+select country, scrape_date,count(distinct location_id) as location_ids, count(*) as locations
+from `grand-water-473707-r8.datamart.datamart_price_comparison_dbt` group by all order by 1,2 limit 100;
+
 ----------------------------------------------------------------------------
 --Count check
 ----------------------------------------------------------------------------
