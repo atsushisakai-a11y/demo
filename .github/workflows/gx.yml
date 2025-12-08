@@ -1,29 +1,55 @@
 name: great-expectations-validation
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # Manual trigger only
 
 jobs:
   gx_validation:
     runs-on: ubuntu-latest
 
     steps:
+      # ------------------------------
+      # 1. CHECK OUT CODE
+      # ------------------------------
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # ------------------------------
+      # 2. PYTHON SETUP
+      # ------------------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install Great Expectations (with CLI)
+      # ------------------------------
+      # 3. REMOVE WRONG GX VERSION (GX v3)
+      # ------------------------------
+      - name: Remove incorrect GX v3 if installed
         run: |
-          pip install "great_expectations<1.0"
+          pip uninstall -y gx || true
+          pip uninstall -y great_expectations || true
+
+      # ------------------------------
+      # 4. INSTALL CLASSIC GREAT EXPECTATIONS (v0.18.x)
+      # ------------------------------
+      - name: Install Classic Great Expectations (CLI)
+        run: |
+          pip install "great_expectations==0.18.12"
           pip install sqlalchemy-bigquery
 
-      # ----------------------------------------
-      # AUTHENTICATION (same method as dbt)
-      # ----------------------------------------
+      # ------------------------------
+      # 5. DEBUG INSTALLED VERSION
+      # ------------------------------
+      - name: Verify GE installation
+        run: |
+          python -c "import great_expectations as ge; print('GE VERSION:', ge.__version__)"
+          which great_expectations || echo "great_expectations NOT FOUND"
+          which gx || echo "gx NOT FOUND"
+
+      # ------------------------------
+      # 6. LOAD GCP CREDENTIALS
+      # ------------------------------
       - name: Load GCP Credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
@@ -32,9 +58,17 @@ jobs:
         run: |
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      # ----------------------------------------
-      # RUN GREAT EXPECTATIONS
-      # ----------------------------------------
-      - name: Run GX checkpoint
+      # ------------------------------
+      # 7. DEBUG REPO STRUCTURE
+      # ------------------------------
+      - name: Show repository structure
+        run: |
+          echo "PWD: $(pwd)"
+          ls -R .
+
+      # ------------------------------
+      # 8. RUN GREAT EXPECTATIONS CHECKPOINT
+      # ------------------------------
+      - name: Run Great Expectations checkpoint
         run: |
           great_expectations checkpoint run dim_parkbee_locations
