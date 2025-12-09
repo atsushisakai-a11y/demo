@@ -1,0 +1,6 @@
+datasource_name: parkbee_bigquery
+class_name: SqlAlchemyDatasource
+module_name: great_expectations.datasource
+
+credentials:
+  url: bigquery://grand-water-473707-r8
