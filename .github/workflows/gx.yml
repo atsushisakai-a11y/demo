@@ -69,6 +69,17 @@ jobs:
       # ------------------------------
       # 8. RUN GREAT EXPECTATIONS CHECKPOINT
       # ------------------------------
+# ----------------------------------------
+      # 8. RUN GREAT EXPECTATIONS CHECKPOINT (FINAL ATTEMPT)
+      # ----------------------------------------
       - name: Run Great Expectations checkpoint
+        # 1. Force the working directory to the repository root
         working-directory: .
-        run: great_expectations --directory great_expectations checkpoint run dim_parkbee_locations
+        run: |
+          # Load Credentials in the current shell and export the environment variable
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
+          
+          # Run the checkpoint command
+          # Since working-directory is set to '.', GE should find the 'great_expectations/' folder.
+          great_expectations checkpoint run dim_parkbee_locations
