@@ -8,71 +8,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # ----------------------------------------------------
-    # 1. CHECK OUT REPOSITORY
-    # ----------------------------------------------------
+
+    # 1. Checkout repo
     - name: Checkout
       uses: actions/checkout@v3
 
-    # ----------------------------------------------------
-    # 2. SET UP PYTHON
-    # ----------------------------------------------------
+    # 2. Python setup
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    # ----------------------------------------------------
-    # 3. INSTALL GX CORE + BIGQUERY DEPENDENCIES
-    # ----------------------------------------------------
-    - name: Install GX Core & BigQuery libs
+    # 3. Install GX Core + BigQuery deps
+    - name: Install GX Core & BigQuery deps
       run: |
         pip install -U pip
-        pip install gxai-core
+        pip install "great_expectations>=1.0.0"
         pip install google-cloud-bigquery
         pip install google-cloud-bigquery-storage
         pip install sqlalchemy-bigquery
 
-    # ----------------------------------------------------
-    # 4. LOAD SERVICE ACCOUNT KEY
-    # ----------------------------------------------------
+    # 4. Load GCP key
     - name: Load GCP Credentials
       run: |
         echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
         echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-    # ----------------------------------------------------
-    # 5. VERIFY gx CLI
-    # ----------------------------------------------------
-    - name: Verify GX Installation
+    # 5. Verify gx CLI
+    - name: Verify GX installation
       run: |
-        echo "GX VERSION:"
+        echo "GX version:"
         gx --version
-        echo "GX LOCATION:"
+        echo "GX location:"
         which gx
 
-    # ----------------------------------------------------
-    # 6. CREATE BIGQUERY DATASET IF NOT EXISTS
-    # ----------------------------------------------------
-    - name: Ensure dataset gx exists
+    # 6. Ensure dataset gx exists
+    - name: Ensure BigQuery dataset exists
       env:
         PROJECT_ID: grand-water-473707-r8
       run: |
         bq --location=EU ls $PROJECT_ID:gx || \
         bq --location=EU mk --dataset $PROJECT_ID:gx
-        echo "Verified dataset: gx"
+        echo "Dataset gx is ready"
 
-    # ----------------------------------------------------
-    # 7. RUN GX DIAGNOSTICS
-    # ----------------------------------------------------
+    # 7. Diagnostics
     - name: GX Diagnostics
       run: |
         gx diagnostics
 
-    # ----------------------------------------------------
-    # 8. RUN CHECKPOINT
-    # ----------------------------------------------------
-    - name: Run GX Checkpoint
+    # 8. Run GX Checkpoint
+    - name: Run checkpoint
       working-directory: gx
       run: |
         gx checkpoint run dim_parkbee_locations
