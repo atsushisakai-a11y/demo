@@ -1,0 +1,80 @@
+# great_expectations/great_expectations.yml
+# This configuration is for Great Expectations version 0.18.x (Classic GX)
+# It includes a Datasource for BigQuery, which relies on the
+# GOOGLE_APPLICATION_CREDENTIALS environment variable set in your GitHub Action.
+
+config_version: 2
+plugins_directory: plugins/
+
+# --- Datasources (Where your data lives) ---
+datasources:
+  # Name this datasource something descriptive
+  parkbee_bigquery:
+    class_name: SimpleSqlalchemyDatasource
+    module_name: great_expectations.datasource.sqlalchemy_datasource
+    
+    # ⚠️ IMPORTANT: Update the connection_string with your actual project ID!
+    connection_string: bigquery://your-gcp-project-id
+
+    # Generators define how to list and get Batches of data
+    generators:
+      default:
+        class_name: TableBatchKwargsGenerator
+        
+# --- Stores (Where your configurations and results live) ---
+# Stores manage the storage of Expectations, Validation Results, and Data Docs.
+stores:
+  
+  # 1. Expectations Store: Where all your .json expectation files are kept.
+  expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+      
+  # 2. Validation Results Store: Where the results of a checkpoint run are saved.
+  # We use a Filesystem store for simplicity in CI/CD.
+  validation_results_store:
+    class_name: ValidationResultsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validation_results/
+      
+  # 3. Data Docs Store: Where the HTML documentation is generated and stored.
+  data_docs_store:
+    class_name: SiteFilesStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/
+      
+# --- Data Docs Sites (The HTML interface) ---
+# Defines the configuration for the HTML documentation (Data Docs).
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    # Define which stores should be used to build the docs
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/
+    site_section_order:
+      - data_asset
+      - expectation_suites
+      - rendered_content
+    sources:
+      # Data Docs will look for expectations here
+      expectations:
+        class_name: ExpectationsStoreSection
+        store_name: expectations_store
+      # Data Docs will look for validation results here
+      validation_results:
+        class_name: ValidationResultsStoreSection
+        store_name: validation_results_store
+        
+# --- Checkpoints (The runner/scheduler of your validations) ---
+# Checkpoints are usually defined in separate YAML files in the 'checkpoints/' directory.
+checkpoints: {}
+
+# --- Security and Metadata ---
+anonymous_usage_statistics:
+  enabled: True
+  data_context_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # Your unique ID
