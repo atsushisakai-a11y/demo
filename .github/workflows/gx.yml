@@ -34,8 +34,8 @@ jobs:
           which gx || echo "gx not found"
           gx --version || echo "gx version check failed"
 
-
-      - name: Run GX checkpoint
+      - name: Run GX checkpoint (debug)
         working-directory: ./gx
         run: |
-          gx checkpoint run dim_parkbee_locations
+          gx --verbose --diagnostics checkpoint run dim_parkbee_locations
+          
