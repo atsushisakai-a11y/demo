@@ -39,9 +39,9 @@ jobs:
         run: |
           echo "Great Expectations version:"
           python - << 'EOF'
-from great_expectations import __version__
-print("GE version:", __version__)
-EOF
+          from great_expectations import __version__
+          print("GE version:", __version__)
+          EOF
           echo "CLI location:"
           which great_expectations || echo "great_expectations NOT FOUND"
 
