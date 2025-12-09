@@ -1,4 +1,62 @@
 ----------------------------------------------------------------------------
+--counts per hour
+----------------------------------------------------------------------------
+WITH raw AS (
+  SELECT
+    address.country AS country,
+    CAST(DATE_TRUNC(scrape_datetime, DAY) AS DATE) AS scrape_date,
+    EXTRACT(HOUR FROM parking_from) AS parking_from_hour,
+    COUNT(*) AS raw_count
+  FROM `grand-water-473707-r8.raw.raw_parkbee_garages`
+  GROUP BY ALL
+),
+
+dwh AS (
+  SELECT
+    dpl.country AS country,
+    CAST(DATE_TRUNC(fpl.parking_from_cet, DAY) AS DATE) AS scrape_date,
+    fpl.parking_from_hour,
+    COUNT(*) AS dwh_count
+  FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` fpl
+  INNER JOIN `grand-water-473707-r8.dwh.dim_parkbee_locations_dbt` dpl
+    ON dpl.location_id = fpl.location_id
+  GROUP BY ALL
+),
+
+datamart AS (
+  SELECT
+    country,
+    parking_date AS scrape_date,
+    parking_from_hour,
+    COUNT(DISTINCT location_id) AS datamart_count
+  FROM `grand-water-473707-r8.datamart.datamart_price_trend`
+  GROUP BY ALL
+)
+
+SELECT
+  COALESCE(raw.country, dwh.country, datamart.country) AS country,
+  COALESCE(raw.scrape_date, dwh.scrape_date, datamart.scrape_date) AS scrape_date,
+  COALESCE(raw.parking_from_hour, dwh.parking_from_hour, datamart.parking_from_hour) AS parking_from_hour,
+  raw.raw_count,
+  dwh.dwh_count,
+  datamart.datamart_count
+FROM raw
+FULL OUTER JOIN dwh
+  ON raw.country = dwh.country
+  AND raw.scrape_date = dwh.scrape_date
+  AND raw.parking_from_hour = dwh.parking_from_hour
+FULL OUTER JOIN datamart
+  ON COALESCE(raw.country, dwh.country) = datamart.country
+  AND COALESCE(raw.scrape_date, dwh.scrape_date) = datamart.scrape_date
+  AND COALESCE(raw.parking_from_hour, dwh.parking_from_hour) = datamart.parking_from_hour
+ORDER BY
+  country,
+  scrape_date,
+  parking_from_hour;
+
+
+
+----------------------------------------------------------------------------
 --Basic select & cleanup
 ----------------------------------------------------------------------------
 
