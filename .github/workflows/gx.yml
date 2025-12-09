@@ -1,14 +1,14 @@
-name: great-expectations-validation
+name: GE Classic Validation
 
 on:
   workflow_dispatch:
 
 jobs:
-  gx_validation:
+  ge-validation:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -16,29 +16,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Great Expectations Classic + BigQuery driver
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install "great_expectations==0.18.12"
           pip install sqlalchemy-bigquery
+          pip install google-cloud-bigquery
 
-      - name: Load GCP Credentials
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+      - name: Load GCP SA key
+        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Debug folder layout
-        run: |
-          echo "GE Configs:"
-          find great_expectations -type f
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      - name: Show FINAL great_expectations.yml used in CI
-        run: |
-          echo "=== GREAT EXPECTATIONS CONFIG ==="
-          sed -n '1,200p' great_expectations/great_expectations.yml
-          echo "================================="
-
-
-      - name: Run GE Checkpoint
+      - name: Run GE checkpoint
+        working-directory: .
         run: |
           great_expectations checkpoint run dim_parkbee_locations
