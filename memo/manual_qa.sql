@@ -46,6 +46,18 @@ select location_id,count(*) from `grand-water-473707-r8.datamart.datamart_price_
 select country, scrape_date,count(distinct location_id) as location_ids, count(*) as locations
 from `grand-water-473707-r8.datamart.datamart_price_comparison_dbt` group by all order by 1,2 limit 100;
 
+SELECT
+  country,
+  parking_date,
+  parking_from_hour,
+  count(distinct location_id) locations
+FROM
+  `grand-water-473707-r8.datamart.datamart_price_trend`
+  group by all
+  order by 1,2,3
+LIMIT
+  1000
+
 ----------------------------------------------------------------------------
 --Count check
 ----------------------------------------------------------------------------
