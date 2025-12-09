@@ -4,19 +4,15 @@ plugins_directory: plugins/
 
 datasources:
   parkbee_bigquery:
-    class_name: SqlAlchemyDatasource
+    class_name: Datasource
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
       connection_string: bigquery://grand-water-473707-r8
-    introspection:
-      enabled: true
     data_connectors:
       default_runtime:
         class_name: RuntimeDataConnector
         batch_identifiers:
           - default_identifier_name
-      default_inferred:
-        class_name: InferredAssetSqlDataConnector
 
 stores:
   expectations_store:
