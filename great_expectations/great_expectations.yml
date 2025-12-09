@@ -17,7 +17,7 @@ datasources:
     connection_string: bigquery://grand-water-473707-r8
 
     # Generators define how to list and get Batches of data
-    generators:
+    batch_kwargs_generators:
       default:
         class_name: TableBatchKwargsGenerator
         
