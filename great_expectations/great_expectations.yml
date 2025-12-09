@@ -1,14 +1,7 @@
-#######################################################################
-#  GREAT EXPECTATIONS CONFIGURATION (CLASSIC v0.18.x)
-#######################################################################
-
 config_version: 3
 
 plugins_directory: plugins/
 
-#######################################################################
-#  DATASOURCES
-#######################################################################
 datasources:
   parkbee_bigquery:
     class_name: SqlAlchemyDatasource
@@ -25,9 +18,6 @@ datasources:
       default_inferred:
         class_name: InferredAssetSqlDataConnector
 
-#######################################################################
-#  STORES
-#######################################################################
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -52,17 +42,11 @@ stores:
     store_backend:
       class_name: InMemoryStoreBackend
 
-#######################################################################
-#  STORE NAMES
-#######################################################################
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 checkpoint_store_name: checkpoint_store
 evaluation_parameter_store_name: evaluation_parameter_store
 
-#######################################################################
-#  DATA DOCS
-#######################################################################
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -74,26 +58,5 @@ data_docs_sites:
       - validations
       - rendered_content
 
-#######################################################################
-#  ANONYMOUS USAGE
-#######################################################################
 anonymous_usage_statistics:
   enabled: true
-
-#######################################################################
-#  CHECKPOINTS (MUST BE A MAPPING — NOT EMPTY {})
-#######################################################################
-checkpoints:
-  dim_parkbee_locations:
-    class_name: Checkpoint
-    config_version: 1.0
-    validations:
-      - batch_request:
-          datasource_name: parkbee_bigquery
-          data_connector_name: default_runtime
-          data_asset_name: dwh.fact_parkbee_locations_dbt
-          runtime_parameters:
-            query: SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` LIMIT 1000
-          batch_identifiers:
-            default_identifier_name: "run1"
-        expectation_suite_name: dim_parkbee_locations
