@@ -34,6 +34,11 @@ jobs:
           which gx || echo "gx not found"
           gx --version || echo "gx version check failed"
 
+      - name: Show folder structure
+        run: |
+          echo "=== Repository structure ==="
+          find . -maxdepth 4 -type d
+          
       - name: Run GX checkpoint (debug)
         working-directory: ./gx
         run: |
