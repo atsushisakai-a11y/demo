@@ -14,7 +14,7 @@ datasources:
     module_name: great_expectations.datasource.sqlalchemy_datasource
     
     # ⚠️ IMPORTANT: Update the connection_string with your actual project ID!
-    connection_string: bigquery://your-gcp-project-id
+    connection_string: bigquery://grand-water-473707-r8
 
     # Generators define how to list and get Batches of data
     generators:
