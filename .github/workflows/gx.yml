@@ -1,88 +1,52 @@
 name: great-expectations-validation
 
 on:
-  workflow_dispatch:   # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   gx_validation:
     runs-on: ubuntu-latest
 
     steps:
-      # ------------------------------
-      # 1. CHECK OUT CODE
-      # ------------------------------
+      # 1. Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ------------------------------
-      # 2. PYTHON SETUP
-      # ------------------------------
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      # ------------------------------
-      # 3. REMOVE WRONG GX VERSION (GX v3)
-      # ------------------------------
-      - name: Remove incorrect GX v3 if installed
+      # 3. Install GX v1 and BigQuery deps
+      - name: Install Great Expectations (GX v1)
         run: |
-          pip uninstall -y gx || true
-          pip uninstall -y great_expectations || true
-
-      # ------------------------------
-      # 4. INSTALL CLASSIC GREAT EXPECTATIONS (v0.18.x)
-      # ------------------------------
-      - name: Install Classic Great Expectations (CLI)
-        run: |
-          pip install "great_expectations==0.18.12"
+          pip install --upgrade pip
+          pip install great_expectations
+          pip install google-cloud-bigquery
           pip install sqlalchemy-bigquery
 
-      # ------------------------------
-      # 5. DEBUG INSTALLED VERSION
-      # ------------------------------
-      - name: Verify GE installation
+      # 4. Debug GX installation
+      - name: Verify GX Installation
         run: |
-          python -c "import great_expectations as ge; print('GE VERSION:', ge.__version__)"
-          which great_expectations || echo "great_expectations NOT FOUND"
-          which gx || echo "gx NOT FOUND"
+          echo "GX version:"
+          gx --version
+          echo "GX executable location:"
+          which gx || echo "gx not found"
 
-      # ------------------------------
-      # 6. LOAD GCP CREDENTIALS
-      # ------------------------------
+      # 5. Load GCP credentials
       - name: Load GCP Credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-
-      - name: Export GOOGLE_APPLICATION_CREDENTIALS
-        run: |
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      # ------------------------------
-      # 7. FIND GREAT EXPECTATIONS EXECUTABLE PATH
-      # ------------------------------
-      - name: Find GE Executable Path
-        id: ge_path_finder
+      # 6. Show repo structure (debug)
+      - name: Show repo structure
         run: |
-          # Find the full path to the great_expectations executable
-          GE_PATH=$(which great_expectations)
-          echo "GE_PATH=$GE_PATH" >> $GITHUB_ENV
-          echo "Found GE at: $GE_PATH"
-          
-          # Optional: Verify PWD again just in case
-          echo "PWD: $(pwd)"
-          ls -F great_expectations/
-          echo "--- Path verification complete ---"
+          echo "--- REPO STRUCTURE ---"
+          ls -R .
 
-      # ------------------------------
-      # 8. RUN GREAT EXPECTATIONS CHECKPOINT (Using full path)
-      # ------------------------------
-      - name: Run Great Expectations checkpoint
-        working-directory: .
+      # 7. Run GX Checkpoint (modern API)
+      - name: Run GX checkpoint
         run: |
-          # Load Credentials in the current shell
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json
-          
-          # ⚠️ Execute using the full, verified path ($GE_PATH)
-          $GE_PATH checkpoint run dim_parkbee_locations
+          gx checkpoint run dim_parkbee_locations
