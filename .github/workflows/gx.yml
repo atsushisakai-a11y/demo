@@ -61,6 +61,16 @@ jobs:
           echo "PWD: $(pwd)"
           ls -R .
 
+      - name: Debug find ALL great_expectations.yml files
+        run: |
+          echo "--- Searching for great_expectations.yml ---"
+          find . -name "great_expectations.yml" -print
+          echo "--- Searching for ANY .yml inside great_expectations ---"
+          find great_expectations -type f -print
+          echo "--- Showing contents of loaded config file ---"
+          cat great_expectations/great_expectations.yml || echo "File missing!"
+          
+
       # -----------------------------------------
       # 7. Run Great Expectations checkpoint
       # -----------------------------------------
