@@ -32,6 +32,13 @@ jobs:
           echo "GE Configs:"
           find great_expectations -type f
 
+      - name: Show FINAL great_expectations.yml used in CI
+        run: |
+          echo "=== GREAT EXPECTATIONS CONFIG ==="
+          sed -n '1,200p' great_expectations/great_expectations.yml
+          echo "================================="
+
+
       - name: Run GE Checkpoint
         run: |
           great_expectations checkpoint run dim_parkbee_locations
