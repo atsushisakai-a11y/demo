@@ -1,24 +1,13 @@
 name: dim_parkbee_locations
-config_version: 1
-
-class_name: SimpleCheckpoint
-
-run_name_template: "%Y%m%d-%H%M%S-dim_parkbee"
+config_version: 1.0
 
 validations:
   - batch_request:
       datasource_name: parkbee_bigquery
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: dim_parkbee_locations_dbt
+      data_connector_name: default_runtime
+      data_asset_name: dwh.fact_parkbee_locations_dbt
+      runtime_parameters:
+        query: SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` LIMIT 1000
+      batch_identifiers:
+        default_identifier_name: "run1"
     expectation_suite_name: dim_parkbee_locations
-
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
