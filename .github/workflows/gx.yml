@@ -61,6 +61,14 @@ jobs:
           echo "PWD: $(pwd)"
           ls -R .
 
+      - name: Debug: show datasource configs
+        run: |
+          echo "Checking for datasource definitions..."
+          find great_expectations -type f -print
+          echo "--- grep for sqlalchemy_datasource ---"
+          grep -R "sqlalchemy_datasource" -n great_expectations || echo "No matches"
+
+
       # -----------------------------------------
       # 7. Run Great Expectations checkpoint
       # -----------------------------------------
