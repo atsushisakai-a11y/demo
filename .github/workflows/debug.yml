@@ -119,6 +119,16 @@ jobs:
           echo "--- Tree ---"
           find models -maxdepth 3
 
+
+      - name: Install dbt
+        run: pip install dbt-bigquery
+      
+      - name: Install dbt packages
+        run: dbt deps --project-dir ./dbt --profiles-dir ./dbt
+      
+      - name: Debug dbt model path
+        run: dbt ls --select dim_google_places_dbt --output path --project-dir ./dbt --profiles-dir ./dbt
+
       # 18. dbt ls
       - name: dbt ls
         run: |
