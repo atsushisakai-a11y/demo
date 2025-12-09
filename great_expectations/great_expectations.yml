@@ -7,9 +7,6 @@ datasources:
     class_name: SimpleSqlalchemyDatasource
     module_name: great_expectations.datasource.sqlalchemy_datasource
     connection_string: bigquery://grand-water-473707-r8
-    batch_kwargs_generators:
-      default:
-        class_name: TableBatchKwargsGenerator
 
 stores:
   expectations_store:
@@ -30,19 +27,13 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
 
-  data_docs_store:
-    class_name: SiteFilesStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/data_docs/
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
-checkpoint_store_name: checkpoint_store
 evaluation_parameter_store_name: evaluation_parameter_store
-
-anonymous_usage_statistics:
-  enabled: true
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   local_site:
@@ -51,11 +42,11 @@ data_docs_sites:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/
     site_section_order:
-      - data_asset
       - expectation_suites
       - validations
       - rendered_content
-    datasource_name: parkbee_bigquery
-    show_how_to_buttons: true
+
+anonymous_usage_statistics:
+  enabled: true
 
 checkpoints: {}
