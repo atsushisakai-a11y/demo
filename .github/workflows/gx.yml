@@ -70,5 +70,6 @@ jobs:
       # 8. RUN GREAT EXPECTATIONS CHECKPOINT
       # ------------------------------
       - name: Run Great Expectations checkpoint
+        working-directory: .
         run: |
           great_expectations checkpoint run dim_parkbee_locations
