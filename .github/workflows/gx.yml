@@ -61,7 +61,7 @@ jobs:
           echo "PWD: $(pwd)"
           ls -R .
 
-      - name: Debug: show datasource configs
+      - name: Debug show datasource configs
         run: |
           echo "Checking for datasource definitions..."
           find great_expectations -type f -print
