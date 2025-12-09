@@ -1,4 +1,5 @@
-config_version: 2
+config_version: 3
+
 plugins_directory: plugins/
 
 datasources:
@@ -17,11 +18,11 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
-  validation_results_store:
+  validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validation_results/
+      base_directory: uncommitted/validations/
 
   checkpoint_store:
     class_name: CheckpointStore
@@ -35,10 +36,13 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/
 
-# REQUIRED FIELD: which store is used
 expectations_store_name: expectations_store
-validations_store_name: validation_results_store
+validations_store_name: validations_store
 checkpoint_store_name: checkpoint_store
+evaluation_parameter_store_name: evaluation_parameter_store
+
+anonymous_usage_statistics:
+  enabled: true
 
 data_docs_sites:
   local_site:
@@ -49,17 +53,9 @@ data_docs_sites:
     site_section_order:
       - data_asset
       - expectation_suites
+      - validations
       - rendered_content
-    sources:
-      expectations:
-        class_name: ExpectationsStoreSection
-        store_name: expectations_store
-      validation_results:
-        class_name: ValidationsStoreSection
-        store_name: validation_results_store
+    datasource_name: parkbee_bigquery
+    show_how_to_buttons: true
 
 checkpoints: {}
-
-anonymous_usage_statistics:
-  enabled: true
-  data_context_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
