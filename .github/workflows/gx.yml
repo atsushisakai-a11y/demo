@@ -67,6 +67,8 @@ jobs:
           find great_expectations -type f -print
           echo "--- grep for sqlalchemy_datasource ---"
           grep -R "sqlalchemy_datasource" -n great_expectations || echo "No matches"
+          grep -R "sqlalchemy_datasource" -n great_expectations || echo "Clean!"
+
 
 
       # -----------------------------------------
