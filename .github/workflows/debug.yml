@@ -133,4 +133,9 @@ jobs:
         run: |
           echo "=== TARGET FOLDER CONTENTS ==="
           ls -R target || echo "target folder does not exist"
+      - name: Check gx version
+        run:
+          python -c "import great_expectations as ge; print('GE VERSION:', ge.__version__)"
+          which great_expectations || echo "great_expectations NOT FOUND"
+          which gx || echo "gx NOT FOUND"
           
