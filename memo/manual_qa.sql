@@ -6,7 +6,8 @@ WITH raw AS (
     address.country AS country,
     CAST(DATE_TRUNC(scrape_datetime, DAY) AS DATE) AS scrape_date,
     EXTRACT(HOUR FROM parking_from) AS parking_from_hour,
-    COUNT(*) AS raw_count
+    COUNT(*) AS raw_count,
+    count(distinct id) as raw_locations
   FROM `grand-water-473707-r8.raw.raw_parkbee_garages`
   GROUP BY ALL
 ),
@@ -16,7 +17,8 @@ dwh AS (
     dpl.country AS country,
     CAST(DATE_TRUNC(fpl.parking_from_cet, DAY) AS DATE) AS scrape_date,
     fpl.parking_from_hour,
-    COUNT(*) AS dwh_count
+    COUNT(*) AS dwh_count,
+    count(distinct fpl.location_id) as dwh_locations
   FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` fpl
   INNER JOIN `grand-water-473707-r8.dwh.dim_parkbee_locations_dbt` dpl
     ON dpl.location_id = fpl.location_id
@@ -28,7 +30,8 @@ datamart AS (
     country,
     parking_date AS scrape_date,
     parking_from_hour,
-    COUNT(DISTINCT location_id) AS datamart_count
+    COUNT(*) AS datamart_count,
+    COUNT(DISTINCT location_id) AS datamart_locations
   FROM `grand-water-473707-r8.datamart.datamart_price_trend`
   GROUP BY ALL
 )
@@ -39,7 +42,10 @@ SELECT
   COALESCE(raw.parking_from_hour, dwh.parking_from_hour, datamart.parking_from_hour) AS parking_from_hour,
   raw.raw_count,
   dwh.dwh_count,
-  datamart.datamart_count
+  datamart.datamart_count,
+  raw.raw_locations,
+  dwh.dwh_locations,
+  datamart.datamart_locations
 FROM raw
 FULL OUTER JOIN dwh
   ON raw.country = dwh.country
@@ -53,8 +59,6 @@ ORDER BY
   country,
   scrape_date,
   parking_from_hour;
-
-
 
 ----------------------------------------------------------------------------
 --Basic select & cleanup
