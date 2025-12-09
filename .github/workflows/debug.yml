@@ -70,3 +70,6 @@ jobs:
       # 10. dbt ls for specific model
       - name: DBT LS (dim_google_places_dbt)
         run: dbt ls --select dim_google_places_dbt --output path --project-dir . --profiles-dir ~/.dbt
+
+      - name: Show repo
+        run: ls -R .
