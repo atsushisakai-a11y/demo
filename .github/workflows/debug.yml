@@ -8,36 +8,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
-      - name: Checkout repo
+      # ---------------------------------------
+      # 1. CHECK OUT THE REPOSITORY
+      # ---------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Setup Python
-      - name: Setup Python
+      # ---------------------------------------
+      # 2. SET UP PYTHON
+      # ---------------------------------------
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # 3. Install dbt-bigquery
+      # ---------------------------------------
+      # 3. INSTALL DBT-BIGQUERY
+      # ---------------------------------------
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # 4. Decode GCP key
+      # ---------------------------------------
+      # 4. DECODE GCP SERVICE ACCOUNT
+      # ---------------------------------------
       - name: Decode GCP SA Key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # 5. Create profiles.yml
-      #- name: Set up dbt profiles
-      #  run: |
-      #    mkdir -p ~/.dbt
-      #    echo "${{ secrets.DBT_PROFILES }}" > ~/.dbt/profiles.yml
+      # ---------------------------------------
+      # 5. CREATE ~/.dbt/profiles.yml
+      # ---------------------------------------
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << EOF
+          cat > ~/.dbt/profiles.yml << 'EOF'
           demo:
             target: prod
             outputs:
@@ -51,42 +57,15 @@ jobs:
                 location: EU
           EOF
 
-      # 6. Show working directory
-      - name: Show working directory
-        run: pwd
+      # ---------------------------------------
+      # 6. INSTALL DBT PACKAGES
+      # ---------------------------------------
+      - name: Install dbt packages (dbt deps)
+        run: dbt deps --project-dir ./dbt --profiles-dir ~/.dbt
 
-      # 7. List project files
-      - name: List directory tree
-        run: |
-          echo "==== PROJECT TREE ===="
-          ls -R .
-
-      # 8. dbt Version
-      - name: DBT Version
-        run: dbt --version
-
-      # 9. dbt Debug
-      - name: DBT Debug
-        run: dbt debug
-
-      # 10. dbt LS for the problematic model
-      - name: DBT LS (model path)
-        run: dbt ls --select dim_google_places_dbt --output path
-
-      # 11. show parsed project name
-      - name: Show parsed project name
-        run: |
-          echo "====== DBT VERSION ======"
-          dbt --version
-          echo "====== DBT DEBUG PROJECT INFO ======"
-          dbt debug
-
-      # 12. Print dbt project info
-      #- name: Print dbt project info
-      #  working-directory: ./demo
-      #  run: dbt debug
-
-      # 13. Print repo structure
+      # ---------------------------------------
+      # 7. SHOW PROJECT STRUCTURE
+      # ---------------------------------------
       - name: Show repo structure
         run: |
           echo "=== WORKING DIRECTORY ==="
@@ -94,58 +73,26 @@ jobs:
           echo "=== REPO TREE ==="
           ls -R .
 
-      # 14. Check dim sql location
-      - name: Inspect model folder names (with invisible chars)
-        run: |
-          echo "--- Inspecting models directory (showing hidden characters) ---"
-          find models -maxdepth 2 -type d | sed -e 's/[[:space:]]/·/g'
+      # ---------------------------------------
+      # 8. DBT DEBUG (connectivity + environment)
+      # ---------------------------------------
+      - name: DBT Debug
+        run: dbt debug --project-dir ./dbt --profiles-dir ~/.dbt
 
-      # 15. Show raw dbt_project.yml
-      - name: Show raw dbt_project.yml (with visible whitespace)
-        run: |
-          sed -n '1,200p' dbt_project.yml | sed -e 's/\t/<TAB>/g' -e 's/ /·/g'
+      # ---------------------------------------
+      # 9. DBT LS (SHOW ALL MODELS)
+      # ---------------------------------------
+      - name: DBT LS (all models)
+        run: dbt ls --project-dir ./dbt --profiles-dir ~/.dbt
 
-      # 16. FIND dbt_project.yml in workspace
-      - name: FIND dbt_project.yml in workspace
-        run: |
-          echo "--- Searching for dbt_project.yml ---"
-          find /home/runner/work/demo -name dbt_project.yml -print
+      # ---------------------------------------
+      # 10. DBT LS (specific model)
+      # ---------------------------------------
+      - name: DBT LS (dim_google_places_dbt)
+        run: dbt ls --select dim_google_places_dbt --output path --project-dir ./dbt --profiles-dir ~/.dbt
 
-      # 17. Debug models directory
-      - name: Debug models directory
-        run: |
-          echo "--- PWD ---"
-          pwd
-          echo "--- Tree ---"
-          find models -maxdepth 3
-
-
-      - name: Install dbt
-        run: pip install dbt-bigquery
-      
-      - name: Install dbt packages
-        run: dbt deps --project-dir ./dbt --profiles-dir ./dbt
-      
-      - name: Debug dbt model path
-        run: dbt ls --select dim_google_places_dbt --output path --project-dir ./dbt --profiles-dir ./dbt
-
-      # 18. dbt ls
-      - name: dbt ls
-        run: |
-          dbt ls --output json
-      # 19. dbt ls --select dim_google_places_dbt --output json
-      - name: dbt ls --select dim_google_places_dbt --output json
-        run: |
-          dbt ls --select dim_google_places_dbt --output json
-
-      # 20. Debug show target folder
-      - name: Debug show target folder
-        run: |
-          echo "=== TARGET FOLDER CONTENTS ==="
-          ls -R target || echo "target folder does not exist"
-      - name: Check gx version
-        run:
-          python -c "import great_expectations as ge; print('GE VERSION:', ge.__version__)"
-          which great_expectations || echo "great_expectations NOT FOUND"
-          which gx || echo "gx NOT FOUND"
-          
+      # ---------------------------------------
+      # 11. SHOW PARSED PROJECT INFO
+      # ---------------------------------------
+      - name: Show parsed dbt project info
+        run: dbt debug --project-dir ./dbt --profiles-dir ~/.dbt
