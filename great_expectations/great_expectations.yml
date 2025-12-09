@@ -1,54 +1,43 @@
 # ------------------------------
-      # 5.5. CREATE REQUIRED CONFIG FILE (Full BigQuery Configuration)
+      # 5.5. CREATE REQUIRED CONFIG FILE (Trimmed for Safety)
       # ------------------------------
       - name: Create great_expectations.yml
         run: |
           mkdir -p great_expectations
-          # Ensure there are NO leading spaces on the lines below,
-          # from 'config_version: 2' down to 'EOL'
           cat > great_expectations/great_expectations.yml << EOL
 config_version: 2
 plugins_directory: plugins/
 
-# --- Datasources (Where your data lives) ---
 datasources:
   parkbee_bigquery:
     class_name: SimpleSqlalchemyDatasource
     module_name: great_expectations.datasource.sqlalchemy_datasource
     
-    # Your BigQuery Project ID
     connection_string: bigquery://grand-water-473707-r8
 
-    # CRITICAL FIX: Renamed from 'generators' to 'batch_kwargs_generators'
     batch_kwargs_generators:
       default:
         class_name: TableBatchKwargsGenerator
         
-# --- Stores (Where your configurations and results live) ---
 stores:
-  
-  # 1. Expectations Store
   expectations_store:
     class_name: ExpectationStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
       
-  # 2. Validation Results Store
   validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validation_results/
       
-  # 3. Data Docs Store
   data_docs_store:
     class_name: SiteFilesStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/
       
-# --- Data Docs Sites (The HTML interface) ---
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -67,10 +56,8 @@ data_docs_sites:
         class_name: ValidationResultsStoreSection
         store_name: validation_results_store
         
-# --- Checkpoints (The runner/scheduler of your validations) ---
 checkpoints: {}
 
-# --- Security and Metadata ---
 anonymous_usage_statistics:
   enabled: True
   data_context_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
