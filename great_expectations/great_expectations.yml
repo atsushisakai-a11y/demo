@@ -1,43 +1,29 @@
-# ------------------------------
-      # 5.5. CREATE REQUIRED CONFIG FILE (Trimmed for Safety)
-      # ------------------------------
-      - name: Create great_expectations.yml
-        run: |
-          mkdir -p great_expectations
-          cat > great_expectations/great_expectations.yml << EOL
 config_version: 2
 plugins_directory: plugins/
-
 datasources:
   parkbee_bigquery:
     class_name: SimpleSqlalchemyDatasource
     module_name: great_expectations.datasource.sqlalchemy_datasource
-    
     connection_string: bigquery://grand-water-473707-r8
-
     batch_kwargs_generators:
       default:
         class_name: TableBatchKwargsGenerator
-        
 stores:
   expectations_store:
     class_name: ExpectationStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-      
   validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validation_results/
-      
   data_docs_store:
     class_name: SiteFilesStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/
-      
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -55,10 +41,7 @@ data_docs_sites:
       validation_results:
         class_name: ValidationResultsStoreSection
         store_name: validation_results_store
-        
 checkpoints: {}
-
 anonymous_usage_statistics:
   enabled: True
   data_context_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-EOL
