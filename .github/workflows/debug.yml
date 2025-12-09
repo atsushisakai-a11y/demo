@@ -57,6 +57,12 @@ jobs:
                 location: EU
           EOF
 
+
+      - name: Find dbt_project.yml
+        run: |
+          echo "Searching for dbt_project.yml ..."
+          find . -name dbt_project.yml -print
+
       # ---------------------------------------
       # 6. INSTALL DBT PACKAGES
       # ---------------------------------------
