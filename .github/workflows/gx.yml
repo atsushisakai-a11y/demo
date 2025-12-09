@@ -8,30 +8,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repository
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Set up Python
+      # 2. Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # 3. Install GX v1 and BigQuery deps
-      - name: Install Great Expectations (GX v1)
+      # 3. Install GX v1 (modern Great Expectations)
+      - name: Install GX Core + CLI
         run: |
           pip install --upgrade pip
-          pip install great_expectations
-          pip install google-cloud-bigquery
-          pip install sqlalchemy-bigquery
+          pip install gx-core
+          pip install gx-cli
+          pip install google-cloud-bigquery sqlalchemy-bigquery
 
-      # 4. Debug GX installation
+      # 4. Verify GX installation
       - name: Verify GX Installation
         run: |
           echo "GX version:"
           gx --version
-          echo "GX executable location:"
+          echo "GX executable:"
           which gx || echo "gx not found"
 
       # 5. Load GCP credentials
@@ -40,13 +40,13 @@ jobs:
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      # 6. Show repo structure (debug)
+      # 6. Show repo structure
       - name: Show repo structure
         run: |
           echo "--- REPO STRUCTURE ---"
           ls -R .
 
-      # 7. Run GX Checkpoint (modern API)
+      # 7. Run GX checkpoint
       - name: Run GX checkpoint
         run: |
           gx checkpoint run dim_parkbee_locations
