@@ -1,22 +1,27 @@
 config_version: 3
 
+# Where custom plugins would go (optional)
 plugins_directory: plugins/
 
 datasources:
   parkbee_bigquery:
     class_name: SqlAlchemyDatasource
+    module_name: great_expectations.datasource
+
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
-      connection_string: bigquery://grand-water-473707-r8
-    introspection:
-      enabled: true
+      connection_string: bigquery://grand-water-473707-r8/dwh?credentials_path=key.json
+
     data_connectors:
       default_runtime:
         class_name: RuntimeDataConnector
         batch_identifiers:
           - default_identifier_name
+
       default_inferred:
         class_name: InferredAssetSqlDataConnector
+        include_schema_name: true
+
 
 stores:
   expectations_store:
@@ -42,10 +47,13 @@ stores:
     store_backend:
       class_name: InMemoryStoreBackend
 
+
+# Which store names GE should use by default
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 checkpoint_store_name: checkpoint_store
 evaluation_parameter_store_name: evaluation_parameter_store
+
 
 data_docs_sites:
   local_site:
@@ -58,5 +66,8 @@ data_docs_sites:
       - validations
       - rendered_content
 
+
 anonymous_usage_statistics:
   enabled: true
+
+checkpoints: {}
