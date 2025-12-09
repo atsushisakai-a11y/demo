@@ -8,39 +8,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+    # ----------------------------------------------------
+    # 1. CHECK OUT REPOSITORY
+    # ----------------------------------------------------
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    # ----------------------------------------------------
+    # 2. SET UP PYTHON
+    # ----------------------------------------------------
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
 
-      - name: Install GX Core + BigQuery
-        run: |
-          pip install --upgrade pip
-          pip install 'great_expectations>=1.0.0'
-          pip install gx-cli
-          pip install google-cloud-bigquery sqlalchemy-bigquery
-          
+    # ----------------------------------------------------
+    # 3. INSTALL GX CORE + BIGQUERY DEPENDENCIES
+    # ----------------------------------------------------
+    - name: Install GX Core & BigQuery libs
+      run: |
+        pip install -U pip
+        pip install gxai-core
+        pip install google-cloud-bigquery
+        pip install google-cloud-bigquery-storage
+        pip install sqlalchemy-bigquery
 
-      - name: Load GCP credentials
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+    # ----------------------------------------------------
+    # 4. LOAD SERVICE ACCOUNT KEY
+    # ----------------------------------------------------
+    - name: Load GCP Credentials
+      run: |
+        echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      - name: Verify GX CLI
-        run: |
-          which gx || echo "gx not found"
-          gx --version || echo "gx version check failed"
+    # ----------------------------------------------------
+    # 5. VERIFY gx CLI
+    # ----------------------------------------------------
+    - name: Verify GX Installation
+      run: |
+        echo "GX VERSION:"
+        gx --version
+        echo "GX LOCATION:"
+        which gx
 
-      - name: Show folder structure
-        run: |
-          echo "=== Repository structure ==="
-          find . -maxdepth 4 -type d
-          
-      - name: Run GX checkpoint (debug)
-        working-directory: ./gx
-        run: |
-          gx --verbose --diagnostics checkpoint run dim_parkbee_locations
-          
+    # ----------------------------------------------------
+    # 6. CREATE BIGQUERY DATASET IF NOT EXISTS
+    # ----------------------------------------------------
+    - name: Ensure dataset gx exists
+      env:
+        PROJECT_ID: grand-water-473707-r8
+      run: |
+        bq --location=EU ls $PROJECT_ID:gx || \
+        bq --location=EU mk --dataset $PROJECT_ID:gx
+        echo "Verified dataset: gx"
+
+    # ----------------------------------------------------
+    # 7. RUN GX DIAGNOSTICS
+    # ----------------------------------------------------
+    - name: GX Diagnostics
+      run: |
+        gx diagnostics
+
+    # ----------------------------------------------------
+    # 8. RUN CHECKPOINT
+    # ----------------------------------------------------
+    - name: Run GX Checkpoint
+      working-directory: gx
+      run: |
+        gx checkpoint run dim_parkbee_locations
