@@ -23,7 +23,6 @@ SELECT
   dpl.location_id,
   dpl.latitude,
   dpl.longitude,
-  dpl.geom,
   avg(fpl.hourly_price) as avg_hourly_price,
   avg(fpl.hourly_price - cpl.avg_hourly_price) mad_hourly_price,
   max(fpl.hourly_price) as max_hourly_price,
