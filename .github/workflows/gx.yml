@@ -20,12 +20,20 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install 'great_expectations>=1.0.0'
+          pip install gx-cli
           pip install google-cloud-bigquery sqlalchemy-bigquery
+          
 
       - name: Load GCP credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+
+      - name: Verify GX CLI
+        run: |
+          which gx || echo "gx not found"
+          gx --version || echo "gx version check failed"
+
 
       - name: Run GX checkpoint
         working-directory: ./gx
