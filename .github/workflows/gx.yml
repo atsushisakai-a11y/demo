@@ -8,45 +8,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # -----------------------------------------
+      # 1. Check out project
+      # -----------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Setup Python
+      # -----------------------------------------
+      # 2. Set up Python
+      # -----------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # 3. Install GX v1 (modern Great Expectations)
-      - name: Install GX Core + CLI
+      # -----------------------------------------
+      # 3. Install Classic Great Expectations
+      # -----------------------------------------
+      - name: Install Classic Great Expectations
         run: |
           pip install --upgrade pip
-          pip install gx-core
-          pip install gx-cli
-          pip install google-cloud-bigquery sqlalchemy-bigquery
+          pip install "great_expectations==0.18.12"   # stable classic version
+          pip install sqlalchemy-bigquery
+          pip install google-cloud-bigquery
 
-      # 4. Verify GX installation
-      - name: Verify GX Installation
+      # -----------------------------------------
+      # 4. Verify installation
+      # -----------------------------------------
+      - name: Verify GE Installation
         run: |
-          echo "GX version:"
-          gx --version
-          echo "GX executable:"
-          which gx || echo "gx not found"
+          echo "Great Expectations version:"
+          python - << 'EOF'
+from great_expectations import __version__
+print("GE version:", __version__)
+EOF
+          echo "CLI location:"
+          which great_expectations || echo "great_expectations NOT FOUND"
 
-      # 5. Load GCP credentials
+      # -----------------------------------------
+      # 5. Load Google credentials
+      # -----------------------------------------
       - name: Load GCP Credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      # 6. Show repo structure
+      # -----------------------------------------
+      # 6. Show project directory (debug)
+      # -----------------------------------------
       - name: Show repo structure
         run: |
-          echo "--- REPO STRUCTURE ---"
+          echo "PWD: $(pwd)"
           ls -R .
 
-      # 7. Run GX checkpoint
-      - name: Run GX checkpoint
+      # -----------------------------------------
+      # 7. Run Great Expectations checkpoint
+      # -----------------------------------------
+      - name: Run Great Expectations checkpoint
         run: |
-          gx checkpoint run dim_parkbee_locations
+          great_expectations checkpoint run dim_parkbee_locations
