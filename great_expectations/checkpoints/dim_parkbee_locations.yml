@@ -2,8 +2,15 @@ name: dim_parkbee_locations
 config_version: 1.0
 
 validations:
-  - batch_kwargs:
-      datasource: parkbee_bigquery
-      table: dwh.fact_parkbee_locations_dbt
-      query: SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` LIMIT 1000
+  - batch_request:
+      datasource_name: parkbee_bigquery
+      data_connector_name: default_runtime
+      data_asset_name: dim_parkbee_locations
+      runtime_parameters:
+        query: |
+          SELECT *
+          FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt`
+          LIMIT 1000
+      batch_identifiers:
+        default_identifier_name: "manual_run"
     expectation_suite_name: dim_parkbee_locations
