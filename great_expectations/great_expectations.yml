@@ -2,11 +2,7 @@ config_version: 3
 
 plugins_directory: plugins/
 
-datasources:
-  parkbee_bigquery:
-    class_name: SimpleSqlalchemyDatasource
-    module_name: great_expectations.datasource.sqlalchemy_datasource
-    connection_string: bigquery://grand-water-473707-r8
+datasources: {}
 
 stores:
   expectations_store:
@@ -34,8 +30,8 @@ stores:
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
 checkpoint_store_name: checkpoint_store
+evaluation_parameter_store_name: evaluation_parameter_store
 
 data_docs_sites:
   local_site:
@@ -50,4 +46,3 @@ data_docs_sites:
 
 anonymous_usage_statistics:
   enabled: true
-
