@@ -58,10 +58,18 @@ jobs:
           EOF
 
 
-      - name: Find dbt_project.yml
+      - name: Show repository root
+        run: |
+          echo "PWD:"
+          pwd
+          echo "Root folder contents:"
+          ls -al .
+      
+      - name: Find dbt project
         run: |
           echo "Searching for dbt_project.yml ..."
-          find . -name dbt_project.yml -print
+          find . -maxdepth 3 -name dbt_project.yml -print
+
 
       # ---------------------------------------
       # 6. INSTALL DBT PACKAGES
