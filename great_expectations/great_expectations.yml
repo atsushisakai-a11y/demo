@@ -8,14 +8,14 @@ datasources:
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
       connection_string: bigquery://grand-water-473707-r8
-      schema_name: dwh
-      temp_table_schema_name: dwh
+      temp_table_schema_name: gx
+      schema_name: gx
     data_connectors:
       default_runtime:
         class_name: RuntimeDataConnector
         batch_identifiers:
-          - default_identifier_name          
-
+          - default_identifier_name
+          
 stores:
   expectations_store:
     class_name: ExpectationsStore
