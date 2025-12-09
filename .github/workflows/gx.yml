@@ -1,63 +1,37 @@
-name: gx-core-validation
+name: great-expectations-validation
 
 on:
   workflow_dispatch:
 
 jobs:
-  validate:
+  gx_validation:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # 1. Checkout repo
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-    # 2. Python setup
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: Install Great Expectations Classic + BigQuery driver
+        run: |
+          pip install --upgrade pip
+          pip install "great_expectations==0.18.12"
+          pip install sqlalchemy-bigquery
 
-    # 3. Install GX Core + BigQuery deps
-    - name: Install GX Core & BigQuery deps
-      run: |
-        pip install -U pip
-        pip install "great_expectations>=1.0.0"
-        pip install google-cloud-bigquery
-        pip install google-cloud-bigquery-storage
-        pip install sqlalchemy-bigquery
+      - name: Load GCP Credentials
+        run: |
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-    # 4. Load GCP key
-    - name: Load GCP Credentials
-      run: |
-        echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-        echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+      - name: Debug folder layout
+        run: |
+          echo "GE Configs:"
+          find great_expectations -type f
 
-    # 5. Verify gx CLI
-    - name: Verify GX installation
-      run: |
-        echo "GX version:"
-        gx --version
-        echo "GX location:"
-        which gx
-
-    # 6. Ensure dataset gx exists
-    - name: Ensure BigQuery dataset exists
-      env:
-        PROJECT_ID: grand-water-473707-r8
-      run: |
-        bq --location=EU ls $PROJECT_ID:gx || \
-        bq --location=EU mk --dataset $PROJECT_ID:gx
-        echo "Dataset gx is ready"
-
-    # 7. Diagnostics
-    - name: GX Diagnostics
-      run: |
-        gx diagnostics
-
-    # 8. Run GX Checkpoint
-    - name: Run checkpoint
-      working-directory: gx
-      run: |
-        gx checkpoint run dim_parkbee_locations
+      - name: Run GE Checkpoint
+        run: |
+          great_expectations checkpoint run dim_parkbee_locations
