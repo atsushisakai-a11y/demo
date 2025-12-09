@@ -1,52 +1,12 @@
-config_version: 3
+config_version: 2
 
 plugins_directory: plugins/
 
 datasources:
   parkbee_bigquery:
-    class_name: SqlAlchemyDatasource
-    execution_engine:
-      class_name: SqlAlchemyExecutionEngine
-      connection_string: bigquery://grand-water-473707-r8/gx   # dataset gx
-    data_connectors:
-      default_runtime:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
-
-stores:
-  expectations_store:
-    class_name: ExpectationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: expectations/
-
-  validations_store:
-    class_name: ValidationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
-
-  checkpoint_store:
-    class_name: CheckpointStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: checkpoints/
-
-  evaluation_parameter_store:
-    class_name: EvaluationParameterStore
-
-expectations_store_name: expectations_store
-validations_store_name: validations_store
-checkpoint_store_name: checkpoint_store
-evaluation_parameter_store_name: evaluation_parameter_store
-
-data_docs_sites:
-  local_site:
-    class_name: SiteBuilder
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/data_docs/
-
-anonymous_usage_statistics:
-  enabled: false   # important for GitHub Actions
+    class_name: SimpleSqlalchemyDatasource
+    module_name: great_expectations.datasource.sqlalchemy_datasource
+    connection_string: bigquery://grand-water-473707-r8/gx
+    batch_kwargs_generators:
+      default:
+        class_name: TableBatchKwargsGenerator
