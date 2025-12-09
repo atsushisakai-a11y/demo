@@ -8,38 +8,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ---------------------------------------
-      # 1. CHECK OUT THE REPOSITORY
-      # ---------------------------------------
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ---------------------------------------
-      # 2. SET UP PYTHON
-      # ---------------------------------------
-      - name: Set up Python
+      # 2. Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # ---------------------------------------
-      # 3. INSTALL DBT-BIGQUERY
-      # ---------------------------------------
+      # 3. Install dbt-bigquery
       - name: Install dbt-bigquery
         run: |
           pip install --upgrade pip
           pip install dbt-bigquery
 
-      # ---------------------------------------
-      # 4. DECODE GCP SERVICE ACCOUNT
-      # ---------------------------------------
+      # 4. Decode GCP key
       - name: Decode GCP SA Key
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      # ---------------------------------------
-      # 5. CREATE ~/.dbt/profiles.yml
-      # ---------------------------------------
+      # 5. Create profiles.yml in ~/.dbt
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -57,56 +47,26 @@ jobs:
                 location: EU
           EOF
 
+      # 6. Install dbt packages
+      - name: dbt deps
+        run: dbt deps --project-dir . --profiles-dir ~/.dbt
 
+      # 7. Show project structure
       - name: Show repository root
         run: |
           echo "PWD:"
           pwd
           echo "Root folder contents:"
           ls -al .
-      
-      - name: Find dbt project
-        run: |
-          echo "Searching for dbt_project.yml ..."
-          find . -maxdepth 3 -name dbt_project.yml -print
 
-
-      # ---------------------------------------
-      # 6. INSTALL DBT PACKAGES
-      # ---------------------------------------
-      - name: Install dbt packages (dbt deps)
-        run: dbt deps --project-dir ./dbt --profiles-dir ~/.dbt
-
-      # ---------------------------------------
-      # 7. SHOW PROJECT STRUCTURE
-      # ---------------------------------------
-      - name: Show repo structure
-        run: |
-          echo "=== WORKING DIRECTORY ==="
-          pwd
-          echo "=== REPO TREE ==="
-          ls -R .
-
-      # ---------------------------------------
-      # 8. DBT DEBUG (connectivity + environment)
-      # ---------------------------------------
+      # 8. dbt debug
       - name: DBT Debug
-        run: dbt debug --project-dir ./dbt --profiles-dir ~/.dbt
+        run: dbt debug --project-dir . --profiles-dir ~/.dbt
 
-      # ---------------------------------------
-      # 9. DBT LS (SHOW ALL MODELS)
-      # ---------------------------------------
+      # 9. dbt ls (all models)
       - name: DBT LS (all models)
-        run: dbt ls --project-dir ./dbt --profiles-dir ~/.dbt
+        run: dbt ls --project-dir . --profiles-dir ~/.dbt
 
-      # ---------------------------------------
-      # 10. DBT LS (specific model)
-      # ---------------------------------------
+      # 10. dbt ls for specific model
       - name: DBT LS (dim_google_places_dbt)
-        run: dbt ls --select dim_google_places_dbt --output path --project-dir ./dbt --profiles-dir ~/.dbt
-
-      # ---------------------------------------
-      # 11. SHOW PARSED PROJECT INFO
-      # ---------------------------------------
-      - name: Show parsed dbt project info
-        run: dbt debug --project-dir ./dbt --profiles-dir ~/.dbt
+        run: dbt ls --select dim_google_places_dbt --output path --project-dir . --profiles-dir ~/.dbt
