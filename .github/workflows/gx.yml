@@ -22,29 +22,23 @@ jobs:
         env:
           PIP_NO_CACHE_DIR: "1"
 
-      - name: Fix GE installation (force correct package)
+      - name: Install Classic Great Expectations 0.17.x
         run: |
+          echo "=== Removing all GE-related packages ==="
           pip uninstall -y great-expectations great_expectations gx gx-core || true
+      
+          echo "=== Installing correct Classic GE ==="
           pip install "great_expectations==0.17.23"
-          pip install "sqlalchemy-bigquery" "google-cloud-bigquery"
-          
-
-      - name: Debug GE version
-        run: |
-          pip show great_expectations
-          python -c "import great_expectations, pkgutil; print('GE version:', great_expectations.__version__)"
+      
+          echo "=== Installing BigQuery SQLAlchemy driver ==="
+          pip install "sqlalchemy-bigquery" "pybigquery" "google-cloud-bigquery"
+      
+          echo "=== Debug: check module exists ==="
           python - << 'EOF'
           import pkgutil
-          print('sqlalchemy_datasource exists?', pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
-          EOF
-
-
-      # 3. Verify the installed version
-      - name: Verify GE installation
-        run: |
-          python - << 'EOF'
           import great_expectations as ge
-          print("GE VERSION:", ge.__version__)
+          print("GE version:", ge.__version__)
+          print("sqlalchemy_datasource exists?", pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
           EOF
 
       - name: Load GCP Key
