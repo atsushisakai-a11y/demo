@@ -62,6 +62,11 @@ jobs:
           for name, ds in ctx.datasources.items():
               print(f"Datasource: {name}, connectors: {list(ds.data_connectors.keys())}")
           EOF
+          
+      - name: Debug checkpoint presence
+        run: |
+          echo "Listing checkpoints folder"
+          ls -R great_expectations/checkpoints || echo "No checkpoints folder"
 
       - name: Run GE checkpoint
         run: |
