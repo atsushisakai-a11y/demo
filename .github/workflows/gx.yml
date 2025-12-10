@@ -62,6 +62,18 @@ jobs:
       - name: Export GOOGLE_APPLICATION_CREDENTIALS
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
 
+             echo "=== GE ROOT DIR ==="
+             great_expectations --version
+              
+             echo "=== Checking GE config path ==="
+             python - <<EOF
+             from great_expectations.data_context import FileDataContext
+             ctx = FileDataContext()
+             print("Loaded GE config from:", ctx.root_directory)
+             print("Datasources in config:", list(ctx.datasources.keys()))
+             EOF
+
+
       - name: Run GE checkpoint
         run: |
           great_expectations checkpoint run dim_parkbee_locations
