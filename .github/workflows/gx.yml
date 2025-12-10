@@ -28,17 +28,13 @@ jobs:
       
       - name: Install GE-compatible dependencies
         run: |
-          pip uninstall -y numpy pandas sqlalchemy great_expectations || true
-      
-          pip install "numpy==1.23.5"
-          pip install "pandas==1.5.3"
-          pip install "sqlalchemy==1.4.52"
-      
-          pip install "google-cloud-bigquery"
-          pip install "sqlalchemy-bigquery==1.5.0"
-          pip install "pybigquery"
-      
-          pip install "great_expectations==0.16.16"
+          pip install --no-cache-dir "numpy==1.23.5"
+          pip install --no-cache-dir "pandas==1.5.3"
+          pip install --no-cache-dir "sqlalchemy==1.4.52"
+          pip install --no-cache-dir "sqlalchemy-bigquery==1.16.0"
+          pip install --no-cache-dir "pybigquery"
+          pip install --no-cache-dir "great_expectations==0.16.16"
+          
       
           python - << 'EOF'
           import great_expectations as ge
