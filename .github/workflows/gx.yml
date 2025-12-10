@@ -2,57 +2,60 @@ name: GE Classic Validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
 
 jobs:
-  ge-validation:
+  run_ge_checkpoint:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.9"
 
-      # 0. Disable pip cache system-wide
-      - name: Disable pip cache
-        run: pip cache purge || true
-        env:
-          PIP_NO_CACHE_DIR: "1"
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      
-      - name: Install GE-compatible dependencies
+      - name: Install system dependencies
         run: |
-          pip install --no-cache-dir "numpy==1.23.5"
-          pip install --no-cache-dir "pandas==1.5.3"
-          pip install --no-cache-dir "sqlalchemy==1.4.52"
-          pip install --no-cache-dir "sqlalchemy-bigquery==1.16.0"
-          pip install --no-cache-dir "pybigquery"
-          pip install --no-cache-dir "great_expectations==0.16.16"
-          
-      
-          python - << 'EOF'
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev
+
+      - name: Install GE Classic + BigQuery dependencies
+        run: |
+          pip install --upgrade pip setuptools wheel
+
+          # Versions compatible with GE Classic
+          pip install numpy==1.23.5
+          pip install pandas==1.5.3
+          pip install sqlalchemy==1.4.52
+          pip install sqlalchemy-bigquery==1.16.0
+          pip install pybigquery
+
+          # Correct Great Expectations
+          pip install great_expectations==0.16.16
+
+      - name: Verify GE Classic installation
+        run: |
+          python - <<EOF
           import great_expectations as ge
-          import numpy as np, pandas as pd, sqlalchemy
-          print("GE:", ge.__version__)
-          print("NumPy:", np.__version__)
-          print("Pandas:", pd.__version__)
-          print("SQLAlchemy:", sqlalchemy.__version__)
+          import pkgutil
+          
+          print("GE version:", ge.__version__)
+          print("SqlAlchemyDatasource exists?", pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
           EOF
 
-
-
-
-      - name: Load GCP Key
-        run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
+      - name: Set Google Credentials
+        run: |
+          echo "$GOOGLE_CREDS" > key.json
+        env:
+          GOOGLE_CREDS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Export GOOGLE_APPLICATION_CREDENTIALS
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
 
-      - name: Run checkpoint
-        run: great_expectations checkpoint run dim_parkbee_locations
+      - name: Run GE checkpoint
+        run: |
+          great_expectations checkpoint run dim_parkbee_locations
