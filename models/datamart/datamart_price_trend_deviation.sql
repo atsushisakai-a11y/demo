@@ -24,7 +24,7 @@ SELECT
   dpl.latitude,
   dpl.longitude,
   avg(fpl.hourly_price) as avg_hourly_price,
-  avg(fpl.hourly_price - cpl.avg_hourly_price) mad_hourly_price,
+  abs(avg(fpl.hourly_price - cpl.avg_hourly_price)) mad_hourly_price,
   max(fpl.hourly_price) as max_hourly_price,
   min(fpl.hourly_price) as min_hourly_price,
 FROM
