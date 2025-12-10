@@ -67,11 +67,11 @@ jobs:
               
              echo "=== Checking GE config path ==="
              python - <<EOF
-             from great_expectations.data_context import FileDataContext
-             ctx = FileDataContext()
-             print("Loaded GE config from:", ctx.root_directory)
-             print("Datasources in config:", list(ctx.datasources.keys()))
-             EOF
+               from great_expectations.data_context import FileDataContext
+               ctx = FileDataContext()
+               print("Loaded GE config from:", ctx.root_directory)
+               print("Datasources in config:", list(ctx.datasources.keys()))
+               EOF
 
 
       - name: Run GE checkpoint
