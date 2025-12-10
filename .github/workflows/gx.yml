@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -23,32 +24,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev
 
-      #- name: Install dependencies
-      #  run: |
-      #    python -m pip install --upgrade pip
-          
-      #    # 1. FIX: Force NumPy to stay on version 1.x
-      #    pip install "numpy<2.0"
-          
-      #    # 2. Then install your other tools (keep your pinned GX version if using legacy config)
-      #    pip install "great_expectations<1.0.0"
-      #    pip install sqlalchemy-bigquery          
-
-      - name: Install dependencies
+      - name: Install Python dependencies (GE Classic)
         run: |
           python -m pip install --upgrade pip
-          
-          # Install specific versions to prevent conflicts
-          # 1. numpy<2.0 fixes the binary incompatibility
-          # 2. great_expectations<1.0.0 brings back "SqlAlchemyDatasource"
-          pip install "numpy<2.0" "great_expectations<1.0.0" sqlalchemy-bigquery          
+          pip install "numpy<2.0" "great_expectations<1.0.0" sqlalchemy-bigquery
 
       - name: Verify GE Classic installation
         run: |
-          python - <<EOF
+          python - << 'EOF'
           import great_expectations as ge
           import pkgutil
-          
           print("GE version:", ge.__version__)
           print("SqlAlchemyDatasource exists?", pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
           EOF
@@ -60,19 +45,23 @@ jobs:
           GOOGLE_CREDS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Export GOOGLE_APPLICATION_CREDENTIALS
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
 
-             echo "=== GE ROOT DIR ==="
-             great_expectations --version
-              
-             echo "=== Checking GE config path ==="
-             python - <<EOF
-               from great_expectations.data_context import FileDataContext
-               ctx = FileDataContext()
-               print("Loaded GE config from:", ctx.root_directory)
-               print("Datasources in config:", list(ctx.datasources.keys()))
-               EOF
+      - name: Debug GE root + datasources
+        run: |
+          echo "=== GE Version ==="
+          great_expectations --version
 
+          echo "=== Loaded GE Config ==="
+          python - << 'EOF'
+          from great_expectations.data_context import FileDataContext
+          ctx = FileDataContext()
+          print("GE root directory:", ctx.root_directory)
+          print("Datasources:", list(ctx.datasources.keys()))
+          for name, ds in ctx.datasources.items():
+              print(f"Datasource: {name}, connectors: {list(ds.data_connectors.keys())}")
+          EOF
 
       - name: Run GE checkpoint
         run: |
