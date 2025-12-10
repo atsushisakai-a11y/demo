@@ -46,6 +46,16 @@ jobs:
           pip install sqlalchemy-bigquery google-cloud-bigquery
           
 
+      - name: Debug GE version
+        run: |
+          pip show great_expectations
+          python -c "import great_expectations, pkgutil; print('GE version:', great_expectations.__version__)"
+          python - << 'EOF'
+          import pkgutil
+          print('sqlalchemy_datasource exists?', pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
+          EOF
+
+
       # 3. Verify the installed version
       - name: Verify GE installation
         run: |
