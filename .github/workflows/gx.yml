@@ -23,19 +23,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev
 
-      - name: Install GE Classic + BigQuery dependencies
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip setuptools wheel
-
-          # Versions compatible with GE Classic
-          pip install numpy==1.23.5
-          pip install pandas==1.5.3
-          pip install sqlalchemy==1.4.52
-          pip install sqlalchemy-bigquery==1.16.0
-          pip install pybigquery
-
-          # Correct Great Expectations
-          pip install great_expectations==0.16.16
+          python -m pip install --upgrade pip
+          
+          # 1. FIX: Force NumPy to stay on version 1.x
+          pip install "numpy<2.0"
+          
+          # 2. Then install your other tools (keep your pinned GX version if using legacy config)
+          pip install "great_expectations<1.0.0"
+          pip install sqlalchemy-bigquery          
 
       - name: Verify GE Classic installation
         run: |
