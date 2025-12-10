@@ -23,6 +23,7 @@ SELECT
   dpl.latitude,
   dpl.longitude,
   dpl.geom,
+  fpl.parking_from_cet as fpl.parking_from_cet,
   CAST(fpl.parking_from_cet AS date) AS parking_date,
   fpl.parking_from_hour,
   fpl.parking_from_weekday,
