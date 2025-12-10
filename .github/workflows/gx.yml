@@ -16,20 +16,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install dependencies (Classic GE)
         run: |
           pip install --upgrade pip
-          pip install "great_expectations==0.18.12"
+          pip install "great_expectations==0.17.21"
           pip install sqlalchemy-bigquery
           pip install google-cloud-bigquery
 
-      - name: Load GCP SA key
+      - name: Load GCP key
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
       - name: Set GOOGLE_APPLICATION_CREDENTIALS
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
       - name: Run GE checkpoint
-        working-directory: .
-        run: |
-          great_expectations checkpoint run dim_parkbee_locations
+        run: great_expectations checkpoint run dim_parkbee_locations
