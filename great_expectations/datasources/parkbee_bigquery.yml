@@ -1,6 +1,9 @@
 datasource_name: parkbee_bigquery
-class_name: SqlAlchemyDatasource
+class_name: SimpleSqlalchemyDatasource
 module_name: great_expectations.datasource
+
+connection_string: bigquery://grand-water-473707-r8
+
 
 execution_engine:
   class_name: SqlAlchemyExecutionEngine
