@@ -55,7 +55,7 @@ jobs:
 
       - name: Set Google Credentials
         run: |
-          echo "$GOOGLE_CREDS" > key.json
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
         env:
           GOOGLE_CREDS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
