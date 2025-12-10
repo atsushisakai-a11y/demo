@@ -44,7 +44,6 @@ jobs:
         run: |
           pip install "great_expectations==0.17.23"
           pip install sqlalchemy-bigquery google-cloud-bigquery
-          
 
       - name: Debug GE version
         run: |
