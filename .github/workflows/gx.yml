@@ -39,9 +39,9 @@ jobs:
       - name: Verify GE installation
         run: |
           python - << 'EOF'
-import great_expectations as ge
-print("GE VERSION:", ge.__version__)
-EOF
+          import great_expectations as ge
+          print("GE VERSION:", ge.__version__)
+          EOF
           pip list
 
       - name: Load GCP Key
