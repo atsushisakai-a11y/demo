@@ -22,22 +22,33 @@ jobs:
         env:
           PIP_NO_CACHE_DIR: "1"
 
-      - name: Install Classic Great Expectations 0.16.x
-        run: |
-          pip uninstall -y great_expectations great-expectations gx gx-core || true
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
       
-          pip install "great_expectations==0.16.16"
-          pip install "sqlalchemy==1.4.52"          # REQUIRED for GE 0.16.x
+      - name: Install GE-compatible dependencies
+        run: |
+          pip uninstall -y numpy pandas sqlalchemy great_expectations || true
+      
+          pip install "numpy==1.23.5"
+          pip install "pandas==1.5.3"
+          pip install "sqlalchemy==1.4.52"
+      
+          pip install "google-cloud-bigquery"
           pip install "sqlalchemy-bigquery==1.5.0"
           pip install "pybigquery"
-          pip install "google-cloud-bigquery"
+      
+          pip install "great_expectations==0.16.16"
       
           python - << 'EOF'
-          import pkgutil
-          import great_expectations as ge
-          print("GE version:", ge.__version__)
-          print("sqlalchemy_datasource exists?", pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
-          EOF
+            import great_expectations as ge
+            import numpy as np, pandas as pd, sqlalchemy
+            print("GE:", ge.__version__)
+            print("NumPy:", np.__version__)
+            print("Pandas:", pd.__version__)
+            print("SQLAlchemy:", sqlalchemy.__version__)
+            EOF
+
 
 
 
