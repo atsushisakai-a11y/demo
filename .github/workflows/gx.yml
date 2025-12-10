@@ -11,23 +11,44 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.10  # REQUIRED
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install dependencies (Classic GE)
+      # CLEAN ALL GE variants
+      - name: Remove ALL Great Expectations versions
+        run: |
+          pip uninstall -y great_expectations || true
+          pip uninstall -y great-expectations || true
+          pip uninstall -y gx || true
+          pip uninstall -y gx-core || true
+          pip uninstall -y ge || true
+          pip uninstall -y greatexpectations || true
+          pip uninstall -y great_expectations_core || true
+
+      # INSTALL Classic GE ONLY
+      - name: Install Classic GE 0.17.21
         run: |
           pip install --upgrade pip
           pip install "great_expectations==0.17.21"
           pip install sqlalchemy-bigquery
           pip install google-cloud-bigquery
 
-      - name: Load GCP key
+      # VERIFY it really installed Classic GE
+      - name: Verify GE installation
+        run: |
+          python - << 'EOF'
+import great_expectations as ge
+print("GE VERSION:", ge.__version__)
+EOF
+          pip list
+
+      - name: Load GCP Key
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
 
-      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+      - name: Export GOOGLE_APPLICATION_CREDENTIALS
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/key.json" >> $GITHUB_ENV
 
-      - name: Run GE checkpoint
+      - name: Run checkpoint
         run: great_expectations checkpoint run dim_parkbee_locations
