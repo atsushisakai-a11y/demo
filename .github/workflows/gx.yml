@@ -16,8 +16,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      # CLEAN ALL GE variants
-      - name: Remove ALL Great Expectations versions
+      # 0. Disable pip cache system-wide
+      - name: Disable pip cache
+        run: pip cache purge || true
+        env:
+          PIP_NO_CACHE_DIR: "1"
+
+      # 1. Uninstall ALL possible GE variants
+      - name: Remove ALL Great Expectations variants
         run: |
           pip uninstall -y great_expectations || true
           pip uninstall -y great-expectations || true
@@ -27,22 +33,20 @@ jobs:
           pip uninstall -y greatexpectations || true
           pip uninstall -y great_expectations_core || true
 
-      # INSTALL Classic GE ONLY
+      # 2. Install ONLY Classic GE
       - name: Install Classic GE 0.17.21
         run: |
-          pip install --upgrade pip
-          pip install "great_expectations==0.17.21"
-          pip install sqlalchemy-bigquery
-          pip install google-cloud-bigquery
+          pip install --no-cache-dir "great_expectations==0.17.21"
+          pip install --no-cache-dir sqlalchemy-bigquery
+          pip install --no-cache-dir google-cloud-bigquery
 
-      # VERIFY it really installed Classic GE
+      # 3. Verify the installed version
       - name: Verify GE installation
         run: |
           python - << 'EOF'
-          import great_expectations as ge
-          print("GE VERSION:", ge.__version__)
-          EOF
-          pip list
+import great_expectations as ge
+print("GE VERSION:", ge.__version__)
+EOF
 
       - name: Load GCP Key
         run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
