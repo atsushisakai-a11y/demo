@@ -1,16 +1,6 @@
-datasource_name: parkbee_bigquery
-class_name: SimpleSqlalchemyDatasource
-module_name: great_expectations.datasource
-
-connection_string: bigquery://grand-water-473707-r8
-
-
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  connection_string: bigquery://grand-water-473707-r8
-
-data_connectors:
-  default_runtime:
-    class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+datasources:
+  parkbee_bigquery:
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      connection_string: bigquery://grand-water-473707-r8
