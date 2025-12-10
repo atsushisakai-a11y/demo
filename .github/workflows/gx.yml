@@ -41,13 +41,13 @@ jobs:
           pip install "great_expectations==0.16.16"
       
           python - << 'EOF'
-            import great_expectations as ge
-            import numpy as np, pandas as pd, sqlalchemy
-            print("GE:", ge.__version__)
-            print("NumPy:", np.__version__)
-            print("Pandas:", pd.__version__)
-            print("SQLAlchemy:", sqlalchemy.__version__)
-            EOF
+          import great_expectations as ge
+          import numpy as np, pandas as pd, sqlalchemy
+          print("GE:", ge.__version__)
+          print("NumPy:", np.__version__)
+          print("Pandas:", pd.__version__)
+          print("SQLAlchemy:", sqlalchemy.__version__)
+          EOF
 
 
 
