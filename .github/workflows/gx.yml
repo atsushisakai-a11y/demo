@@ -34,11 +34,17 @@ jobs:
           pip uninstall -y great_expectations_core || true
 
       # 2. Install ONLY Classic GE
-      - name: Install Classic GE 0.17.21
+      #- name: Install Classic GE 0.17.21
+      #  run: |
+      #    pip install --no-cache-dir "great_expectations==0.17.21"
+      #    pip install --no-cache-dir sqlalchemy-bigquery
+      #    pip install --no-cache-dir google-cloud-bigquery
+
+      - name: Install Great Expectations (Classic)
         run: |
-          pip install --no-cache-dir "great_expectations==0.17.21"
-          pip install --no-cache-dir sqlalchemy-bigquery
-          pip install --no-cache-dir google-cloud-bigquery
+          pip install "great_expectations==0.17.23"
+          pip install sqlalchemy-bigquery google-cloud-bigquery
+          
 
       # 3. Verify the installed version
       - name: Verify GE installation
