@@ -1,50 +1,50 @@
-name: dim_parkbee_locations
-config_version: 1.0
-class_name: Checkpoint
-
-run_name_template: "%Y-%m-%d-%H-%M-%S"
-
-validations:
-  - batch_request:
-      datasource_name: parkbee_bigquery
-      data_connector_name: default_runtime
-      data_asset_name: fact_parkbee_locations_dbt
-      runtime_parameters:
-        query: |
-          SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt`
-          LIMIT 100
-      batch_identifiers:
-        default_identifier_name: "run1"
-
-    expectation_suite_name: dim_parkbee_locations
-
-
 #name: dim_parkbee_locations
 #config_version: 1.0
 #class_name: Checkpoint
-#module_name: great_expectations.checkpoint
+
+#run_name_template: "%Y-%m-%d-%H-%M-%S"
 
 #validations:
 #  - batch_request:
 #      datasource_name: parkbee_bigquery
 #      data_connector_name: default_runtime
-#      data_asset_name: dwh.fact_parkbee_locations_dbt
+#      data_asset_name: fact_parkbee_locations_dbt
 #      runtime_parameters:
-#        query: SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` LIMIT 1000
+#        query: |
+#          SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt`
+#          LIMIT 100
 #      batch_identifiers:
 #        default_identifier_name: "run1"
+
 #    expectation_suite_name: dim_parkbee_locations
 
+
+name: dim_parkbee_locations
+config_version: 1.0
+class_name: Checkpoint
+module_name: great_expectations.checkpoint
+
+validations:
+  - batch_request:
+      datasource_name: parkbee_bigquery
+      data_connector_name: default_runtime
+      data_asset_name: dwh.fact_parkbee_locations_dbt
+      runtime_parameters:
+        query: SELECT * FROM `grand-water-473707-r8.dwh.fact_parkbee_locations_dbt` LIMIT 1000
+      batch_identifiers:
+        default_identifier_name: "run1"
+    expectation_suite_name: dim_parkbee_locations
+
 # REQUIRED in GE 0.15.x
-#action_list:
-#  - name: store_validation_result
-#    action:
-#      class_name: StoreValidationResultAction
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
 
-#  - name: store_evaluation_params
-#    action:
-#      class_name: StoreEvaluationParametersAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
 
-#  - name: update_data_docs
-#    action:
-#      class_name: UpdateDataDocsAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
