@@ -1,6 +1,5 @@
 name: dim_parkbee_locations
 config_version: 1.0
-
 class_name: Checkpoint
 module_name: great_expectations.checkpoint
 
