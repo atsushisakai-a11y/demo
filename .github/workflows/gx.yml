@@ -10,10 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
+      # --------------------------------------------------------
+      # 1. CHECKOUT
+      # --------------------------------------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
 
+
+      # --------------------------------------------------------
+      # 2. PYTHON 3.11 + build tools
+      # --------------------------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -24,81 +30,73 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev
 
-      - name: Install Python dependencies (GE Classic)
+
+      # --------------------------------------------------------
+      # 3. INSTALL DEPENDENCIES (Classic GE + BigQuery)
+      # --------------------------------------------------------
+      - name: Install Python packages
         run: |
           python -m pip install --upgrade pip
-          pip install "numpy<2.0" "great_expectations<1.0.0" sqlalchemy-bigquery
 
-      - name: Verify GE Classic installation
-        run: |
-          python - << 'EOF'
-          import great_expectations as ge
-          import pkgutil
-          print("GE version:", ge.__version__)
-          print("SqlAlchemyDatasource exists?", pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource"))
-          EOF
+          # Required to avoid binary conflicts with GE Classic
+          pip install "numpy<2.0"
 
-      - name: Set Google Credentials
+          # Classic GE with SqlAlchemyDatasource
+          pip install "great_expectations<1.0.0"
+
+          # BigQuery support
+          pip install sqlalchemy-bigquery
+
+
+      # --------------------------------------------------------
+      # 4. FORCE GE TO USE THE CORRECT PROJECT ROOT
+      # --------------------------------------------------------
+      - name: Force GE to use correct project directory
+        run: echo "GE_HOME=${{ github.workspace }}/great_expectations" >> $GITHUB_ENV
+
+
+      # --------------------------------------------------------
+      # 5. INSTALL GOOGLE CREDENTIALS
+      # --------------------------------------------------------
+      - name: Install GCP service account credentials
         run: |
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > key.json
-        env:
-          GOOGLE_CREDS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Export GOOGLE_APPLICATION_CREDENTIALS
-        run: |
-          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/key.json" >> $GITHUB_ENV
 
-      - name: Debug GE root + datasources
-        run: |
-          echo "=== GE Version ==="
-          great_expectations --version
 
-          echo "=== Loaded GE Config ==="
-          python - << 'EOF'
-          from great_expectations.data_context import FileDataContext
-          ctx = FileDataContext()
-          print("GE root directory:", ctx.root_directory)
-          print("Datasources:", list(ctx.datasources.keys()))
-          for name, ds in ctx.datasources.items():
-              print(f"Datasource: {name}, connectors: {list(ds.data_connectors.keys())}")
-          EOF
-          
-      - name: Debug checkpoint presence
-        run: |
-          echo "Listing checkpoints folder"
-          ls -R great_expectations/checkpoints || echo "No checkpoints folder"
-
-      - name: DEBUG 1 — Print GE Root Directory
+      # --------------------------------------------------------
+      # 6. DEBUG — Verify GE sees your datasources + checkpoints
+      # --------------------------------------------------------
+      - name: Debug: Verify GE Loads Correct Context
         run: |
           python - <<EOF
           from great_expectations.data_context import FileDataContext
+
           ctx = FileDataContext()
-          print("GE ROOT DIR =", ctx.root_directory)
-          print("Datasources:", ctx.datasources.keys())
-          print("Checkpoints dir exists?", ctx.root_directory + "/checkpoints")
+          print("=== GE ROOT DIRECTORY ===")
+          print(ctx.root_directory)
+
+          print("=== DATASOURCES ===")
+          print(ctx.datasources.keys())
+
+          print("=== CHECKPOINTS ===")
+          print(ctx.list_checkpoints())
           EOF
 
-      - name: DEBUG 2 — List checkpoints folder
-        run: ls -R great_expectations/checkpoints || echo "NO CHECKPOINT FOLDER FOUND"
-
-      - name: DEBUG 3 — GE list checkpoints
-        run: great_expectations checkpoint list
-
-      - name: DEBUG 4 — GE checkpoint list
+      - name: Debug: File structure
         run: |
-          echo "=== GE CHECKPOINT LIST ==="
-          great_expectations checkpoint list || echo "Failed to list checkpoints"
+          echo "=== Checkpoint folder ==="
+          ls -R great_expectations/checkpoints || echo "not found"
 
-      - name: DEBUG 5 — GE checkpoint new (non-interactive)"
-        run: |
-          echo "=== GE CHECKPOINT NEW TEST ==="
-          great_expectations checkpoint new dim_parkbee_locations --no-interactive || echo "Checkpoint creation failed"
+          echo "=== Datasources folder ==="
+          ls -R great_expectations/datasources || echo "not found"
 
-      - name: DEBUG 6 — Inspect checkpoints folder after GE new"
-        run: |
-          echo "=== LIST CHECKPOINTS FOLDER AFTER NEW ==="
-          ls -R great_expectations/checkpoints || echo "No checkpoints folder found"
 
+      # --------------------------------------------------------
+      # 7. RUN CHECKPOINT
+      # --------------------------------------------------------
       - name: Run GE checkpoint
         run: |
           great_expectations checkpoint run dim_parkbee_locations
