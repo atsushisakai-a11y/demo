@@ -37,4 +37,15 @@ stores:
     class_name: ValidationsStore
     module_name: great_expectations.data_context.store
     store_backend:
-      class_name: TupleFilesyst_
+      class_name: TupleFilesystemStoreBackend
+      module_name: great_expectations.data_context.store
+      base_directory: uncommitted/validation_results/
+
+  checkpoint_store:
+    class_name: CheckpointStore
+    module_name: great_expectations.data_context.store
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      module_name: great_expectations.data_context.store
+      base_directory: checkpoints/
+
