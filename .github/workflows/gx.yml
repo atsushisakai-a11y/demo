@@ -128,6 +128,16 @@ jobs:
           echo "=== Searching for gx directories ==="
           find . -type d -name "gx" -print
 
+      - name: Show Loaded GE Context Config
+        run: |
+          python - <<EOF
+          from great_expectations.data_context import FileDataContext
+          ctx = FileDataContext(context_root_dir="great_expectations")
+          print("\n=== ACTIVE GE CONFIG ===")
+          print(ctx.get_config().to_json_dict())
+          EOF
+
+
       # --------------------------------------------------------
       # 7. RUN CHECKPOINT
       # --------------------------------------------------------
