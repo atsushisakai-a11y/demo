@@ -51,9 +51,11 @@ jobs:
       # --------------------------------------------------------
       # 4. FORCE GE TO USE THE CORRECT PROJECT ROOT
       # --------------------------------------------------------
-      - name: Force GE to use correct project directory
-        run: echo "GE_HOME=${{ github.workspace }}/great_expectations" >> $GITHUB_ENV
-
+      - name: Force GE to use correct GE project directory
+        run: |
+          echo "GE_HOME=${{ github.workspace }}/great_expectations" >> $GITHUB_ENV
+          echo "GE_ROOT_DIR=${{ github.workspace }}/great_expectations" >> $GITHUB_ENV
+          echo "GE_DATA_CONTEXT_ROOT_DIR=${{ github.workspace }}/great_expectations" >> $GITHUB_ENV
 
       # --------------------------------------------------------
       # 5. INSTALL GOOGLE CREDENTIALS
