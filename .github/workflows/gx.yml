@@ -41,6 +41,15 @@ jobs:
           pip install great_expectations==0.15.50
           pip install sqlalchemy-bigquery
 
+      - name: Verify SqlAlchemyDatasource exists
+        run: |
+          python - <<EOF
+          import pkgutil
+          import great_expectations as ge
+          print("GE version:", ge.__version__)
+          print("SqlAlchemyDatasource exists:",
+                pkgutil.find_loader("great_expectations.datasource.sqlalchemy_datasource") is not None)
+          EOF
 
       # --------------------------------------------------------
       # 4. FORCE GE TO USE THE CORRECT PROJECT ROOT
