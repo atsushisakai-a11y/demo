@@ -68,6 +68,37 @@ jobs:
           echo "Listing checkpoints folder"
           ls -R great_expectations/checkpoints || echo "No checkpoints folder"
 
+      - name: DEBUG 1 — Print GE Root Directory
+        run: |
+          python - <<EOF
+          from great_expectations.data_context import FileDataContext
+          ctx = FileDataContext()
+          print("GE ROOT DIR =", ctx.root_directory)
+          print("Datasources:", ctx.datasources.keys())
+          print("Checkpoints dir exists?", ctx.root_directory + "/checkpoints")
+          EOF
+
+      - name: DEBUG 2 — List checkpoints folder
+        run: ls -R great_expectations/checkpoints || echo "NO CHECKPOINT FOLDER FOUND"
+
+      - name: DEBUG 3 — GE list checkpoints
+        run: great_expectations checkpoint list
+
+      - name: DEBUG 4 — GE checkpoint list
+        run: |
+          echo "=== GE CHECKPOINT LIST ==="
+          great_expectations checkpoint list || echo "Failed to list checkpoints"
+
+      - name: DEBUG 5 — GE checkpoint new (non-interactive)"
+        run: |
+          echo "=== GE CHECKPOINT NEW TEST ==="
+          great_expectations checkpoint new dim_parkbee_locations --no-interactive || echo "Checkpoint creation failed"
+
+      - name: DEBUG 6 — Inspect checkpoints folder after GE new"
+        run: |
+          echo "=== LIST CHECKPOINTS FOLDER AFTER NEW ==="
+          ls -R great_expectations/checkpoints || echo "No checkpoints folder found"
+
       - name: Run GE checkpoint
         run: |
           great_expectations checkpoint run dim_parkbee_locations
