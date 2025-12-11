@@ -6,9 +6,9 @@ datasources:
     class_name: SqlAlchemyDatasource
     module_name: great_expectations.datasource
 
-    execution_engine:
-      class_name: SqlAlchemyExecutionEngine
-      connection_string: bigquery://grand-water-473707-r8
+    credentials:
+      drivername: bigquery
+      project: grand-water-473707-r8
 
     data_connectors:
       default_runtime:
@@ -18,7 +18,7 @@ datasources:
 
       default_inferred:
         class_name: InferredAssetSqlDataConnector
-        include_schema_name: true        
+        include_schema_name: true
 
 stores:
   expectations_store:
@@ -49,6 +49,8 @@ data_docs_sites:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/data_docs/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
   enabled: true
