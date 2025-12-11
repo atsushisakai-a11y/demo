@@ -49,3 +49,17 @@ stores:
       module_name: great_expectations.data_context.store
       base_directory: checkpoints/
 
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+checkpoint_store_name: checkpoint_store
+
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    module_name: great_expectations.render.renderer.site_builder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      module_name: great_expectations.data_context.store
+      base_directory: uncommitted/data_docs/
+
+
