@@ -106,6 +106,15 @@ jobs:
           print("Checkpoints:", ctx.list_checkpoints())
           EOF
 
+      - name: Remove gx folder if it exists
+        run: |
+          if [ -d "gx" ]; then
+            echo "GX folder detected — removing..."
+            rm -rf gx
+          else
+            echo "No gx folder found."
+          fi
+
       - name: Debug list root
         run: |
           echo "=== ROOT DIR CONTENTS ==="
