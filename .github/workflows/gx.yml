@@ -69,7 +69,7 @@ jobs:
       # --------------------------------------------------------
       # 6. DEBUG — Verify GE sees your datasources + checkpoints
       # --------------------------------------------------------
-      - name: Debug: Verify GE Loads Correct Context
+      - name: Debug Verify GE Loads Correct Context
         run: |
           python - <<EOF
           from great_expectations.data_context import FileDataContext
@@ -85,7 +85,7 @@ jobs:
           print(ctx.list_checkpoints())
           EOF
 
-      - name: Debug: File structure
+      - name: Debug File structure
         run: |
           echo "=== Checkpoint folder ==="
           ls -R great_expectations/checkpoints || echo "not found"
