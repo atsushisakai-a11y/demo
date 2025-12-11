@@ -8,7 +8,8 @@ datasources:
 
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
-      connection_string: bigquery://grand-water-473707-r8
+      # FIXED BigQuery URI (must use pybigquery dialect)
+      connection_string: bigquery+pybigquery://grand-water-473707-r8
 
     data_connectors:
       default_runtime:
@@ -16,28 +17,24 @@ datasources:
         batch_identifiers:
           - default_identifier_name
 
-      default_inferred:
-        class_name: InferredAssetSqlDataConnector
-        include_schema_name: true
-
 stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: expectations/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/expectations
 
   validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validation_results/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/validation_results
 
   checkpoint_store:
     class_name: CheckpointStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: checkpoints/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/checkpoints
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
@@ -48,9 +45,7 @@ data_docs_sites:
     class_name: SiteBuilder
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/data_docs/
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/data_docs/
 
 anonymous_usage_statistics:
-  enabled: true
+  enabled: false
