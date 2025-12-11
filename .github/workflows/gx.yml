@@ -99,6 +99,8 @@ jobs:
       # --------------------------------------------------------
       # 7. RUN CHECKPOINT
       # --------------------------------------------------------
-      - name: Run GE checkpoint
+      - name: Run GE checkpoint (forced context)
         run: |
+          GE_DATA_CONTEXT_ROOT_DIR="${{ github.workspace }}/great_expectations" \
           great_expectations checkpoint run dim_parkbee_locations
+          
