@@ -1,6 +1,3 @@
-config_version: 3
-plugins_directory: plugins/
-
 datasources:
   parkbee_bigquery:
     class_name: SqlAlchemyDatasource
@@ -8,7 +5,7 @@ datasources:
 
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
-      connection_string: bigquery+pybigquery://grand-water-473707-r8
+      connection_string: bigquery+pybigquery://grand-water-473707-r8/dwh
 
     data_connectors:
       default_runtime:
@@ -19,38 +16,3 @@ datasources:
       default_inferred:
         class_name: InferredAssetSqlDataConnector
         include_schema_name: true
-
-stores:
-  expectations_store:
-    class_name: ExpectationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/expectations
-
-  validations_store:
-    class_name: ValidationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/validation_results
-
-  checkpoint_store:
-    class_name: CheckpointStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/checkpoints
-
-expectations_store_name: expectations_store
-validations_store_name: validations_store
-checkpoint_store_name: checkpoint_store
-
-data_docs_sites:
-  local_site:
-    class_name: SiteBuilder
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/data_docs
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
-
-anonymous_usage_statistics:
-  enabled: true
