@@ -10,7 +10,7 @@ datasources:
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
       module_name: great_expectations.execution_engine
-      connection_string: bigquery+pybigquery://grand-water-473707-r8
+      connection_string: bigquery+pybigquery://grand-water-473707-r8/dwh
 
     data_connectors:
       default_runtime:
@@ -31,7 +31,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       module_name: great_expectations.data_context.store
-      base_directory: expectations/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/expectations/
 
   validations_store:
     class_name: ValidationsStore
@@ -39,7 +39,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       module_name: great_expectations.data_context.store
-      base_directory: uncommitted/validation_results/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/validation_results/
 
   checkpoint_store:
     class_name: CheckpointStore
@@ -47,11 +47,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       module_name: great_expectations.data_context.store
-      base_directory: checkpoints/
-
-expectations_store_name: expectations_store
-validations_store_name: validations_store
-checkpoint_store_name: checkpoint_store
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/checkpoints/
 
 data_docs_sites:
   local_site:
@@ -60,6 +56,8 @@ data_docs_sites:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       module_name: great_expectations.data_context.store
-      base_directory: uncommitted/data_docs/
+      base_directory: ${GE_DATA_CONTEXT_ROOT_DIR}/uncommitted/data_docs/
 
-
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+checkpoint_store_name: checkpoint_store
