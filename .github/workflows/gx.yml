@@ -34,17 +34,11 @@ jobs:
       # --------------------------------------------------------
       # 3. INSTALL DEPENDENCIES (Classic GE + BigQuery)
       # --------------------------------------------------------
-      - name: Install Python packages
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-
-          # Required to avoid binary conflicts with GE Classic
           pip install "numpy<2.0"
-
-          # Classic GE with SqlAlchemyDatasource
-          pip install "great_expectations<1.0.0"
-
-          # BigQuery support
+          pip install great_expectations==0.15.50
           pip install sqlalchemy-bigquery
 
 
