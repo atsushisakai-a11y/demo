@@ -1,20 +1,13 @@
-datasources:
-  parkbee_bigquery:
-    class_name: SqlAlchemyDatasource
-    module_name: great_expectations.datasource
+datasource_name: parkbee_bigquery
+class_name: SqlAlchemyDatasource
+module_name: great_expectations.datasource.sqlalchemy_datasource
 
-    credentials:
-      url: bigquery://grand-water-473707-r8
+credentials:
+  url: bigquery+pybigquery://grand-water-473707-r8
 
-    execution_engine:
-      class_name: SqlAlchemyExecutionEngine
-
-    data_connectors:
-      default_runtime:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
-
-      default_inferred:
-        class_name: InferredAssetSqlDataConnector
-        include_schema_name: true
+data_connectors:
+  default_runtime:
+    class_name: RuntimeDataConnector
+    module_name: great_expectations.datasource.data_connector
+    batch_identifiers:
+      - run_id
