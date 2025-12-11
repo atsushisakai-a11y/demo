@@ -95,16 +95,16 @@ jobs:
           echo "=== Datasources folder ==="
           ls -R great_expectations/datasources || echo "not found"
 
-      - name: Debug: Confirm GE context is loading from correct directory
+      - name: Debug Confirm GE context is loading from correct directory
         run: |
           GE_DATA_CONTEXT_ROOT_DIR="${{ github.workspace }}/great_expectations" \
           python - <<EOF
-      from great_expectations.data_context import FileDataContext
-      ctx = FileDataContext()
-      print("Context root:", ctx.root_directory)
-      print("Datasources:", list(ctx.datasources.keys()))
-      print("Checkpoints:", ctx.list_checkpoints())
-      EOF
+          from great_expectations.data_context import FileDataContext
+          ctx = FileDataContext()
+          print("Context root:", ctx.root_directory)
+          print("Datasources:", list(ctx.datasources.keys()))
+          print("Checkpoints:", ctx.list_checkpoints())
+          EOF
 
 
       # --------------------------------------------------------
