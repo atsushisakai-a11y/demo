@@ -106,6 +106,15 @@ jobs:
           print("Checkpoints:", ctx.list_checkpoints())
           EOF
 
+      - name: Debug list root
+        run: |
+          echo "=== ROOT DIR CONTENTS ==="
+          ls -la .
+      
+      - name: Search for gx folders
+        run: |
+          echo "=== Searching for gx directories ==="
+          find . -type d -name "gx" -print
 
       # --------------------------------------------------------
       # 7. RUN CHECKPOINT
