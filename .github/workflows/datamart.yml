@@ -2,8 +2,8 @@ name: 94.Datamart
 
 on:
   workflow_dispatch:   # manual run
-  schedule:
-    - cron: "0 3 * * *"   # optional: run every day at 03:00 CET
+  #schedule:
+  #  - cron: "0 3 * * *"   # optional: run every day at 03:00 CET
 
 jobs:
   build-datamart:
