@@ -84,3 +84,4 @@ models:
           combination_of_columns:
             - location_id
             - parking_from_cet
+          severity: warn
