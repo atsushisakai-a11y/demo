@@ -62,6 +62,7 @@ models:
   # DATAMART — PRICE COMPARISON
   # ==========================================================
   - name: datamart_price_trend
+  description: "Hourly parking price trend by location"
     columns:
       - name: country
         tests:
@@ -77,4 +78,9 @@ models:
 
       - name: location_id
         tests:
-          - not_null                 
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - location_id
+            - parking_from_cet
