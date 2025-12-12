@@ -62,7 +62,7 @@ models:
   # DATAMART — PRICE COMPARISON
   # ==========================================================
   - name: datamart_price_trend
-  description: "Hourly parking price trend by location"
+    description: "Hourly parking price trend by location"
     columns:
       - name: country
         tests:
