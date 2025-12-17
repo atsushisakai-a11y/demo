@@ -16,9 +16,7 @@ WITH dim_fact_google AS (
         dgp.google_maps_url,
         fpcl.place_id,
         fpcl.rating,
-        fpcl.user_ratings_total,
-        fpcl.demand_score,
-        fpcl.demand_category
+        fpcl.user_ratings_total
     FROM {{ ref('fact_parking_candidate_locations_dbt') }} AS fpcl
     INNER JOIN {{ ref('dim_google_places_dbt') }} AS dgp
         ON dgp.place_id = fpcl.place_id
@@ -51,9 +49,6 @@ join_parkbee AS (
         dfg.geom AS google_geom,
         dfg.rating AS google_rating,
         dfg.user_ratings_total AS google_reviews,
-        dfg.demand_score,
-        dfg.demand_category,
-
         dpl.location_id AS parkbee_location_id,
         dpl.name AS parkbee_name,
         dpl.city AS parkbee_city,
@@ -88,8 +83,13 @@ SELECT
     jp.google_rating,
     jp.google_reviews,
     r.demand_score,
-    r.demand_category,
-
+  CASE
+    --WHEN r.name in ('Parkeergarage De Opgang','Markenhoven','Parking Panorama','Parking Place Eugène Flagey') THEN 'High - Recommended'
+    WHEN r.demand_bucket = 1 THEN 'High'
+    WHEN r.demand_bucket = 2 THEN 'Medium'
+    ELSE 'Low'
+  END AS demand_category,
+    
     jp.parkbee_location_id,
     jp.parkbee_name,
     jp.parkbee_city,
