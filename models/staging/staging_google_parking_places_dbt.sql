@@ -12,6 +12,7 @@ WITH source AS (
         lng,
         ST_GEOGPOINT(lng, lat) AS geom,
         SPLIT(types, ',')[SAFE_OFFSET(0)] AS primary_type,
+        types,
         rating,
         user_ratings_total,
         google_maps_url,
@@ -37,6 +38,7 @@ SELECT
     lng,
     geom,
     primary_type,
+    types,
     CASE
         WHEN primary_type IN ('parking') THEN 'parking'
         WHEN LOWER(name) LIKE '%charging%station%'
@@ -50,6 +52,7 @@ SELECT
                 'real_estate_agency', 'plumber', 'accounting',
                 'finance', 'bank', 'lawyer','general_contractor','insurance_agency'
             )
+            OR types like '%finance%'
             THEN 'office'
         WHEN primary_type LIKE '%store%' THEN 'store'
         ELSE 'other'
