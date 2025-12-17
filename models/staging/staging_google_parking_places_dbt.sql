@@ -63,4 +63,4 @@ SELECT
     ELSE 'Low'
   END AS demand_category
 */
-FROM ranked
+FROM source
