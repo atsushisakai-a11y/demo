@@ -7,6 +7,7 @@ SELECT
     sg.place_id,
     sg.name,
     sg.address,
+    sg.primary_type,
     sg.lat,
     sg.lng,
     sg.google_maps_url,
