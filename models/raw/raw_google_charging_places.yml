@@ -3,12 +3,7 @@ version: 2
 models:
   - name: raw_google_charging_places
     columns:
-#      - name: place_id
-#        tests:
-#          - not_null:
-#              severity: warn
-
-      - name: fetched_at
+      - name: place_id
         tests:
           - not_null:
               severity: warn
