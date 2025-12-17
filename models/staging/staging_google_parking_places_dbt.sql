@@ -37,18 +37,22 @@ SELECT
     lng,
     geom,
     primary_type,
-  CASE
-    WHEN primary_type in ('parking') then 'parking'
-    WHEN lower(name) LIKE '%charging%station%' or lower(name) LIKE '%recharge%' or primary_type in ('oplaadpunt') THEN 'charging station'
-    WHEN
-      primary_type LIKE '%office%'
-      OR primary_type LIKE '%company%'
-      OR primary_type IN (
-        'real_estate_agency', 'plumber', 'accounting',
-        'finance', 'bank', 'lawyer')
-      THEN 'office'
-    WHEN primary_type LIKE '%store%' THEN 'store'    
-    ELSE 'other'
+    CASE
+        WHEN primary_type IN ('parking') THEN 'parking'
+        WHEN LOWER(name) LIKE '%charging%station%'
+          OR LOWER(name) LIKE '%recharge%'
+          OR primary_type IN ('oplaadpunt')
+          THEN 'charging station'
+        WHEN
+            primary_type LIKE '%office%'
+            OR primary_type LIKE '%company%'
+            OR primary_type IN (
+                'real_estate_agency', 'plumber', 'accounting',
+                'finance', 'bank', 'lawyer'
+            )
+            THEN 'office'
+        WHEN primary_type LIKE '%store%' THEN 'store'
+        ELSE 'other'
     END AS location_type,
     rating,
     user_ratings_total,
@@ -65,3 +69,8 @@ SELECT
     parking_types_raw,
     fetched_at
 FROM source
+QUALIFY
+    ROW_NUMBER() OVER (
+        PARTITION BY place_id
+        ORDER BY fetched_at DESC
+    ) = 1
