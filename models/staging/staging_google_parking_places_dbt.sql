@@ -11,7 +11,7 @@ WITH source AS (
         lat,
         lng,
         ST_GEOGPOINT(lng, lat) AS geom,
-        types,
+        SPLIT(types, ',')[SAFE_OFFSET(0)] AS primary_type,
         rating,
         user_ratings_total,
         google_maps_url,
@@ -28,21 +28,6 @@ WITH source AS (
         parking_types_raw,
         fetched_at
     FROM {{ source('raw', 'raw_google_charging_places') }}
-),
-
-parking_demand AS (
-    SELECT
-        *,
-        (user_ratings_total + IFNULL(rating * 10, 0)) AS demand_score
-    FROM source
-    WHERE LOWER(types) LIKE '%parking%'
-),
-
-ranked AS (
-    SELECT
-        *,
-        NTILE(3) OVER (ORDER BY demand_score DESC NULLS LAST) AS demand_bucket
-    FROM parking_demand
 )
 
 SELECT
@@ -52,7 +37,7 @@ SELECT
     lat,
     lng,
     geom,
-    types,
+    primary_type,
     rating,
     user_ratings_total,
     google_maps_url,
@@ -67,7 +52,8 @@ SELECT
     parking_address,
     parking_summary,
     parking_types_raw,
-    fetched_at,
+    fetched_at
+    /*
     demand_score,
     demand_bucket,
   CASE
@@ -75,5 +61,6 @@ SELECT
     WHEN demand_bucket = 1 THEN 'High'
     WHEN demand_bucket = 2 THEN 'Medium'
     ELSE 'Low'
-  END AS demand_category    
+  END AS demand_category
+*/
 FROM ranked
