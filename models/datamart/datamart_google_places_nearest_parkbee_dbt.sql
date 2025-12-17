@@ -23,7 +23,20 @@ WITH dim_fact_google AS (
     INNER JOIN {{ ref('dim_google_places_dbt') }} AS dgp
         ON dgp.place_id = fpcl.place_id
 ),
+parking_demand AS (
+    SELECT
+        *,
+        (user_ratings_total + IFNULL(rating * 10, 0)) AS demand_score
+    FROM dim_fact_google
+    WHERE LOWER(types) LIKE '%parking%'
+),
 
+ranked AS (
+    SELECT
+        *,
+        NTILE(3) OVER (ORDER BY demand_score DESC NULLS LAST) AS demand_bucket
+    FROM parking_demand
+),
 -- ======================================
 -- 2. Join ParkBee + compute distance
 -- ======================================
