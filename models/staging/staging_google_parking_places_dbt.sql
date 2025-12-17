@@ -40,6 +40,7 @@ SELECT
     primary_type,
     types,
     CASE
+       WHEN LOWER(name) LIKE '%parkbee%' THEN 'parking_parkbee'
         WHEN primary_type IN ('parking') THEN 'parking'
         WHEN LOWER(name) LIKE '%charging%station%'
           OR LOWER(name) LIKE '%recharge%'
