@@ -9,6 +9,7 @@
 WITH dim_fact_google AS (
     SELECT
         dgp.name,
+        dgp.primary_type,
         dgp.address,
         dgp.geom,
         dgp.lat,
@@ -42,6 +43,7 @@ join_parkbee AS (
     SELECT
         dfg.place_id,
         dfg.name AS google_place_name,
+        dfg.primary_type,
         dfg.address AS google_place_address,
         dfg.lat AS google_lat,
         dfg.lng AS google_lng,
@@ -77,6 +79,7 @@ SELECT
     jp.place_id,
     jp.google_place_name,
     jp.google_place_address,
+    jp.primary_type,
     jp.google_lat,
     jp.google_lng,
     jp.google_maps_url,
