@@ -7,12 +7,12 @@ SELECT
   dgp.name,
   dgp.primary_type,
   CASE
-    WHEN lower(dgp.name) LIKE '%charging%station%' THEN 'charging station'
+    WHEN lower(dgp.name) LIKE '%charging%station%' or lower(dgp.name) LIKE '%recharge%' or dgp.primary_type in ('oplaadpunt') THEN 'charging station'
     WHEN
       dgp.primary_type LIKE '%office%'
       OR dgp.primary_type LIKE '%company%'
       OR dgp.primary_type IN (
-        'point_of_interest', 'real_estate_agency', 'plumber', 'accounting',
+        'real_estate_agency', 'plumber', 'accounting',
         'finance', 'bank', 'lawyer')
       THEN 'office'
     WHEN dgp.primary_type LIKE '%store%' THEN 'store'    
