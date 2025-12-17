@@ -39,6 +39,7 @@ SELECT
     geom,
     primary_type,
   CASE
+    WHEN primary_type in ('parking') then 'parking'
     WHEN lower(name) LIKE '%charging%station%' or lower(name) LIKE '%recharge%' or primary_type in ('oplaadpunt') THEN 'charging station'
     WHEN
       primary_type LIKE '%office%'
