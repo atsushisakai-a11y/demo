@@ -79,41 +79,43 @@ join_parkbee AS (
 -- 3. Select only nearest ParkBee + enrich
 -- ======================================
 SELECT
-    place_id,
-    google_place_name,
-    google_place_address,
-    google_lat,
-    google_lng,
-    google_maps_url,
-    google_rating,
-    google_reviews,
-    demand_score,
-    demand_category,
+    jp.place_id,
+    jp.google_place_name,
+    jp.google_place_address,
+    jp.google_lat,
+    jp.google_lng,
+    jp.google_maps_url,
+    jp.google_rating,
+    jp.google_reviews,
+    r.demand_score,
+    r.demand_category,
 
-    parkbee_location_id,
-    parkbee_name,
-    parkbee_city,
-    parkbee_country,
-    parkbee_lat,
-    parkbee_lng,
+    jp.parkbee_location_id,
+    jp.parkbee_name,
+    jp.parkbee_city,
+    jp.parkbee_country,
+    jp.parkbee_lat,
+    jp.parkbee_lng,
 
-    distance_meters,
-    distance_meters / 1000 AS distance_km,
+    jp.distance_meters,
+    jp.distance_meters / 1000 AS distance_km,
 
     CASE
-        WHEN distance_meters <= 100 THEN '0–100m (Very Close)'
-        WHEN distance_meters <= 300 THEN '100–300m (Close)'
-        WHEN distance_meters <= 500 THEN '300–500m (Walkable)'
-        WHEN distance_meters <= 1000 THEN '0.5–1 km (Slightly Far)'
+        WHEN jp.distance_meters <= 100 THEN '0–100m (Very Close)'
+        WHEN jp.distance_meters <= 300 THEN '100–300m (Close)'
+        WHEN jp.distance_meters <= 500 THEN '300–500m (Walkable)'
+        WHEN jp.distance_meters <= 1000 THEN '0.5–1 km (Slightly Far)'
         ELSE '> 1 km (Far)'
     END AS distance_category,
 
     CASE
-        WHEN LOWER(google_place_name) LIKE '%parkbee%' THEN 'Yes'
+        WHEN LOWER(jp.google_place_name) LIKE '%parkbee%' THEN 'Yes'
         ELSE 'No'
     END AS on_parkbee
 
-FROM join_parkbee
-WHERE rn = 1
+FROM join_parkbee jp
+LEFT JOIN ranked r
+    ON r.place_id = jp.place_id
+WHERE jp.rn = 1
 
-ORDER BY distance_meters ASC
+ORDER BY jp.distance_meters ASC
