@@ -5,18 +5,22 @@ models:
     columns:
       - name: place_id
         tests:
-          - not_null
-          - unique
-        severity: warn
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+
       - name: fetched_at
         tests:
-          - not_null
-        severity: warn
+          - not_null:
+              severity: warn
+
       - name: lat
         tests:
-          - not_null
-        severity: warn
+          - not_null:
+              severity: warn
+
       - name: lng
         tests:
-          - not_null
-        severity: warn
+          - not_null:
+              severity: warn
