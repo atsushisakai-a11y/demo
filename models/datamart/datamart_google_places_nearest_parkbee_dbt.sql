@@ -87,7 +87,7 @@ SELECT
     jp.google_reviews,
     r.demand_score,
   CASE
-    --WHEN r.name in ('Parkeergarage De Opgang','Markenhoven','Parking Panorama','Parking Place Eugène Flagey') THEN 'High - Recommended'
+    WHEN r.name in ('Parkeergarage De Opgang','Markenhoven','Parking Panorama','Parking Place Eugène Flagey') THEN 'High - Recommended'
     WHEN r.demand_bucket = 1 THEN 'High'
     WHEN r.demand_bucket = 2 THEN 'Medium'
     ELSE 'Low'
