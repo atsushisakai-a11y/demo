@@ -48,7 +48,7 @@ SELECT
             OR primary_type LIKE '%company%'
             OR primary_type IN (
                 'real_estate_agency', 'plumber', 'accounting',
-                'finance', 'bank', 'lawyer'
+                'finance', 'bank', 'lawyer','general_contractor','insurance_agency'
             )
             THEN 'office'
         WHEN primary_type LIKE '%store%' THEN 'store'
