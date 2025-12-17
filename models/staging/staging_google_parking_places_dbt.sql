@@ -45,6 +45,7 @@ SELECT
           OR LOWER(name) LIKE '%recharge%'
           OR primary_type IN ('oplaadpunt')
           THEN 'charging station'
+        WHEN primary_type LIKE '%store%' THEN 'store'
         WHEN
             primary_type LIKE '%office%'
             OR primary_type LIKE '%company%'
@@ -53,8 +54,9 @@ SELECT
                 'finance', 'bank', 'lawyer','general_contractor','insurance_agency'
             )
             OR types like '%finance%'
+            OR primary_type = 'point_of_interest' 
             THEN 'office'
-        WHEN primary_type LIKE '%store%' THEN 'store'
+
         ELSE 'other'
     END AS location_type,
     rating,
