@@ -38,6 +38,18 @@ SELECT
     lng,
     geom,
     primary_type,
+  CASE
+    WHEN lower(name) LIKE '%charging%station%' or lower(name) LIKE '%recharge%' or primary_type in ('oplaadpunt') THEN 'charging station'
+    WHEN
+      primary_type LIKE '%office%'
+      OR primary_type LIKE '%company%'
+      OR primary_type IN (
+        'real_estate_agency', 'plumber', 'accounting',
+        'finance', 'bank', 'lawyer')
+      THEN 'office'
+    WHEN primary_type LIKE '%store%' THEN 'store'    
+    ELSE 'other'
+    END AS location_type,
     rating,
     user_ratings_total,
     google_maps_url,
@@ -53,14 +65,4 @@ SELECT
     parking_summary,
     parking_types_raw,
     fetched_at
-    /*
-    demand_score,
-    demand_bucket,
-  CASE
-    WHEN name in ('Parkeergarage De Opgang','Markenhoven','Parking Panorama','Parking Place Eugène Flagey') THEN 'High - Recommended'
-    WHEN demand_bucket = 1 THEN 'High'
-    WHEN demand_bucket = 2 THEN 'Medium'
-    ELSE 'Low'
-  END AS demand_category
-*/
 FROM source
