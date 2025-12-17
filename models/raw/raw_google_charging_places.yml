@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: raw_google_charging_places
-##    columns:
+    columns:
 #      - name: place_id
 #        tests:
 #          - not_null:
