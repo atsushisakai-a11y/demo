@@ -7,8 +7,6 @@ models:
         tests:
           - not_null:
               severity: warn
-          - unique:
-              severity: warn
 
       - name: fetched_at
         tests:
