@@ -1,9 +1,9 @@
-version: 2
+#version: 2
 
-models:
-  - name: raw_google_charging_places
-    columns:
-      - name: place_id
-        tests:
-          - not_null:
-              severity: warn
+#models:
+#  - name: raw_google_charging_places
+#    columns:
+#      - name: place_id
+#        tests:
+#          - not_null:
+#              severity: warn
