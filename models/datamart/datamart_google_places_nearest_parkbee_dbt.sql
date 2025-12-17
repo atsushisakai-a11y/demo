@@ -27,7 +27,7 @@ parking_demand AS (
         *,
         (user_ratings_total + IFNULL(rating * 10, 0)) AS demand_score
     FROM dim_fact_google
-    WHERE LOWER(types) LIKE '%parking%'
+    WHERE LOWER(primary_type) LIKE '%parking%'
 ),
 
 ranked AS (
