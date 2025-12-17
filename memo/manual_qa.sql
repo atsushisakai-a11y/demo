@@ -83,7 +83,18 @@ cast(date_trunc(scrape_datetime, day) as date) as scrape_datetime,
 EXTRACT(HOUR FROM parking_from) AS parking_from_hour,
 count(*)
 FROM `grand-water-473707-r8.raw.raw_parkbee_garages` group by all order by 1,2,3,4
+with multiple_place_id as (
+SELECT place_id, count(*)
+FROM `grand-water-473707-r8.raw.raw_google_charging_places`
+group by all
+having count(*) > 1
+)
 
+SELECT gcp.place_id, gcp.fetched_at
+FROM `grand-water-473707-r8.raw.raw_google_charging_places` gcp
+inner join multiple_place_id mpi
+on mpi.place_id = gcp.place_id
+order by 1,2
   
   --STAGING
 drop table `grand-water-473707-r8.staging.staging_parkbee_garages`;
