@@ -120,5 +120,5 @@ FROM join_parkbee jp
 LEFT JOIN ranked r
     ON r.place_id = jp.place_id
 WHERE jp.rn = 1
-
+AND LOWER(jp.primary_type) LIKE '%parking%'
 ORDER BY jp.distance_meters ASC
