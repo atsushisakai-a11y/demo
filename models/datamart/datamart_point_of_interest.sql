@@ -13,7 +13,7 @@ WITH parkbee_parking AS (
       ST_GEOGPOINT(dpl.longitude, dpl.latitude),
       500
     ) AS buffer_500m,
-    fpl.occupancy_rate
+    fpl.utilization_rate
   FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
   INNER JOIN {{ ref('dim_parkbee_locations_dbt') }} dpl
     ON dpl.location_id = fpl.location_id
