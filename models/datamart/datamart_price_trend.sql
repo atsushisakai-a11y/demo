@@ -28,7 +28,7 @@ SELECT
   fpl.parking_from_hour,
   fpl.parking_from_weekday,
   fpl.hourly_price,
-  fpl.occupancy_rate
+  fpl.utilization_rate
 FROM
   {{ ref('fact_parkbee_locations_dbt') }} fpl
 INNER JOIN
