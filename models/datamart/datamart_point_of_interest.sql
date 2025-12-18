@@ -22,7 +22,7 @@ INNER JOIN {{ ref('dim_google_places_dbt') }} AS dgp
 
 WITH parkbee_parking AS (
   SELECT
-    parking_from_cet,
+    fpl.parking_from_cet,
     name AS parking_name,
     latitude,
     longitude,
@@ -30,8 +30,9 @@ WITH parkbee_parking AS (
       ST_GEOGPOINT(longitude, latitude),
       500
     ) AS buffer_500m,
-    occupancy_rate
-  FROM `grand-water-473707-r8.datamart.datamart_price_comparison`
+    fpl.occupancy_rate
+  FROM {{ ref('fact_parkbee_locations_dbt') }} fpl fpl
+    INNER JOIN 
   WHERE scrape_date = '2025-12-18'
 ),
 
