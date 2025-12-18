@@ -21,7 +21,7 @@ SELECT
     dpl.country,
     dpl.latitude,
     dpl.longitude,
-    fpl.occupancy_rate,
+    fpl.utilization_rate,
     fpl.price_cost,
     fpl.hourly_price,
     fpl.available_spaces,
