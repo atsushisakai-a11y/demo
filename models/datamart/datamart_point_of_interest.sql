@@ -14,7 +14,7 @@ WITH parkbee_parking AS (
       500
     ) AS buffer_500m,
     fpl.occupancy_rate
-  FROM {{ ref('fact_parkbee_locations_dbt') }} fpl fpl
+  FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
   INNER JOIN {{ ref('dim_parkbee_locations_dbt') }} dpl
     ON dpl.location_id = fpl.location_id
   WHERE fpl.scrape_date = '2025-12-18'
