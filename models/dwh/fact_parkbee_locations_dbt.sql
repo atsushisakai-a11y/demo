@@ -34,6 +34,6 @@ SELECT
         WHEN spg.total_spaces > 0 THEN 
             (spg.total_spaces - spg.available_spaces) / spg.total_spaces
         ELSE NULL
-    END AS occupancy_rate
+    END AS utilization_rate
 
 FROM spg
