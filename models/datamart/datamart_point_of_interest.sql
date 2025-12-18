@@ -17,7 +17,7 @@ WITH parkbee_parking AS (
   FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
   INNER JOIN {{ ref('dim_parkbee_locations_dbt') }} dpl
     ON dpl.location_id = fpl.location_id
-  WHERE fpl.scrape_date = '2025-12-18'
+  WHERE date_trunc(fpl.scrape_datetime_cet, day) = '2025-12-18'
 ),
 
 google_pois AS (
