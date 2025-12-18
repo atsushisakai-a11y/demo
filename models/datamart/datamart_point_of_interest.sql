@@ -37,7 +37,7 @@ parkbee_with_poi AS (
     p.parking_from_cet AS reference_time,
     p.parking_name AS name,
     'parking' AS primary_type,
-    'parking' AS location_type,
+    'park bee' AS location_type,
     p.latitude AS lat,
     p.longitude AS lng,
     ST_GEOGPOINT(p.longitude, p.latitude) AS geom,
