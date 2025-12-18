@@ -3,37 +3,21 @@
     tags = ["datamart"]
 ) }}
 
-SELECT
-  dgp.name,
-  dgp.primary_type,
-  dgp.location_type,
-  dgp.address,
-  dgp.geom,
-  dgp.lat,
-  dgp.lng,
-  dgp.google_maps_url,
-  fpcl.place_id,
-  fpcl.rating,
-  fpcl.user_ratings_total
-FROM {{ ref('fact_parking_candidate_locations_dbt') }} AS fpcl
-INNER JOIN {{ ref('dim_google_places_dbt') }} AS dgp
-  ON dgp.place_id = fpcl.place_id
-
-
 WITH parkbee_parking AS (
   SELECT
     fpl.parking_from_cet,
-    name AS parking_name,
-    latitude,
-    longitude,
+    dpl.name AS parking_name,
+    dpl.latitude,
+    dpl.longitude,
     ST_BUFFER(
-      ST_GEOGPOINT(longitude, latitude),
+      ST_GEOGPOINT(dpl.longitude, dpl.latitude),
       500
     ) AS buffer_500m,
     fpl.occupancy_rate
   FROM {{ ref('fact_parkbee_locations_dbt') }} fpl fpl
-    INNER JOIN 
-  WHERE scrape_date = '2025-12-18'
+  INNER JOIN {{ ref('dim_parkbee_locations_dbt') }} dpl
+    ON dpl.location_id = fpl.location_id
+  WHERE fpl.scrape_date = '2025-12-18'
 ),
 
 google_pois AS (
