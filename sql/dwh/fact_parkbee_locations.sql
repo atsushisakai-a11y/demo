@@ -13,7 +13,7 @@ SELECT
     WHEN spg.total_spaces > 0 THEN (spg.total_spaces - spg.available_spaces) / spg.total_spaces
     ELSE NULL
 END
-  AS occupancy_rate
+  AS utilization_rate
 FROM
   `grand-water-473707-r8.staging.staging_parkbee_garages` spg
   ;
