@@ -41,17 +41,13 @@ parkbee_with_poi AS (
     p.latitude AS lat,
     p.longitude AS lng,
     ST_GEOGPOINT(p.longitude, p.latitude) AS geom,
-    p.occupancy_rate,
+    p.utilization_rate,
     COUNT(g.place_id) AS poi_count_500m
   FROM parkbee_parking p
   LEFT JOIN google_pois g
     ON ST_CONTAINS(p.buffer_500m, g.geom)
   GROUP BY
-    p.parking_from_cet,
-    p.parking_name,
-    p.latitude,
-    p.longitude,
-    p.occupancy_rate
+    ALL
 )
 
 -- 🔽 UNION ParkBee + Google POIs
@@ -63,7 +59,7 @@ SELECT
   lng,
   geom,
   NULL as url,
-  occupancy_rate,
+  utilization_rate,
   poi_count_500m
 FROM parkbee_with_poi
 
