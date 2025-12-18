@@ -49,7 +49,7 @@ ON
   ST_WITHIN(dpl.geom, z.geom)
 WHERE
   fpl.occupancy_rate > 0 --remove places with data issues
-  and fpl.occupancy_rate < 1 --remove places with data issues
+  and fpl.utilization_rate < 1 --remove places with data issues
   and fpl.hourly_price <= 20 --remove outlier
 ORDER BY
   1,
