@@ -79,4 +79,4 @@ SELECT
   url,
   NULL AS occupancy_rate,
   NULL AS poi_count_500m
-FROM google_pois;
+FROM google_pois
