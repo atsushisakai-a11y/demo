@@ -23,7 +23,7 @@ joined AS (
         ST_GEOGPOINT(spg.longitude, spg.latitude) AS geom,
         DATE_TRUNC(l.first_seen_datetime, DAY) AS first_seen_date,
         DATE_TRUNC(l.last_seen_datetime, DAY) AS last_seen_date
-    FROM {{ ref('staging_parkbee_garages_dbt') }} spg
+    FROM {{ ref('staging_parkbee_garages') }} spg
     INNER JOIN latest l
         ON l.location_id = spg.location_id
        AND l.last_seen_datetime = spg.scrape_datetime_cet
