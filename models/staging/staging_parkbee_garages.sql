@@ -5,7 +5,8 @@
 -- Staging model for ParkBee garages
 
 SELECT
-    id AS location_id,
+  'parkbee' AS platform,
+  'parkbee|' || id AS place_id,
     name,
     latitude,
     longitude,
