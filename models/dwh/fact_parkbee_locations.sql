@@ -8,7 +8,7 @@ WITH spg AS (
 )
 
 SELECT
-    spg.place_id,
+    spg.location_id,
     spg.scrape_datetime_cet,
     spg.parking_from_cet,
     spg.parking_to_cet,
