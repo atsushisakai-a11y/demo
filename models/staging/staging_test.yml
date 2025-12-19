@@ -47,7 +47,7 @@ models:
   # ------------------------------------------------------
   # STAGING PARKING FEE AMSTERDAM
   # ------------------------------------------------------
-  - name: staging_parking_fee_amsterdam_dbt
+  - name: staging_parking_fee_amsterdam
     columns:
       - name: zone_id
         tests:
