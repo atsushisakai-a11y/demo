@@ -69,7 +69,7 @@ join_parkbee AS (
         ) AS rn
 
     FROM dim_fact_google dfg
-    CROSS JOIN {{ ref('dim_parkbee_locations_dbt') }} AS dpl
+    CROSS JOIN {{ ref('dim_parkbee_locations') }} AS dpl
 )
 
 -- ======================================
