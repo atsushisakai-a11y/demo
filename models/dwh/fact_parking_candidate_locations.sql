@@ -4,7 +4,7 @@
 ) }}
 
 SELECT
-    place_id,
+    location_id,
     rating,
     user_ratings_total
 FROM
