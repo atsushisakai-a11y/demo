@@ -42,7 +42,7 @@ INNER JOIN latest l
     ON  l.location_id = fpl.location_id
     AND l.max_scrape_datetime_cet = fpl.scrape_datetime_cet
 
-INNER JOIN {{ ref('dim_parkbee_locations_dbt') }} dpl
+INNER JOIN {{ ref('dim_parkbee_locations') }} dpl
     ON dpl.location_id = fpl.location_id
 
 LEFT JOIN {{ ref('fact_parking_fee_amsterdam_dbt') }} z
