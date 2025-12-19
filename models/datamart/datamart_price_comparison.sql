@@ -45,7 +45,7 @@ INNER JOIN latest l
 INNER JOIN {{ ref('dim_parkbee_locations') }} dpl
     ON dpl.location_id = fpl.location_id
 
-LEFT JOIN {{ ref('fact_parking_fee_amsterdam_dbt') }} z
+LEFT JOIN {{ ref('fact_parking_fee_amsterdam') }} z
     ON ST_WITHIN(dpl.geom, z.geom)
 
 WHERE
