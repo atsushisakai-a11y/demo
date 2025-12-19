@@ -19,7 +19,7 @@ SELECT
         WHEN pricingAndAvailability.availability.totalSpaces > 0 THEN 
             (pricingAndAvailability.availability.totalSpaces - pricingAndAvailability.availability.availableSpaces) / pricingAndAvailability.availability.totalSpaces
         ELSE NULL
-    END AS utilization_rate
+    END AS utilization_rate,
     scrape_datetime AS scrape_datetime_cet,
     parking_from AS parking_from_cet,
     parking_to AS parking_to_cet,
