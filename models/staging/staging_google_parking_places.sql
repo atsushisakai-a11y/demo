@@ -31,7 +31,8 @@ WITH source AS (
 )
 
 SELECT
-    place_id,
+  'google' AS platform,
+  'google|' || place_id AS place_id,
     name,
     address,
     lat,
