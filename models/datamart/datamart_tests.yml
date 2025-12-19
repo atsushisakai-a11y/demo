@@ -36,7 +36,7 @@ models:
   # ==========================================================
   # DATAMART — PRICE COMPARISON
   # ==========================================================
-  - name: datamart_price_comparison_dbt
+  - name: datamart_price_comparison
     columns:
       - name: scrape_date
         tests:
