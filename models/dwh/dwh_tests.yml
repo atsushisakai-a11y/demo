@@ -5,7 +5,7 @@ models:
   # ------------------------------
   # DIM GOOGLE PLACES
   # ------------------------------
-  - name: dim_google_places_dbt
+  - name: dim_google_places
     columns:
       - name: place_id
         tests:
