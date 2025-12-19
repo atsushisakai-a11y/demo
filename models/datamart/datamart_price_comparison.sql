@@ -36,7 +36,7 @@ SELECT
         ELSE 'No public parking data'
     END AS price_position
 
-FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
+FROM {{ ref('fact_parkbee_locations') }} fpl
 
 INNER JOIN latest l
     ON  l.location_id = fpl.location_id
