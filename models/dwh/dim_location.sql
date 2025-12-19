@@ -13,8 +13,8 @@ WITH
     GROUP BY spg.location_id
   )
 SELECT
-  'parkbee' AS platform,
-  'parkbee|' || spg.location_id AS place_id,
+  spg.platform,
+  spg.place_id,
   spg.location_id AS external_id,
   spg.country,
   spg.city,
@@ -36,8 +36,8 @@ INNER JOIN latest l
       = spg.scrape_datetime_cet
 UNION ALL
 SELECT
-  'google' AS platform,
-  'google|' || sg.place_id AS place_id,
+  sg.platform,
+  sg.place_id,
   sg.place_id AS external_id,
   NULL AS country,
   NULL AS city,
