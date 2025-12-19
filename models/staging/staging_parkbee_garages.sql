@@ -15,11 +15,19 @@ SELECT
     pricingAndAvailability.pricing.currency AS price_currency,
     pricingAndAvailability.availability.availableSpaces AS available_spaces,
     pricingAndAvailability.availability.totalSpaces AS total_spaces,
+    CASE
+        WHEN pricingAndAvailability.availability.totalSpaces > 0 THEN 
+            (pricingAndAvailability.availability.totalSpaces - pricingAndAvailability.availability.availableSpaces) / pricingAndAvailability.availability.totalSpaces
+        ELSE NULL
+    END AS utilization_rate
     scrape_datetime AS scrape_datetime_cet,
     parking_from AS parking_from_cet,
     parking_to AS parking_to_cet,
+    EXTRACT(HOUR FROM parking_from) AS parking_from_hour,
+    EXTRACT(HOUR FROM parking_to) AS parking_to_hour,
+    FORMAT_TIMESTAMP('%a', parking_from) AS parking_from_weekday,
     parking_duration_hours,
-    hourly_price
+    SAFE_DIVIDE(pricingAndAvailability.pricing.cost, parking_duration_hours) AS hourly_price
 FROM
     {{ source('raw', 'raw_parkbee_garages') }}
 WHERE
