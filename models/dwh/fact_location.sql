@@ -6,7 +6,7 @@ SELECT
   total_spaces,
   available_spaces,
   hourly_price
-FROM `grand-water-473707-r8.staging.staging_parkbee_garages`
+FROM {{ ref('staging_parkbee_garages') }}
 
 union all
 
