@@ -42,7 +42,7 @@ parkbee_with_poi AS (
     p.longitude AS lng,
     ST_GEOGPOINT(p.longitude, p.latitude) AS geom,
     p.utilization_rate,
-    COUNT(g.place_id) AS poi_count_500m
+    COUNT(g.location_id) AS poi_count_500m
   FROM parkbee_parking p
   LEFT JOIN google_pois g
     ON ST_CONTAINS(p.buffer_500m, g.geom)
