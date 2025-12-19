@@ -5,7 +5,7 @@ models:
   # ==========================================================
   # DATAMART — GOOGLE PLACES NEAREST PARKBEE
   # ==========================================================
-  - name: datamart_google_places_nearest_parkbee_dbt
+  - name: datamart_google_places_nearest_parkbee
     columns:
       - name: place_id
         tests:
