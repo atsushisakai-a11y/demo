@@ -32,7 +32,7 @@ WITH source AS (
 
 SELECT
   'google' AS platform,
-  'google|' || place_id AS place_id,
+  'google|' || place_id AS location_id,
     name,
     address,
     lat,
