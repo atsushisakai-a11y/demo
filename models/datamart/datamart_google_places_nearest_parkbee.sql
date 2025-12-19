@@ -19,7 +19,7 @@ WITH dim_fact_google AS (
         fpcl.rating,
         fpcl.user_ratings_total
     FROM {{ ref('fact_parking_candidate_locations_dbt') }} AS fpcl
-    INNER JOIN {{ ref('dim_google_places_dbt') }} AS dgp
+    INNER JOIN {{ ref('dim_google_places') }} AS dgp
         ON dgp.place_id = fpcl.place_id
 ),
 parking_demand AS (
