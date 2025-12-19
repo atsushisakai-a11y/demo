@@ -7,7 +7,7 @@ models:
   # ------------------------------
   - name: dim_google_places
     columns:
-      - name: place_id
+      - name: location_id
         tests:
           - not_null
           - unique
