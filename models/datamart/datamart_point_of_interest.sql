@@ -14,7 +14,7 @@ WITH parkbee_parking AS (
       500
     ) AS buffer_500m,
     fpl.utilization_rate
-  FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
+  FROM {{ ref('fact_parkbee_locations') }} fpl
   INNER JOIN {{ ref('dim_parkbee_locations') }} dpl
     ON dpl.location_id = fpl.location_id
   WHERE date_trunc(fpl.scrape_datetime_cet, day) = '2025-12-18'
