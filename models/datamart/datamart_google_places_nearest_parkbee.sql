@@ -15,12 +15,12 @@ WITH dim_fact_google AS (
         dgp.lat,
         dgp.lng,
         dgp.google_maps_url,
-        fpcl.place_id,
+        fpcl.location_id,
         fpcl.rating,
         fpcl.user_ratings_total
     FROM {{ ref('fact_parking_candidate_locations') }} AS fpcl
     INNER JOIN {{ ref('dim_google_places') }} AS dgp
-        ON dgp.place_id = fpcl.place_id
+        ON dgp.location_id = fpcl.location_id
 ),
 parking_demand AS (
     SELECT
@@ -41,7 +41,7 @@ ranked AS (
 -- ======================================
 join_parkbee AS (
     SELECT
-        dfg.place_id,
+        dfg.location_id,
         dfg.name AS google_place_name,
         dfg.primary_type,
         dfg.address AS google_place_address,
@@ -64,7 +64,7 @@ join_parkbee AS (
 
         -- Row numbering → keep NEAREST ParkBee only
         ROW_NUMBER() OVER (
-            PARTITION BY dfg.place_id
+            PARTITION BY dfg.location_id
             ORDER BY ST_DISTANCE(dfg.geom, dpl.geom)
         ) AS rn
 
@@ -76,7 +76,7 @@ join_parkbee AS (
 -- 3. Select only nearest ParkBee + enrich
 -- ======================================
 SELECT
-    jp.place_id,
+    jp.location_id,
     jp.google_place_name,
     jp.google_place_address,
     jp.primary_type,
@@ -118,7 +118,7 @@ SELECT
 
 FROM join_parkbee jp
 LEFT JOIN ranked r
-    ON r.place_id = jp.place_id
+    ON r.location_id = jp.location_id
 WHERE jp.rn = 1
 AND LOWER(jp.primary_type) LIKE '%parking%'
 ORDER BY jp.distance_meters ASC
