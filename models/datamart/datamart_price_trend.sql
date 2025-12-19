@@ -30,7 +30,7 @@ SELECT
   fpl.hourly_price,
   fpl.utilization_rate
 FROM
-  {{ ref('fact_parkbee_locations_dbt') }} fpl
+  {{ ref('fact_parkbee_locations') }} fpl
 INNER JOIN
   {{ ref('dim_parkbee_locations') }} dpl
 ON
