@@ -15,7 +15,7 @@ models:
   # ------------------------------
   # DIM PARKBEE LOCATIONS
   # ------------------------------
-  - name: dim_parkbee_locations_dbt
+  - name: dim_parkbee_locations
     columns:
       - name: location_id
         tests:
