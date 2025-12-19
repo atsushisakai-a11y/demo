@@ -7,7 +7,7 @@ WITH latest AS (
     SELECT
         fpl.location_id,
         MAX(fpl.scrape_datetime_cet) AS max_scrape_datetime_cet
-    FROM {{ ref('fact_parkbee_locations_dbt') }} fpl
+    FROM {{ ref('fact_parkbee_locations') }} fpl
     GROUP BY fpl.location_id
 )
 
