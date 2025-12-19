@@ -33,12 +33,12 @@ models:
   # ------------------------------
   # FACT PARKBEE LOCATIONS
   # ------------------------------
-  - name: fact_parkbee_locations_dbt
+  - name: fact_parkbee_locations
     columns:
       - name: location_id
         tests:
           - relationships:
-              to: ref('dim_parkbee_locations_dbt')
+              to: ref('dim_parkbee_locations')
               field: location_id      
 
       - name: hourly_price
