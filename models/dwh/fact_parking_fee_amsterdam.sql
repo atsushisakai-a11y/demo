@@ -12,7 +12,7 @@ SELECT
     spfa.zone_lat,
     spfa.zone_lng,
     spfa.geom
-FROM {{ ref('staging_parking_fee_amsterdam_dbt') }} AS spfa
+FROM {{ ref('staging_parking_fee_amsterdam') }} AS spfa
 ORDER BY
     zone_id,
     days
