@@ -1,3 +1,7 @@
+{{ config(
+    materialized = "table"
+) }}
+
 SELECT
   location_id,
   scrape_datetime_cet,
