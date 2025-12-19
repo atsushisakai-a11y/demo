@@ -27,7 +27,7 @@ google_pois AS (
     location_type,
     geom,
     google_maps_url as url
-  FROM {{ ref('dim_google_places_dbt') }} AS dgp
+  FROM {{ ref('dim_google_places') }} AS dgp
   WHERE location_type in ('office','parking')
 ),
 
