@@ -6,16 +6,16 @@
 WITH
   latest AS (
     SELECT
-      spg.location_id,
+      spg.place_id,
       MAX(spg.scrape_datetime_cet) AS last_seen_datetime,
       MIN(spg.scrape_datetime_cet) AS first_seen_datetime
     FROM {{ ref('staging_parkbee_garages') }} spg
-    GROUP BY spg.location_id
+    GROUP BY spg.place_id
   )
 SELECT
   spg.platform,
   spg.place_id,
-  spg.location_id AS external_id,
+  spg.place_id AS external_id,
   spg.country,
   spg.city,
   spg.name,
@@ -31,7 +31,7 @@ SELECT
 FROM {{ ref('staging_parkbee_garages') }} spg
 INNER JOIN latest l
   ON
-    l.location_id = spg.location_id
+    l.place_id = spg.place_id
     AND l.last_seen_datetime
       = spg.scrape_datetime_cet
 UNION ALL
