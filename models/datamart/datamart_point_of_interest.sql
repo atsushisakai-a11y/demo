@@ -22,7 +22,7 @@ WITH parkbee_parking AS (
 
 google_pois AS (
   SELECT
-    place_id,
+    location_id,
     name AS poi_name,
     location_type,
     geom,
