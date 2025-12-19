@@ -1,6 +1,6 @@
 {{ config(
     materialized = "table",
-    alias = "staging_google_parking_places_dbt"
+    alias = "staging_google_parking_places"
 ) }}
 
 WITH source AS (
