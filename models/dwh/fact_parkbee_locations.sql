@@ -4,7 +4,7 @@
 
 WITH spg AS (
     SELECT * 
-    FROM {{ ref('staging_parkbee_garages_dbt') }}
+    FROM {{ ref('staging_parkbee_garages') }}
 )
 
 SELECT
