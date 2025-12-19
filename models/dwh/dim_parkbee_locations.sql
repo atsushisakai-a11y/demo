@@ -8,7 +8,7 @@ WITH latest AS (
         spg.location_id,
         MAX(spg.scrape_datetime_cet) AS last_seen_datetime,
         MIN(spg.scrape_datetime_cet) AS first_seen_datetime
-    FROM {{ ref('staging_parkbee_garages_dbt') }} spg
+    FROM {{ ref('staging_parkbee_garages') }} spg
     GROUP BY spg.location_id
 ),
 
