@@ -30,7 +30,7 @@ SELECT
 FROM
   {{ ref('fact_parkbee_locations_dbt') }} fpl
 INNER JOIN
-  {{ ref('dim_parkbee_locations_dbt') }} dpl
+  {{ ref('dim_parkbee_locations') }} dpl
 ON
   dpl.location_id = fpl.location_id
 INNER JOIN
