@@ -6,7 +6,7 @@
 
 SELECT
   'parkbee' AS platform,
-  'parkbee|' || id AS place_id,
+  'parkbee|' || id AS location_id,
     name,
     latitude,
     longitude,
