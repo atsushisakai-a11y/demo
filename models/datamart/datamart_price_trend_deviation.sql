@@ -9,7 +9,7 @@ WITH
     avg(fpl.hourly_price) as avg_hourly_price,
     COUNT(*) AS counts
   FROM
-    {{ ref('fact_parkbee_locations_dbt') }} fpl
+    {{ ref('fact_parkbee_locations') }} fpl
   WHERE
     CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
   GROUP BY
