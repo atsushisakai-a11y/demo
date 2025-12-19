@@ -28,7 +28,7 @@ SELECT
   max(fpl.hourly_price) as max_hourly_price,
   min(fpl.hourly_price) as min_hourly_price,
 FROM
-  {{ ref('fact_parkbee_locations_dbt') }} fpl
+  {{ ref('fact_parkbee_locations') }} fpl
 INNER JOIN
   {{ ref('dim_parkbee_locations') }} dpl
 ON
