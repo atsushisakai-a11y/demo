@@ -48,7 +48,7 @@ models:
   # ------------------------------
   # FACT PARKING FEE AMSTERDAM
   # ------------------------------
-  - name: fact_parking_fee_amsterdam_dbt
+  - name: fact_parking_fee_amsterdam
     columns:
       - name: zone_id
         tests:
