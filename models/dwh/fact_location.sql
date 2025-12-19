@@ -18,4 +18,4 @@ SELECT
   total_count,
   available_count,
   NULL as hourly_price
-FROM `grand-water-473707-r8.staging.staging_google_parking_places`
+FROM {{ ref('staging_google_parking_places') }}
