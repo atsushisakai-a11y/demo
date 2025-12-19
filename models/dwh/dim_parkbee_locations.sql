@@ -9,7 +9,7 @@ WITH latest AS (
         MAX(spg.scrape_datetime_cet) AS last_seen_datetime,
         MIN(spg.scrape_datetime_cet) AS first_seen_datetime
     FROM {{ ref('staging_parkbee_garages') }} spg
-    GROUP BY spg.location_id
+    GROUP BY spg.place_id
 ),
 
 joined AS (
