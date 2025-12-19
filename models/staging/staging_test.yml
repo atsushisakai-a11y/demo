@@ -5,7 +5,7 @@ models:
   # ------------------------------------------------------
   # STAGING GOOGLE PARKING PLACES
   # ------------------------------------------------------
-  - name: staging_google_parking_places_dbt
+  - name: staging_google_parking_places
     columns:
       - name: place_id
         tests:
