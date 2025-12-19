@@ -4,7 +4,7 @@
 ) }}
 
 SELECT
-    sg.place_id,
+    sg.location_id,
     sg.name,
     sg.address,
     sg.primary_type,
