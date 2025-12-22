@@ -1,3 +1,8 @@
+  {{ config(
+      materialized = "table",
+      tags = ["datamart"]
+  ) }}
+
 WITH
   count_per_location AS (
     SELECT
