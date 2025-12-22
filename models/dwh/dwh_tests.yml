@@ -2,20 +2,7 @@ version: 2
 
 models:
 
-  # ------------------------------
-  # DIM GOOGLE PLACES
-  # ------------------------------
-  - name: dim_google_places
-    columns:
-      - name: location_id
-        tests:
-          - not_null
-          - unique
-
-  # ------------------------------
-  # DIM PARKBEE LOCATIONS
-  # ------------------------------
-  - name: dim_parkbee_locations
+  - name: dim_location
     columns:
       - name: location_id
         tests:
@@ -30,34 +17,11 @@ models:
         tests:
           - not_null
 
-  # ------------------------------
-  # FACT PARKBEE LOCATIONS
-  # ------------------------------
-  - name: fact_parkbee_locations
+  - name: fact_location
     columns:
       - name: location_id
         tests:
           - relationships:
-              to: ref('dim_parkbee_locations')
-              field: location_id      
+              to: ref('dim_location')
+              field: location_id
 
-      - name: hourly_price
-        tests:
-          - not_null
-
-  # ------------------------------
-  # FACT PARKING FEE AMSTERDAM
-  # ------------------------------
-  - name: fact_parking_fee_amsterdam
-    columns:
-      - name: zone_id
-        tests:
-          - not_null
-
-      - name: geom
-        tests:
-          - not_null
-
-      - name: hourly_rate
-        tests:
-          - not_null
