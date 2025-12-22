@@ -25,7 +25,7 @@ SELECT
   dl.geom,
   fl.parking_from_cet,
   CAST(fl.parking_from_cet AS date) AS parking_date,
-  fl.parking_from_hour,
+  fl.parking_from_cet,
   fl.parking_from_weekday,
   fl.hourly_price,
   fl.utilization_rate
