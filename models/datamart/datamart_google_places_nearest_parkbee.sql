@@ -84,7 +84,7 @@ SELECT
     jp.primary_type,
     jp.google_lat,
     jp.google_lng,
-    jp.google_maps_url,
+    jp.url,
     jp.google_rating,
     jp.google_reviews,
     r.demand_score,
