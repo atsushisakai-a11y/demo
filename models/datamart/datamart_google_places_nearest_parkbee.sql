@@ -27,7 +27,7 @@ WITH dim_fact_google AS (
 parking_demand AS (
     SELECT
         *,
-        (user_ratings_total + IFNULL(rating * 10, 0)) AS demand_score
+        (ratings + IFNULL(avg_review_rating * 10, 0)) AS demand_score
     FROM dim_fact_google
     WHERE LOWER(primary_type) LIKE '%parking%'
 ),
