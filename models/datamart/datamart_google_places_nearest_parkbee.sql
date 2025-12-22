@@ -52,21 +52,21 @@ join_parkbee AS (
         dfg.geom AS google_geom,
         dfg.rating AS google_rating,
         dfg.user_ratings_total AS google_reviews,
-        dpl.location_id AS parkbee_location_id,
-        dpl.name AS parkbee_name,
-        dpl.city AS parkbee_city,
-        dpl.country AS parkbee_country,
-        dpl.latitude AS parkbee_lat,
-        dpl.longitude AS parkbee_lng,
-        dpl.geom AS parkbee_geom,
+        dl.location_id AS parkbee_location_id,
+        dl.name AS parkbee_name,
+        dl.city AS parkbee_city,
+        dl.country AS parkbee_country,
+        dl.latitude AS parkbee_lat,
+        dl.longitude AS parkbee_lng,
+        dl.geom AS parkbee_geom,
 
         -- ⭐ Compute distance
-        ST_DISTANCE(dfg.geom, dpl.geom) AS distance_meters,
+        ST_DISTANCE(dfg.geom, dl.geom) AS distance_meters,
 
         -- Row numbering → keep NEAREST ParkBee only
         ROW_NUMBER() OVER (
             PARTITION BY dfg.location_id
-            ORDER BY ST_DISTANCE(dfg.geom, dpl.geom)
+            ORDER BY ST_DISTANCE(dfg.geom, dl.geom)
         ) AS rn
 
     FROM dim_fact_google dfg
