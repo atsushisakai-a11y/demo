@@ -14,7 +14,9 @@ SELECT
     ELSE NULL
 END
   AS utilization_rate,
-  hourly_price
+  hourly_price,
+    NULL as avg_rating,
+    NULL as ratings
 FROM {{ ref('staging_parkbee_garages') }}
 
 union all
@@ -31,5 +33,7 @@ SELECT
     ELSE NULL
 END
   AS utilization_rate,    
-  NULL as hourly_price
+  NULL as hourly_price,
+  rating as avg_rating,
+  user_ratings_total as ratings
 FROM {{ ref('staging_google_parking_places') }}
