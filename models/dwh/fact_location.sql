@@ -27,7 +27,7 @@ SELECT
   total_count,
   available_count,
   CASE
-    WHEN total_spaces > 0 THEN (total_spaces - available_spaces) / total_spaces
+    WHEN total_count > 0 THEN (total_count - available_count) / total_count
     ELSE NULL
 END
   AS utilization_rate,    
