@@ -14,7 +14,6 @@ WITH latest AS (
 SELECT
     CAST(DATE_TRUNC(fl.scrape_datetime_cet, DAY) AS DATE) AS scrape_date,
     fl.parking_from_cet,
-    fl.parking_to_cet,
     dl.name,
     dl.location_id,
     dl.city,
