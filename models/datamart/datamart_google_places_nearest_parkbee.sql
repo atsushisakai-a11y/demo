@@ -16,7 +16,7 @@ WITH dim_fact_google AS (
         dl.longitude,
         dl.url,
         fl.location_id,
-        fl.avg_review_rating,
+        fl.avg_rating,
         fl.ratings,
         fl.user_ratings_total
     FROM {{ ref('fact_location') }} AS fl
@@ -27,7 +27,7 @@ WITH dim_fact_google AS (
 parking_demand AS (
     SELECT
         *,
-        (ratings + IFNULL(avg_review_rating * 10, 0)) AS demand_score
+        (ratings + IFNULL(avg_rating * 10, 0)) AS demand_score
     FROM dim_fact_google
     WHERE LOWER(primary_type) LIKE '%parking%'
 ),
