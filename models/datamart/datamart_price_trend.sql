@@ -41,6 +41,7 @@ ON
   cpl.location_id = fl.location_id
 WHERE
   CAST(fl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    and dl.platform = 'parkbee'
 ORDER BY
   1,
   2,
