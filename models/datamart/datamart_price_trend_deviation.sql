@@ -1,45 +1,44 @@
-  {{ config(
-      materialized = "table",
-      tags = ["datamart"]
-  ) }}
 WITH
   count_per_location AS (
-  SELECT
-    fpl.location_id,
-    avg(fpl.hourly_price) as avg_hourly_price,
-    COUNT(*) AS counts
-  FROM
-    {{ ref('fact_parkbee_locations') }} fpl
-  WHERE
-    CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-  GROUP BY
-    ALL
-  HAVING
-    COUNT(*) >= 8 )
+    SELECT
+      fl.location_id,
+      avg(fl.hourly_price) AS avg_hourly_price,
+      COUNT(*) AS counts
+    FROM
+      {{ ref('fact_location') }} fl
+    WHERE
+      CAST(fl.parking_from_cet AS date)
+      >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    GROUP BY
+      ALL
+    HAVING
+      COUNT(*) >= 8
+  )
 SELECT
-  dpl.country,
-  dpl.city,
-  dpl.name,
-  dpl.location_id,
-  dpl.latitude,
-  dpl.longitude,
-  avg(fpl.hourly_price) as avg_hourly_price,
-  abs(avg(fpl.hourly_price - cpl.avg_hourly_price)) mad_hourly_price,
-  max(fpl.hourly_price) as max_hourly_price,
-  min(fpl.hourly_price) as min_hourly_price,
+  dl.country,
+  dl.city,
+  dl.name,
+  dl.location_id,
+  dl.latitude,
+  dl.longitude,
+  avg(fl.hourly_price) AS avg_hourly_price,
+  abs(avg(fl.hourly_price - cpl.avg_hourly_price)) mad_hourly_price,
+  max(fl.hourly_price) AS max_hourly_price,
+  min(fl.hourly_price) AS min_hourly_price,
 FROM
-  {{ ref('fact_parkbee_locations') }} fpl
+  {{ ref('fact_location') }} fl
 INNER JOIN
-  {{ ref('dim_parkbee_locations') }} dpl
-ON
-  dpl.location_id = fpl.location_id
+  {{ ref('dim_location') }} dl
+  ON
+    dl.location_id = fl.location_id
 INNER JOIN
   count_per_location cpl
-ON
-  cpl.location_id = fpl.location_id
+  ON
+    cpl.location_id = fl.location_id
 WHERE
-  CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-group by all
+  CAST(fl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+  and dl.platform = 'parkbee'
+GROUP BY ALL
 ORDER BY
   1,
   2,
