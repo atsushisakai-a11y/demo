@@ -18,7 +18,7 @@ WITH dim_fact_google AS (
         fl.location_id,
         fl.avg_rating,
         fl.ratings,
-        fl.user_ratings_total
+        fl.avg_rating
     FROM {{ ref('fact_location') }} AS fl
     INNER JOIN {{ ref('dim_location') }} AS dl
         ON dl.location_id = fl.location_id
