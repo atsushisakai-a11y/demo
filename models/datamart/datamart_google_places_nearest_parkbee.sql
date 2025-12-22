@@ -8,19 +8,20 @@
 -- ======================================
 WITH dim_fact_google AS (
     SELECT
-        dgp.name,
-        dgp.primary_type,
-        dgp.address,
-        dgp.geom,
-        dgp.lat,
-        dgp.lng,
-        dgp.google_maps_url,
+        dl.name,
+        dl.primary_type,
+        dl.address,
+        dl.geom,
+        dl.lat,
+        dl.lng,
+        dl.google_maps_url,
         fpcl.location_id,
         fpcl.rating,
         fpcl.user_ratings_total
     FROM {{ ref('fact_parking_candidate_locations') }} AS fpcl
-    INNER JOIN {{ ref('dim_google_places') }} AS dgp
-        ON dgp.location_id = fpcl.location_id
+    INNER JOIN {{ ref('dim_location') }} AS dl
+        ON dl.location_id = fpcl.location_id
+    WHERE dl.platform = 'google'
 ),
 parking_demand AS (
     SELECT
@@ -69,7 +70,8 @@ join_parkbee AS (
         ) AS rn
 
     FROM dim_fact_google dfg
-    CROSS JOIN {{ ref('dim_parkbee_locations') }} AS dpl
+    CROSS JOIN {{ ref('dim_location') }} AS dl
+    WHERE dl.platform = 'parkbee'
 )
 
 -- ======================================
