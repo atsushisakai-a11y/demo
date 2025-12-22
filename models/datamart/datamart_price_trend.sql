@@ -5,42 +5,42 @@
 WITH
   count_per_location AS (
   SELECT
-    fpl.location_id,
+    fl.location_id,
     COUNT(*) AS counts
   FROM
-    {{ ref('fact_parkbee_locations') }} fpl
+    {{ ref('fact_location') }} fl
   WHERE
-    CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+    CAST(fl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
   GROUP BY
     ALL
   HAVING
     COUNT(*) >= 8 )
 SELECT
-  dpl.country,
-  dpl.city,
-  dpl.name,
-  dpl.location_id,
-  dpl.latitude,
-  dpl.longitude,
-  dpl.geom,
-  fpl.parking_from_cet,
-  CAST(fpl.parking_from_cet AS date) AS parking_date,
-  fpl.parking_from_hour,
-  fpl.parking_from_weekday,
-  fpl.hourly_price,
-  fpl.utilization_rate
+  dl.country,
+  dl.city,
+  dl.name,
+  dl.location_id,
+  dl.latitude,
+  dl.longitude,
+  dl.geom,
+  fl.parking_from_cet,
+  CAST(fl.parking_from_cet AS date) AS parking_date,
+  fl.parking_from_hour,
+  fl.parking_from_weekday,
+  fl.hourly_price,
+  fl.utilization_rate
 FROM
-  {{ ref('fact_parkbee_locations') }} fpl
+  {{ ref('fact_location') }} fl
 INNER JOIN
-  {{ ref('dim_parkbee_locations') }} dpl
+  {{ ref('dim_location') }} dl
 ON
-  dpl.location_id = fpl.location_id
+  dl.location_id = fl.location_id
 INNER JOIN
   count_per_location cpl
 ON
-  cpl.location_id = fpl.location_id
+  cpl.location_id = fl.location_id
 WHERE
-  CAST(fpl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+  CAST(fl.parking_from_cet AS date) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
 ORDER BY
   1,
   2,
