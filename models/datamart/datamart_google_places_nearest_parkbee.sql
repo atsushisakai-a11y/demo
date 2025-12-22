@@ -16,7 +16,8 @@ WITH dim_fact_google AS (
         dl.longitude,
         dl.url,
         fl.location_id,
-        fl.rating,
+        fl.avg_review_rating,
+        fl.ratings,
         fl.user_ratings_total
     FROM {{ ref('fact_location') }} AS fl
     INNER JOIN {{ ref('dim_location') }} AS dl
@@ -50,8 +51,8 @@ join_parkbee AS (
         dfg.longitude AS google_lng,
         dfg.url,
         dfg.geom AS google_geom,
-        dfg.rating AS google_rating,
-        dfg.user_ratings_total AS google_reviews,
+        dfg.avg_review_rating AS google_rating,
+        dfg.ratings AS google_reviews,
         dl.location_id AS parkbee_location_id,
         dl.name AS parkbee_name,
         dl.city AS parkbee_city,
