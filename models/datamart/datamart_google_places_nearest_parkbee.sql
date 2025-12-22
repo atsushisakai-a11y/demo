@@ -14,7 +14,7 @@ WITH dim_fact_google AS (
         dl.geom,
         dl.latitude,
         dl.longitude,
-        dl.google_maps_url,
+        dl.url,
         fpcl.location_id,
         fpcl.rating,
         fpcl.user_ratings_total
@@ -48,7 +48,7 @@ join_parkbee AS (
         dfg.address AS google_place_address,
         dfg.latitude AS google_lat,
         dfg.longitude AS google_lng,
-        dfg.google_maps_url,
+        dfg.url,
         dfg.geom AS google_geom,
         dfg.rating AS google_rating,
         dfg.user_ratings_total AS google_reviews,
