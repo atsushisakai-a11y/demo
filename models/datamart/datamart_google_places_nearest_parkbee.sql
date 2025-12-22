@@ -15,12 +15,12 @@ WITH dim_fact_google AS (
         dl.latitude,
         dl.longitude,
         dl.url,
-        fpcl.location_id,
-        fpcl.rating,
-        fpcl.user_ratings_total
-    FROM {{ ref('fact_parking_candidate_locations') }} AS fpcl
+        fl.location_id,
+        fl.rating,
+        fl.user_ratings_total
+    FROM {{ ref('fact_location') }} AS fl
     INNER JOIN {{ ref('dim_location') }} AS dl
-        ON dl.location_id = fpcl.location_id
+        ON dl.location_id = fl.location_id
     WHERE dl.platform = 'google'
 ),
 parking_demand AS (
