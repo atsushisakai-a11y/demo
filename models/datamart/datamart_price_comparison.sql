@@ -21,7 +21,6 @@ SELECT
     dl.latitude,
     dl.longitude,
     fl.utilization_rate,
-    fl.price_cost,
     fl.hourly_price,
     fl.available_spaces,
     fl.total_spaces,
