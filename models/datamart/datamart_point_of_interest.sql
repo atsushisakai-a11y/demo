@@ -5,19 +5,20 @@
 
 WITH parkbee_parking AS (
   SELECT
-    fpl.parking_from_cet,
-    dpl.name AS parking_name,
-    dpl.latitude,
-    dpl.longitude,
+    fl.parking_from_cet,
+    dl.name AS parking_name,
+    dl.latitude,
+    dl.longitude,
     ST_BUFFER(
-      ST_GEOGPOINT(dpl.longitude, dpl.latitude),
+      ST_GEOGPOINT(dl.longitude, dl.latitude),
       500
     ) AS buffer_500m,
-    fpl.utilization_rate
-  FROM {{ ref('fact_parkbee_locations') }} fpl
-  INNER JOIN {{ ref('dim_parkbee_locations') }} dpl
-    ON dpl.location_id = fpl.location_id
-  WHERE date_trunc(fpl.scrape_datetime_cet, day) = '2025-12-18'
+    fl.utilization_rate
+  FROM {{ ref('fact_location') }} fl
+  INNER JOIN {{ ref('dim_location') }} dl
+    ON dl.location_id = fl.location_id
+  WHERE date_trunc(fl.scrape_datetime_cet, day) = '2025-12-18'
+    AND dl.platform = 'parkbee'
 ),
 
 google_pois AS (
@@ -26,9 +27,10 @@ google_pois AS (
     name AS poi_name,
     location_type,
     geom,
-    google_maps_url as url
-  FROM {{ ref('dim_google_places') }} AS dgp
+    url
+  FROM {{ ref('dim_location') }} AS dl
   WHERE location_type in ('office','parking')
+    AND platform = 'google'
 ),
 
 parkbee_with_poi AS (
