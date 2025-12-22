@@ -51,7 +51,7 @@ join_parkbee AS (
         dfg.longitude AS google_lng,
         dfg.url,
         dfg.geom AS google_geom,
-        dfg.avg_review_rating AS google_rating,
+        dfg.avg_rating AS google_rating,
         dfg.ratings AS google_reviews,
         dl.location_id AS parkbee_location_id,
         dl.name AS parkbee_name,
